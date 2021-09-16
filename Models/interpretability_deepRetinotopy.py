@@ -119,7 +119,7 @@ class Net(torch.nn.Module):
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net().to(device)
-model.load_state_dict(torch.load('./deepRetinotopy_PA_LH_model.pt',
+model.load_state_dict(torch.load('./output/deepRetinotopy_PA_LH_model1.pt',
                                  map_location=device))
 
 # Create an output folder if it doesn't already exist

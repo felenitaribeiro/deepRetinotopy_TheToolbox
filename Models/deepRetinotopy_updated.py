@@ -210,10 +210,10 @@ for i in range(5):
                                 'deepRetinotopy_PA_LH_output_epoch' + str(
                                     epoch) + '.pt')) # Rename if RH
 
-# Saving model's learned parameters
-torch.save(model.state_dict(),
-           osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                    'deepRetinotopy_PA_LH_model' + str(i+1) + '.pt')) # Rename if RH
+    # Saving model's learned parameters
+    torch.save(model.state_dict(),
+               osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                        'deepRetinotopy_PA_LH_model' + str(i+1) + '.pt')) # Rename if RH
 
 # end = time.time() # To find out how long it takes to train the model
 # time = (end - init) / 60

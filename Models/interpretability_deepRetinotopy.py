@@ -123,7 +123,7 @@ model.load_state_dict(torch.load('./deepRetinotopy_PA_LH_model.pt',
                                  map_location=device))
 
 # Create an output folder if it doesn't already exist
-directory = './devset_results'
+directory = './testset_results'
 if not osp.exists(directory):
     os.makedirs(directory)
 
@@ -150,6 +150,6 @@ for node in nodes:
 
     torch.save({'Predicted_values': evaluation['Predicted_values'],
                 'Measured_values': evaluation['Measured_values']},
-               osp.join(osp.dirname(osp.realpath(__file__)), 'devset_results',
+               osp.join(osp.dirname(osp.realpath(__file__)), 'testset_results',
                         'testset-node' + str(node) + '_neighborhood' + str(
                             neighborhood_size) + '.pt'))

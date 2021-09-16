@@ -6,7 +6,7 @@ import torch_geometric.transforms as T
 import sys
 import numpy as np
 
-sys.path.append('../..')
+sys.path.append('..')
 
 from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader

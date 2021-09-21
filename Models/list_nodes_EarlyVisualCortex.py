@@ -19,5 +19,5 @@ final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(
 
 # Selecting nodes
 nodes = cluster[final_mask_L == 1]
-nodes = np.where(nodes==1)[0]
+nodes = np.where(nodes!=0)[0]
 np.savez('./nodes_earlyVisualCortex.npz', list = nodes)

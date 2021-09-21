@@ -12,7 +12,6 @@ from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
 
-
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
 pre_transform = T.Compose([T.FaceToEdge()])
 
@@ -23,6 +22,7 @@ test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
                           prediction='polarAngle', myelination=True,
                           hemisphere=hemisphere)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+
 
 # Model
 class Net(torch.nn.Module):
@@ -113,36 +113,39 @@ class Net(torch.nn.Module):
         return x
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net().to(device)
-model.load_state_dict(torch.load('./output/deepRetinotopy_PA_LH_model1.pt',
-                                 map_location=device))
+for i in range(5):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = Net().to(device)
+    model.load_state_dict(
+        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i) + '.pt',
+                   map_location=device))
 
-# Create an output folder if it doesn't already exist
-directory = './testset_results'
-if not osp.exists(directory):
-    os.makedirs(directory)
-
-def test():
-    model.eval()
-    MeanAbsError = 0
-    y = []
-    y_hat = []
-    for data in test_loader:
-        pred = model(data.to(device)).detach()
-        y_hat.append(pred)
-        y.append(data.to(device).y.view(-1))
-        MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
-        MeanAbsError += MAE
-    test_MAE = MeanAbsError / len(test_loader)
-    output = {'Predicted_values': y_hat, 'Measured_values': y,
-              'MAE': test_MAE}
-    return output
+    # Create an output folder if it doesn't already exist
+    directory = './testset_results'
+    if not osp.exists(directory):
+        os.makedirs(directory)
 
 
-evaluation = test()
+    def test():
+        model.eval()
+        MeanAbsError = 0
+        y = []
+        y_hat = []
+        for data in test_loader:
+            pred = model(data.to(device)).detach()
+            y_hat.append(pred)
+            y.append(data.to(device).y.view(-1))
+            MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
+            MeanAbsError += MAE
+        test_MAE = MeanAbsError / len(test_loader)
+        output = {'Predicted_values': y_hat, 'Measured_values': y,
+                  'MAE': test_MAE}
+        return output
 
-torch.save({'Predicted_values': evaluation['Predicted_values'],
-            'Measured_values': evaluation['Measured_values']},
-           osp.join(osp.dirname(osp.realpath(__file__)), 'testset_results',
-                    'testset-intactData_model1.pt'))
+
+    evaluation = test()
+
+    torch.save({'Predicted_values': evaluation['Predicted_values'],
+                'Measured_values': evaluation['Measured_values']},
+               osp.join(osp.dirname(osp.realpath(__file__)), 'testset_results',
+                        'testset-intactData_model' + str(i) + '.pt'))

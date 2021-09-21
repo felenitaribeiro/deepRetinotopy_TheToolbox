@@ -121,9 +121,9 @@ for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i) + '.pt',
+        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
                    map_location=device))
-    
+
     # Create an output folder if it doesn't already exist
     directory = './testset_results'
     if not osp.exists(directory):

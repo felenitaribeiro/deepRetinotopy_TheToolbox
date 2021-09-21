@@ -117,7 +117,7 @@ for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i) + '.pt',
+        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
                    map_location=device))
 
     # Create an output folder if it doesn't already exist
@@ -148,4 +148,4 @@ for i in range(5):
     torch.save({'Predicted_values': evaluation['Predicted_values'],
                 'Measured_values': evaluation['Measured_values']},
                osp.join(osp.dirname(osp.realpath(__file__)), 'testset_results',
-                        'testset-intactData_model' + str(i) + '.pt'))
+                        'testset-intactData_model' + str(i + 1) + '.pt'))

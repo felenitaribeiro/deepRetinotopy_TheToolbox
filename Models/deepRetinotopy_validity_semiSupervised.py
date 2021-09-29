@@ -141,7 +141,8 @@ def train(epoch):
         threshold = R2.view(-1) > 2.2
 
         loss = torch.nn.SmoothL1Loss()
-        output_loss = loss(R2 * model(data)[ROIminusPatch], R2 * data.y.view(-1)[ROIminusPatch])
+        output_loss = loss(R2[ROIminusPatch] * model(data)[ROIminusPatch],
+                           R2[ROIminusPatch] * data.y.view(-1)[ROIminusPatch])
         output_loss.backward()
 
         MAE = torch.mean(abs(

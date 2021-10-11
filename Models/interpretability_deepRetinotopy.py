@@ -25,7 +25,7 @@ test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 nodes = np.load('nodes_earlyVisualCortex.npz')['list']
-neighborhood_size = 15
+neighborhood_sizes = np.arange(11,15,1)
 
 
 # Model
@@ -116,44 +116,44 @@ class Net(torch.nn.Module):
         x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
         return x
 
+for neighborhood_size in neighborhood_sizes:
+    for i in range(5):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model = Net().to(device)
+        model.load_state_dict(
+            torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
+                       map_location=device))
 
-for i in range(5):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = Net().to(device)
-    model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
-                   map_location=device))
+        # Create an output folder if it doesn't already exist
+        directory = './testset_results'
+        if not osp.exists(directory):
+            os.makedirs(directory)
 
-    # Create an output folder if it doesn't already exist
-    directory = './testset_results'
-    if not osp.exists(directory):
-        os.makedirs(directory)
-
-    for node in nodes:
-        def test():
-            model.eval()
-            MeanAbsError = 0
-            y = []
-            y_hat = []
-            for data in test_loader:
-                new_data, _ = node_neighbourhood(data, node, neighborhood_size)
-                pred = model(new_data.to(device)).detach()
-                y_hat.append(pred)
-                y.append(data.to(device).y.view(-1))
-                MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
-                MeanAbsError += MAE
-            test_MAE = MeanAbsError / len(test_loader)
-            output = {'Predicted_values': y_hat, 'Measured_values': y,
-                      'MAE': test_MAE}
-            return output
+        for node in nodes:
+            def test():
+                model.eval()
+                MeanAbsError = 0
+                y = []
+                y_hat = []
+                for data in test_loader:
+                    new_data, _ = node_neighbourhood(data, node, neighborhood_size)
+                    pred = model(new_data.to(device)).detach()
+                    y_hat.append(pred)
+                    y.append(data.to(device).y.view(-1))
+                    MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
+                    MeanAbsError += MAE
+                test_MAE = MeanAbsError / len(test_loader)
+                output = {'Predicted_values': y_hat, 'Measured_values': y,
+                          'MAE': test_MAE}
+                return output
 
 
-        evaluation = test()
+            evaluation = test()
 
-        torch.save({'Predicted_values': evaluation['Predicted_values'],
-                    'Measured_values': evaluation['Measured_values']},
-                   osp.join(osp.dirname(osp.realpath(__file__)),
-                            'testset_results',
-                            'testset-node' + str(node) + '_neighborhood' + str(
-                                neighborhood_size) + '_model' + str(
-                                i + 1) + '.pt'))
+            torch.save({'Predicted_values': evaluation['Predicted_values'],
+                        'Measured_values': evaluation['Measured_values']},
+                       osp.join(osp.dirname(osp.realpath(__file__)),
+                                'testset_results',
+                                'testset-node' + str(node) + '_neighborhood' + str(
+                                    neighborhood_size) + '_model' + str(
+                                    i + 1) + '.pt'))

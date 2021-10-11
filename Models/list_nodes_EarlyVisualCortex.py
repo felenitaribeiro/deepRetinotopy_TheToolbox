@@ -10,6 +10,10 @@ V1, V2, V3 = add_fovea(early_visual_cortex)
 cluster = np.sum(
     [np.reshape(V1, (-1, 1)), np.reshape(V2, (-1, 1)),
      np.reshape(V3, (-1, 1))], axis=0)
+cluster[V3 == 3] = 3
+cluster[V2 == 2] = 2
+cluster[V1 == 1] = 1
+
 label = ['Early visual cortex']
 
 # ROI

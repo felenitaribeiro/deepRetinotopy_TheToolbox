@@ -25,7 +25,7 @@ test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 nodes = np.load('nodes_earlyVisualCortex.npz')['list']
-neighborhood_sizes = np.arange(11,15,1)
+neighborhood_sizes = np.arange(16,21,1)
 
 
 # Model

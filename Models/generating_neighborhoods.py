@@ -20,6 +20,7 @@ dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(),
 dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
 for data in dev_loader:
-    new_data, _ = node_neighbourhood(data, 1871, 10)
+    new_data, _ = node_neighbourhood(data, 1871, 20)
+    #1973
 
 np.savez('10hops_neighbors_test.npz', list=_['level_10'].tolist())

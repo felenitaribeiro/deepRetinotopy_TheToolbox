@@ -8,7 +8,7 @@ from Retinotopy.functions.plusFovea import add_fovea
 from Retinotopy.functions.error_metrics import smallest_angle
 
 
-def PA_difference(model):
+def PA_difference(model, number):
     """Function to determine the difference between intact new_predictions (
     with
     intact features) and knocked out new_predictions of polar angle values
@@ -39,15 +39,15 @@ def PA_difference(model):
             mean_delta = []
             intact_predictions = torch.load(
                 '/home/uqfribe1/PycharmProjects/deepRetinotopy_explain'
-                '/testset_results/left_hemi/testset-intactData_model' + str(
-                    j + 1) + '.pt',
+                '/testset_results/left_hemi/testset-intactData_model'+str(number)+'.pt',
                 # TODO
                 map_location='cpu')
             new_predictions = torch.load(
                 '/home/uqfribe1/Desktop/Project3/testset-results/'
-                'testset_results_interpretability_10neighbor/testset_results/'
-                'testset-node' + str(node) + '_neighborhood10_model' + str(
-                    j + 1) + '.pt',
+                'testset_results_interpretability_reversed_'+ str(
+                    j + 16) + 'neighbor/testset_results/'
+                'testset-node' + str(node) + '_neighborhood'+ str(
+                    j + 16) + '_reversed_model'+str(number)+'.pt',
                 map_location='cpu')
 
             # ROI settings
@@ -107,8 +107,8 @@ def PA_difference(model):
 
             mean_error.append(np.mean(mean_delta))
         np.savez(
-            './../output/meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model' + str(
-                j + 1) + '.npz',
+            './../output/meanErrorVSnodes_dorsalEarlyVisualCortex_'+ str(
+                    j + 16) + 'neighbor_reversed_model'+str(number)+'.npz',
             list=np.reshape(mean_error, (len(nodes), -1)))
 
 
@@ -116,5 +116,8 @@ def PA_difference(model):
 directory = './../output'
 if not os.path.exists(directory):
     os.makedirs(directory)
-
-PA_difference('deepRetinotopy')
+PA_difference('deepRetinotopy', 5)
+PA_difference('deepRetinotopy', 4)
+PA_difference('deepRetinotopy', 3)
+PA_difference('deepRetinotopy', 2)
+PA_difference('deepRetinotopy', 1)

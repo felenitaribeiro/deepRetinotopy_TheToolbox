@@ -18,7 +18,7 @@ path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
 pre_transform = T.Compose([T.FaceToEdge()])
 
 # Defining patch
-kernel = np.load('./10hops_neighbors_test.npz')['list']
+kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
 
 # TODO - different dataset splits
 train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(),

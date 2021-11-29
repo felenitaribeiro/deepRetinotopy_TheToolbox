@@ -30,7 +30,7 @@ train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
 # Patch
-kernel = np.load('./10hops_neighbors_test.npz')['list']
+kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
 ROIminusPatch= [item for item in np.arange(0,3267) if item not in kernel]
 
 # Model

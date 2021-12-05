@@ -199,16 +199,16 @@ for i in range(5):
             'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
             '{:.4f}, Test_MAE_thr: {:.4f}'.format(
                 epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
-        if epoch % 25 == 0:  # To save intermediate predictions
-            torch.save({'Epoch': epoch,
-                        'Predicted_values': test_output['Predicted_values'],
-                        'Measured_values': test_output['Measured_values'],
-                        'R2': test_output['R2'], 'Loss': loss,
-                        'Dev_MAE': test_output['MAE']},
-                       osp.join(osp.dirname(osp.realpath(__file__)),
-                                'output',
-                                'deepRetinotopy_PA_LH_output_epoch' + str(
-                                    epoch) + '.pt')) # Rename if RH
+        # if epoch % 25 == 0:  # To save intermediate predictions
+        #     torch.save({'Epoch': epoch,
+        #                 'Predicted_values': test_output['Predicted_values'],
+        #                 'Measured_values': test_output['Measured_values'],
+        #                 'R2': test_output['R2'], 'Loss': loss,
+        #                 'Dev_MAE': test_output['MAE']},
+        #                osp.join(osp.dirname(osp.realpath(__file__)),
+        #                         'output',
+        #                         'deepRetinotopy_PA_LH_output_epoch' + str(
+        #                             epoch) + '.pt')) # Rename if RH
 
     # Saving model's learned parameters
     torch.save(model.state_dict(),

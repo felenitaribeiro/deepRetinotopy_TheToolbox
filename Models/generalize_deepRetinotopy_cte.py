@@ -19,7 +19,7 @@ pre_transform = T.Compose([T.FaceToEdge()])
 hemisphere = 'Left'  # or 'Right'
 
 # Defining patch
-kernel = np.load('./10hops_neighbors_test.npz')['list']
+kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
 
 # Loading test dataset
 dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(),

@@ -30,6 +30,7 @@ class Retinotopy(InMemoryDataset):
         self.prediction = prediction
         self.n_examples = int(n_examples)
         self.hemisphere = hemisphere
+        self.patch = patch
         super(Retinotopy, self).__init__(root, transform, pre_transform,
                                          pre_filter)
         self.set = set

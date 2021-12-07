@@ -8,7 +8,7 @@ import numpy as np
 
 sys.path.append('..')
 
-from Retinotopy.dataset.HCP_3sets_ROI_ctePatch import Retinotopy
+from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
 from Retinotopy.functions.neighborhood import node_neighbourhood
@@ -18,19 +18,17 @@ pre_transform = T.Compose([T.FaceToEdge()])
 
 hemisphere = 'Left'  # or 'Right'
 
-# Defining patch
-kernel = np.load('./10hops_neighbors_test.npz')['list']
 
 # Loading test dataset
 dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
-                          hemisphere=hemisphere, patch=kernel)
+                          hemisphere=hemisphere)
 test_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
-                          hemisphere=hemisphere, patch=kernel)
+                          hemisphere=hemisphere)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 

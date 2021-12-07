@@ -29,8 +29,8 @@ def labels(input, labels):
 
     # Change the nodes numbers (indexes) from the visual system to range
     # from 0:len(index_mask)
-    faces = np.array(faces) * 10000
-    index = np.array(labels) * 10000
+    faces = np.array(faces)
+    index = np.array(labels) 
     for i in range(len(labels)):
         faces[np.where(faces == index[i])] = i
 

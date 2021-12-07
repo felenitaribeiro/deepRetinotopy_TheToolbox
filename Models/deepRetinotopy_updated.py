@@ -15,8 +15,6 @@ from torch_geometric.nn import SplineConv
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
 
 pre_transform = T.Compose([T.FaceToEdge()])
-
-# TODO - different dataset splits
 train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(),
                            pre_transform=pre_transform, n_examples=181,
                            prediction='polarAngle', myelination=True,
@@ -120,6 +118,7 @@ class Net(torch.nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = Net().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
 def train(epoch):
     model.train()
 

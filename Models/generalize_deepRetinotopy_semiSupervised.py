@@ -29,13 +29,13 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = SplineConv(2, 32, dim=3, kernel_size=25)
-        self.bn1 = torch.nn.BatchNorm1d(32)
+        self.conv1 = SplineConv(2, 8, dim=3, kernel_size=25)
+        self.bn1 = torch.nn.BatchNorm1d(8)
 
-        self.conv2 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn2 = torch.nn.BatchNorm1d(32)
+        self.conv2 = SplineConv(8, 16, dim=3, kernel_size=25)
+        self.bn2 = torch.nn.BatchNorm1d(16)
 
-        self.conv3 = SplineConv(32, 32, dim=3, kernel_size=25)
+        self.conv3 = SplineConv(16, 32, dim=3, kernel_size=25)
         self.bn3 = torch.nn.BatchNorm1d(32)
 
         self.conv4 = SplineConv(32, 32, dim=3, kernel_size=25)
@@ -112,7 +112,6 @@ class Net(torch.nn.Module):
 
         x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
         return x
-
 
 for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

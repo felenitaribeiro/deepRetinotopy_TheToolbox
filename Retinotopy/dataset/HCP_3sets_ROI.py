@@ -49,72 +49,72 @@ class Retinotopy(InMemoryDataset):
             if self.myelination == True:
                 if self.prediction == 'eccentricity':
                     return [
-                        'training_ecc_LH_myelincurv_ROI.pt',
-                        'development_ecc_LH_myelincurv_ROI.pt',
-                        'test_ecc_LH_myelincurv_ROI.pt']
+                        'training_ecc_LH_myelincurv_ROI_original.pt',
+                        'development_ecc_LH_myelincurv_ROI_original.pt',
+                        'test_ecc_LH_myelincurv_ROI_original.pt']
 
                 elif self.prediction == 'polarAngle':
                     return [
-                        'training_PA_LH_myelincurv_ROI.pt',
-                        'development_PA_LH_myelincurv_ROI.pt',
-                        'test_PA_LH_myelincurv_ROI.pt']
+                        'training_PA_LH_myelincurv_ROI_original.pt',
+                        'development_PA_LH_myelincurv_ROI_original.pt',
+                        'test_PA_LH_myelincurv_ROI_original.pt']
 
                 else:
                     return [
-                        'training_pRFsize_LH_myelincurv_ROI.pt',
-                        'development_pRFsize__LH_myelincurv_ROI.pt',
-                        'test_pRFsize_LH_myelincurv_ROI.pt']
+                        'training_pRFsize_LH_myelincurv_ROI_original.pt',
+                        'development_pRFsize__LH_myelincurv_ROI_original.pt',
+                        'test_pRFsize_LH_myelincurv_ROI_original.pt']
             else:
                 if self.prediction == 'eccentricity':
-                    return ['training_ecc_LH_ROI.pt',
-                            'development_ecc_LH_ROI.pt',
-                            'test_ecc_LH_ROI.pt']
+                    return ['training_ecc_LH_ROI_original.pt',
+                            'development_ecc_LH_ROI_original.pt',
+                            'test_ecc_LH_ROI_original.pt']
 
                 elif self.prediction == 'polarAngle':
-                    return ['training_PA_LH_ROI.pt',
-                            'development_PA_LH_ROI.pt',
-                            'test_PA_LH_ROI.pt']
+                    return ['training_PA_LH_ROI_original.pt',
+                            'development_PA_LH_ROI_original.pt',
+                            'test_PA_LH_ROI_original.pt']
                 else:
                     return [
-                        'training_pRFsize_LH_ROI.pt',
-                        'development_pRFsize_LH_ROI.pt',
-                        'test_pRFsize_LH_ROI.pt']
+                        'training_pRFsize_LH_ROI_original.pt',
+                        'development_pRFsize_LH_ROI_original.pt',
+                        'test_pRFsize_LH_ROI_original.pt']
 
         else:
             if self.myelination == True:
                 if self.prediction == 'eccentricity':
                     return [
-                        'training_ecc_RH_myelincurv_ROI.pt',
-                        'development_ecc_RH_myelincurv_ROI.pt',
-                        'test_ecc_RH_myelincurv_ROI.pt']
+                        'training_ecc_RH_myelincurv_ROI_original.pt',
+                        'development_ecc_RH_myelincurv_ROI_original.pt',
+                        'test_ecc_RH_myelincurv_ROI_original.pt']
 
                 elif self.prediction == 'polarAngle':
                     return [
-                        'training_PA_RH_myelincurv_ROI.pt',
-                        'development_PA_RH_myelincurv_ROI.pt',
-                        'test_PA_RH_myelincurv_ROI.pt']
+                        'training_PA_RH_myelincurv_ROI_original.pt',
+                        'development_PA_RH_myelincurv_ROI_original.pt',
+                        'test_PA_RH_myelincurv_ROI_original.pt']
 
                 else:
                     return [
-                        'training_pRFsize_RH_myelincurv_ROI.pt',
-                        'development_pRFsize_RH_myelincurv_ROI.pt',
-                        'test_pRFsize_RH_myelincurv_ROI.pt']
+                        'training_pRFsize_RH_myelincurv_ROI_original.pt',
+                        'development_pRFsize_RH_myelincurv_ROI_original.pt',
+                        'test_pRFsize_RH_myelincurv_ROI_original.pt']
             else:
                 if self.prediction == 'eccentricity':
-                    return ['training_ecc_RH_ROI.pt',
-                            'development_ecc_RH_ROI.pt',
-                            'test_ecc_RH_ROI.pt']
+                    return ['training_ecc_RH_ROI_original.pt',
+                            'development_ecc_RH_ROI_original.pt',
+                            'test_ecc_RH_ROI_original.pt']
 
                 elif self.prediction == 'polarAngle':
-                    return ['training_PA_RH_ROI.pt',
-                            'development_PA_RH_ROI.pt',
-                            'test_PA_RH_ROI.pt']
+                    return ['training_PA_RH_ROI_original.pt',
+                            'development_PA_RH_ROI_original.pt',
+                            'test_PA_RH_ROI_original.pt']
 
                 else:
                     return [
-                        'training_pRFsize_RH_ROI.pt',
-                        'development_pRFsize_RH_ROI.pt',
-                        'test_pRFsize_RH_ROI.pt']
+                        'training_pRFsize_RH_ROI_original.pt',
+                        'development_pRFsize_RH_ROI_original.pt',
+                        'test_pRFsize_RH_ROI_original.pt']
 
     def download(self):
         raise RuntimeError(
@@ -138,11 +138,11 @@ class Retinotopy(InMemoryDataset):
         faces_L = labels(scipy.io.loadmat(osp.join(path, 'tri_faces_L.mat'))[
                              'tri_faces_L'] - 1, index_L_mask)
 
-        spurious_connections = [[122, 2], [122, 6], [122, 1717], [122, 2707],
-                                [176, 3], [176, 1716], [176, 3265],
-                                [1716, 3], [1716, 1718],
-                                [1717, 6],
-                                [1718, 3], [1718, 4], [1718, 6]]
+        # spurious_connections = [[122, 2], [122, 6], [122, 1717], [122, 2707],
+        #                         [176, 3], [176, 1716], [176, 3265],
+        #                         [1716, 3], [1716, 1718],
+        #                         [1717, 6],
+        #                         [1718, 3], [1718, 4], [1718, 6]]
         for i in range(0, self.n_examples):
             data = read_HCP(path, Hemisphere=self.hemisphere, index=i,
                             surface='mid', visual_mask_L=final_mask_L,
@@ -152,24 +152,24 @@ class Retinotopy(InMemoryDataset):
             if self.pre_transform is not None:
                 data = self.pre_transform(data)
 
-            ### Fixing spurious connections
-            incorrect_connections_1 = [torch.where(torch.sum(
-                data.edge_index.T == torch.tensor(
-                    spurious_connections[i]), axis=1) == 2) for i in
-                                       range(len(spurious_connections))]
-            incorrect_connections_2 = [torch.where(torch.sum(
-                data.edge_index.T == torch.tensor(
-                    spurious_connections[i][::-1]), axis=1) == 2) for i in
-                                       range(len(spurious_connections))]
-            mask = torch.cat([
-                torch.tensor(incorrect_connections_1),
-                torch.tensor(incorrect_connections_2)])
-            mask_tensor = torch.zeros(data.edge_index.T.shape[0])
-            mask_tensor[mask] = 1
-
-            new_edges = data.edge_index.T[mask_tensor == 0]
-            data.edge_index = new_edges.T
-            ###
+            # ### Fixing spurious connections
+            # incorrect_connections_1 = [torch.where(torch.sum(
+            #     data.edge_index.T == torch.tensor(
+            #         spurious_connections[i]), axis=1) == 2) for i in
+            #                            range(len(spurious_connections))]
+            # incorrect_connections_2 = [torch.where(torch.sum(
+            #     data.edge_index.T == torch.tensor(
+            #         spurious_connections[i][::-1]), axis=1) == 2) for i in
+            #                            range(len(spurious_connections))]
+            # mask = torch.cat([
+            #     torch.tensor(incorrect_connections_1),
+            #     torch.tensor(incorrect_connections_2)])
+            # mask_tensor = torch.zeros(data.edge_index.T.shape[0])
+            # mask_tensor[mask] = 1
+            #
+            # new_edges = data.edge_index.T[mask_tensor == 0]
+            # data.edge_index = new_edges.T
+            # ###
 
             data_list.append(data)
 

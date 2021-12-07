@@ -15,11 +15,11 @@ from torch_geometric.nn import SplineConv
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
 
 pre_transform = T.Compose([T.FaceToEdge()])
-train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(norm=False),
+train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(max_value=10),
                            pre_transform=pre_transform, n_examples=181,
                            prediction='polarAngle', myelination=True,
                            hemisphere='Left') # Change to Right for the RH
-dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(norm=False),
+dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=10),
                          pre_transform=pre_transform, n_examples=181,
                          prediction='polarAngle', myelination=True,
                          hemisphere='Left') # Change to Right for the RH
@@ -190,7 +190,7 @@ if not osp.exists(directory):
     os.makedirs(directory)
 
 # Model training
-for i in range(2):
+for i in range(5):
     for epoch in range(1, 201):
         loss, MAE = train(epoch)
         test_output = test()
@@ -212,7 +212,7 @@ for i in range(2):
     # Saving model's learned parameters
     torch.save(model.state_dict(),
                osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                        'deepRetinotopy_PA_LH_model' + str(i+1) + '_orig_noNorm.pt')) # Rename if RH
+                        'deepRetinotopy_PA_LH_model' + str(i+1) + '_fixNorm.pt')) # Rename if RH
 
 # end = time.time() # To find out how long it takes to train the model
 # time = (end - init) / 60

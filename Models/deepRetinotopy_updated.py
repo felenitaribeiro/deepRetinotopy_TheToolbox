@@ -190,7 +190,7 @@ if not osp.exists(directory):
     os.makedirs(directory)
 
 # Model training
-for i in range(1):
+for i in range(5):
     for epoch in range(1, 201):
         loss, MAE = train(epoch)
         test_output = test()

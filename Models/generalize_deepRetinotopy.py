@@ -123,7 +123,7 @@ class Net(torch.nn.Module):
         return x
 
 
-for i in range(5):
+for i in range(1):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(

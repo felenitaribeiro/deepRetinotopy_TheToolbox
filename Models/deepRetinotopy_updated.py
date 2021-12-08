@@ -13,13 +13,14 @@ from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
-
+norm_value = 70.4237
 pre_transform = T.Compose([T.FaceToEdge()])
-train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(max_value=10),
+
+train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(max_value=norm_value),
                            pre_transform=pre_transform, n_examples=181,
                            prediction='polarAngle', myelination=True,
                            hemisphere='Left') # Change to Right for the RH
-dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=10),
+dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=norm_value),
                          pre_transform=pre_transform, n_examples=181,
                          prediction='polarAngle', myelination=True,
                          hemisphere='Left') # Change to Right for the RH
@@ -212,7 +213,7 @@ for i in range(5):
     # Saving model's learned parameters
     torch.save(model.state_dict(),
                osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                        'deepRetinotopy_PA_LH_model' + str(i+1) + '_fixNorm.pt')) # Rename if RH
+                        'deepRetinotopy_PA_LH_model' + str(i+1) + '.pt')) # Rename if RH
 
 # end = time.time() # To find out how long it takes to train the model
 # time = (end - init) / 60

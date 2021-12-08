@@ -22,6 +22,12 @@ norm_value = 70.4237
 kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
 
 # Loading test dataset
+dev_dataset = Retinotopy(path, 'Development',
+                         transform=T.Cartesian(max_value=norm_value),
+                         pre_transform=pre_transform, n_examples=181,
+                         prediction='polarAngle', myelination=True,
+                         hemisphere=hemisphere, patch=kernel)
+dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 test_dataset = Retinotopy(path, 'Test',
                           transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
@@ -128,7 +134,7 @@ for i in range(5):
                    map_location=device))
 
     # Create an output folder if it doesn't already exist
-    directory = './testset_results'
+    directory = './devset_results'
     if not osp.exists(directory):
         os.makedirs(directory)
 
@@ -138,13 +144,13 @@ for i in range(5):
         MeanAbsError = 0
         y = []
         y_hat = []
-        for data in test_loader:
+        for data in dev_loader:
             pred = model(data.to(device)).detach()
             y_hat.append(pred)
             y.append(data.to(device).y.view(-1))
             MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
             MeanAbsError += MAE
-        test_MAE = MeanAbsError / len(test_loader)
+        test_MAE = MeanAbsError / len(dev_loader)
         output = {'Predicted_values': y_hat, 'Measured_values': y,
                   'MAE': test_MAE}
         return output
@@ -155,6 +161,6 @@ for i in range(5):
     torch.save({'Predicted_values': evaluation['Predicted_values'],
                 'Measured_values': evaluation['Measured_values']},
                osp.join(osp.dirname(osp.realpath(__file__)),
-                        'testset_results',
-                        'testset-cteCurvPatch_model' + str(
+                        'devset_results',
+                        'devset-cteCurvPatch_model' + str(
                             i + 1) + '.pt'))

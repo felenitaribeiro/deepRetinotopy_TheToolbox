@@ -15,10 +15,11 @@ from Retinotopy.functions.neighborhood import node_neighbourhood
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
 pre_transform = T.Compose([T.FaceToEdge()])
-
+norm_value = 70.4237
 hemisphere = 'Left'  # or 'Right'
 # Loading test dataset
-test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
+test_dataset = Retinotopy(path, 'Test',
+                          transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
                           hemisphere=hemisphere)
@@ -113,17 +114,20 @@ class Net(torch.nn.Module):
         x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
         return x
 
+
 for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i+1) + '_ROIminusPatch.pt',
+        torch.load('./output/deepRetinotopy_PA_LH_model' + str(
+            i + 1) + '_ROIminusPatch.pt',
                    map_location=device))
 
     # Create an output folder if it doesn't already exist
     directory = './testset_results'
     if not osp.exists(directory):
         os.makedirs(directory)
+
 
     def test():
         model.eval()

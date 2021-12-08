@@ -16,29 +16,32 @@ from Retinotopy.functions.neighborhood import node_neighbourhood_curv
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
 pre_transform = T.Compose([T.FaceToEdge()])
 
-hemisphere = 'Left'  # or 'Right'
+hemisphere = 'Left'
+norm_value = 70.4237
+
 # Loading test dataset
-test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
+test_dataset = Retinotopy(path, 'Test',
+                          transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
                           hemisphere=hemisphere)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 nodes = np.load('nodes_earlyVisualCortex.npz')['list']
-neighborhood_sizes = [5,10,15,20]
+neighborhood_sizes = [5, 10, 15, 20]
 
 
 # Model
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = SplineConv(2, 32, dim=3, kernel_size=25)
-        self.bn1 = torch.nn.BatchNorm1d(32)
+        self.conv1 = SplineConv(2, 8, dim=3, kernel_size=25)
+        self.bn1 = torch.nn.BatchNorm1d(8)
 
-        self.conv2 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn2 = torch.nn.BatchNorm1d(32)
+        self.conv2 = SplineConv(8, 16, dim=3, kernel_size=25)
+        self.bn2 = torch.nn.BatchNorm1d(16)
 
-        self.conv3 = SplineConv(32, 32, dim=3, kernel_size=25)
+        self.conv3 = SplineConv(16, 32, dim=3, kernel_size=25)
         self.bn3 = torch.nn.BatchNorm1d(32)
 
         self.conv4 = SplineConv(32, 32, dim=3, kernel_size=25)
@@ -116,13 +119,15 @@ class Net(torch.nn.Module):
         x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
         return x
 
+
 for neighborhood_size in neighborhood_sizes:
     for i in range(5):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = Net().to(device)
         model.load_state_dict(
-            torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
-                       map_location=device))
+            torch.load(
+                './output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
+                map_location=device))
 
         # Create an output folder if it doesn't already exist
         directory = './testset_results'
@@ -136,11 +141,13 @@ for neighborhood_size in neighborhood_sizes:
                 y = []
                 y_hat = []
                 for data in test_loader:
-                    new_data, _ = node_neighbourhood_curv(data, node, neighborhood_size)
+                    new_data, _ = node_neighbourhood_curv(data, node,
+                                                          neighborhood_size)
                     pred = model(new_data.to(device)).detach()
                     y_hat.append(pred)
                     y.append(data.to(device).y.view(-1))
-                    MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
+                    MAE = torch.mean(
+                        abs(data.to(device).y.view(-1) - pred)).item()
                     MeanAbsError += MAE
                 test_MAE = MeanAbsError / len(test_loader)
                 output = {'Predicted_values': y_hat, 'Measured_values': y,
@@ -154,6 +161,7 @@ for neighborhood_size in neighborhood_sizes:
                         'Measured_values': evaluation['Measured_values']},
                        osp.join(osp.dirname(osp.realpath(__file__)),
                                 'testset_results',
-                                'testset-node' + str(node) + '_neighborhood' + str(
+                                'testset-node' + str(
+                                    node) + '_neighborhood' + str(
                                     neighborhood_size) + '_model' + str(
                                     i + 1) + '_curvature.pt'))

@@ -18,12 +18,14 @@ hemisphere = 'Left'  # or 'Right'
 norm_value = 70.4237
 
 # Loading test dataset
-dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=norm_value),
-                          pre_transform=pre_transform, n_examples=181,
-                          prediction='polarAngle', myelination=True,
-                          hemisphere=hemisphere)
+dev_dataset = Retinotopy(path, 'Development',
+                         transform=T.Cartesian(max_value=norm_value),
+                         pre_transform=pre_transform, n_examples=181,
+                         prediction='polarAngle', myelination=True,
+                         hemisphere=hemisphere)
 test_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
-test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(max_value=norm_value),
+test_dataset = Retinotopy(path, 'Test',
+                          transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
                           hemisphere=hemisphere)
@@ -123,13 +125,14 @@ for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i+1) + '.pt',
+        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
                    map_location=device))
 
     # Create an output folder if it doesn't already exist
     directory = './testset_results'
     if not osp.exists(directory):
         os.makedirs(directory)
+
 
     def test():
         model.eval()

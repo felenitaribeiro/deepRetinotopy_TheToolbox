@@ -130,7 +130,7 @@ for neighborhood_size in neighborhood_sizes:
                 map_location=device))
 
         # Create an output folder if it doesn't already exist
-        directory = './testset_results'
+        directory = './testset_results_reverse'
         if not osp.exists(directory):
             os.makedirs(directory)
 
@@ -160,7 +160,7 @@ for neighborhood_size in neighborhood_sizes:
             torch.save({'Predicted_values': evaluation['Predicted_values'],
                         'Measured_values': evaluation['Measured_values']},
                        osp.join(osp.dirname(osp.realpath(__file__)),
-                                'testset_results',
+                                'testset_results_reverse',
                                 'testset-node' + str(
                                     node) + '_neighborhood' + str(
                                     neighborhood_size) + '_reversed_model' + str(

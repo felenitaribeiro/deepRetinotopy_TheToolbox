@@ -1,7 +1,7 @@
-# deepRetinotopy_explain
+# An explainability framework for cortical surface-based deep learning
 
 This repository contains all source code necessary to replicate our recent work entitled "An explainability framework 
-for cortical surface-based deep learning" available on [arXiv](). Note that, this repo is an updated version of 
+for cortical surface-based deep learning" available on [arXiv](). Note that, this repo is a modified version of 
 [deepRetinotopy](https://github.com/Puckett-Lab/deepRetinotopy).
 
 ## Table of Contents

@@ -37,25 +37,23 @@ def PA_difference(model='deepRetinotopy', number=None, feature=None):
         for node in nodes:
             mean_delta = []
             intact_predictions = torch.load(
-                '/home/uqfribe1/Desktop/Project3/testset-results'
-                '/testset_results_intactFeat/testset_results'
+                './../../../Models/generalizability'
+                '/testset_results'
                 '/testset-intactData_model' + str(number) + '.pt',
                 map_location='cpu')
             if feature == 'reverse':
                 new_predictions = torch.load(
-                    '/home/uqfribe1/Desktop/Project3/testset-results'
-                    '/testset_results_interpretability_' + str(
-                        j) + 'neighbor_reverse/testset_results_reverse'
-                             '/testset-node' + str(
+                    './../../../Models/explainability'
+                    '/testset_results_reverse'
+                    '/testset-node' + str(
                         node) + '_neighborhood' + str(
                         j) + '_reversed_model' + str(number) + '.pt',
                     map_location='cpu')
             else:
                 new_predictions = torch.load(
-                    '/home/uqfribe1/Desktop/Project3/testset-results'
-                    '/testset_results_interpretability_' + str(
-                        j) + 'neighbor/testset_results'
-                             '/testset-node' + str(
+                    './../../../Models/explainability'
+                    '/testset_results'
+                    '/testset-node' + str(
                         node) + '_neighborhood' + str(
                         j) + '_model' + str(number) + '.pt',
                     map_location='cpu')

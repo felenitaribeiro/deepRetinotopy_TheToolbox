@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def reliabity_corrMatrix(feature):
     """Determines the correlation between saliency maps generated
     with different models.
@@ -13,17 +14,20 @@ def reliabity_corrMatrix(feature):
         corrMatrix (numpy array); Correlation matrix (5,5)
 
     """
-    corrMatrix = np.zeros((5,5))
+    corrMatrix = np.zeros((5, 5))
     for i in range(5):
         for j in range(5):
             if feature == 'both':
                 error_1 = np.load('./../../stats/output/'
-                            'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model'+ str(i+1) +'.npz')[
-                'list']
+                                  'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model' + str(
+                    i + 1) + '.npz')[
+                    'list']
                 error_2 = np.load('./../../stats/output/'
-                            'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model'+ str(j+1) +'.npz')[
-                'list']
-                corrMatrix[i,j] = np.corrcoef(error_1.flatten(), error_2.flatten())[0][1]
+                                  'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model' + str(
+                    j + 1) + '.npz')[
+                    'list']
+                corrMatrix[i, j] = \
+                    np.corrcoef(error_1.flatten(), error_2.flatten())[0][1]
             else:
                 error_1 = np.load('./../../stats/output/'
                                   'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_' + feature + '_model' + str(
@@ -34,9 +38,10 @@ def reliabity_corrMatrix(feature):
                     j + 1) + '.npz')[
                     'list']
                 corrMatrix[i, j] = \
-                np.corrcoef(error_1.flatten(), error_2.flatten())[0][1]
+                    np.corrcoef(error_1.flatten(), error_2.flatten())[0][1]
 
     return corrMatrix
+
 
 # Create an output folder if it doesn't already exist
 directory = './../../../stats/output'
@@ -59,7 +64,7 @@ for feature in features:
     # plt.savefig('realiabilityMatrix_'+ feature + '.svg')
     # plt.show()
 
-    corrMatrix = np.triu(corrMatrix, k=1)[np.triu(corrMatrix, k=1)!=0]
+    corrMatrix = np.triu(corrMatrix, k=1)[np.triu(corrMatrix, k=1) != 0]
     tmp = pd.DataFrame({'Feature': [str(feature)],
                         'Mean': [np.mean(corrMatrix)],
                         'SD': [np.std(corrMatrix)]})

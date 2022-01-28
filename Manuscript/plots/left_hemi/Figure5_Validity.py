@@ -5,13 +5,14 @@ import seaborn as sns
 import pandas as pd
 import scipy
 
-
 from Retinotopy.functions.error_metrics import smallest_angle
 from Retinotopy.functions.def_ROIs_DorsalEarlyVisualCortex import roi as roi2
 from Retinotopy.functions.def_ROIs_WangParcelsPlusFovea import roi
 
+
 def validity_measure(measure):
-    data = pd.DataFrame(columns=['Saliency', 'Nodes', 'Neighborhood', 'Feature'])
+    data = pd.DataFrame(
+        columns=['Saliency', 'Nodes', 'Neighborhood', 'Feature'])
     models = ['testset-intactData_model5.pt',
               'testset-semiSupervised_model2.pt',
               'testset-ctePatch_model4.pt',
@@ -22,12 +23,12 @@ def validity_measure(measure):
     mean_across = []
     mean_delta = []
     eccentricity_mask = np.reshape(
-            np.load('./../output/MaskEccentricity_'
-                    'above1below8ecc_LH.npz')['list'], (-1))
+        np.load('./../output/MaskEccentricity_'
+                'above1below8ecc_LH.npz')['list'], (-1))
     for model in models:
         results = torch.load(
             '/home/uqfribe1/Desktop/Project3/Figures/figure5/'
-             + str(model), map_location='cpu')
+            + str(model), map_location='cpu')
 
         theta_withinsubj = []
         theta_acrosssubj_pred = []
@@ -59,10 +60,10 @@ def validity_measure(measure):
                     # Loading predicted values
                     pred = np.reshape(np.array(results['Predicted_values'][i]),
                                       (-1, 1))
-                    temp = predictions = torch.load(
-                        '/home/uqfribe1/Desktop/Project3'
-                        '/testset-results/testset_results_intactFeat/'
-                        'testset_results/testset-intactData_model5.pt',
+                    temp = torch.load(
+                        './../../../Models/generalizability'
+                        '/testset-results'
+                        '/testset-intactData_model5.pt',
                         map_location='cpu')
                     measured = np.reshape(np.array(temp['Measured_values'][j]),
                                           (-1, 1))
@@ -83,8 +84,9 @@ def validity_measure(measure):
 
                     # Computing delta theta, angle between vector defined
                     # predicted value and empirical value same subj
-                    theta = smallest_angle(pred[eccentricity_mask], measured[eccentricity_mask])
-                    theta_withinsubj.append(theta[mask[eccentricity_mask]>1])
+                    theta = smallest_angle(pred[eccentricity_mask],
+                                           measured[eccentricity_mask])
+                    theta_withinsubj.append(theta[mask[eccentricity_mask] > 1])
                     # print(np.shape(pred))
 
                 # Compute angle difference across predicted maps
@@ -92,8 +94,9 @@ def validity_measure(measure):
                     # Loading predicted values
                     pred = np.reshape(np.array(results['Predicted_values'][i]),
                                       (-1, 1))
-                    pred2 = np.reshape(np.array(results['Predicted_values'][j]),
-                                       (-1, 1))
+                    pred2 = np.reshape(
+                        np.array(results['Predicted_values'][j]),
+                        (-1, 1))
 
                     # Rescaling polar angles
                     minus = pred > 180
@@ -109,8 +112,10 @@ def validity_measure(measure):
                     pred2 = np.array(pred2) * (np.pi / 180)
 
                     # Difference
-                    theta_pred = smallest_angle(pred[eccentricity_mask], pred2[eccentricity_mask])
-                    theta_pred_across_temp.append(theta_pred[mask[eccentricity_mask]>1])
+                    theta_pred = smallest_angle(pred[eccentricity_mask],
+                                                pred2[eccentricity_mask])
+                    theta_pred_across_temp.append(
+                        theta_pred[mask[eccentricity_mask] > 1])
 
             theta_acrosssubj_pred.append(
                 np.mean(theta_pred_across_temp, axis=0))
@@ -126,22 +131,25 @@ def validity_measure(measure):
 
     fig = plt.figure()
     sns.set_style("ticks")
-    if measure =='Error':
+    if measure == 'Error':
         data = np.concatenate([[mean_delta[0], len(mean_delta[0]) * ['Intact'],
                                 len(mean_delta[0]) * [
                                     'Error']],
                                [mean_delta[2], len(mean_delta[2]) * ['Cte'],
                                 len(mean_delta[2]) * [
                                     'Error']],
-                               [mean_delta[3], len(mean_delta[3]) * ['Cte curv'],
+                               [mean_delta[3],
+                                len(mean_delta[3]) * ['Cte curv'],
                                 len(mean_delta[3]) * [
                                     'Error']],
-                               [mean_delta[4], len(mean_delta[4]) * ['Cte myelin'],
+                               [mean_delta[4],
+                                len(mean_delta[4]) * ['Cte myelin'],
                                 len(mean_delta[4]) * [
                                     'Error']],
-                               [mean_delta[1], len(mean_delta[1]) * ['Semi-supervised'],
+                               [mean_delta[1],
+                                len(mean_delta[1]) * ['Semi-supervised'],
                                 len(mean_delta[1]) * [
-                                    'Error']],],
+                                    'Error']], ],
                               axis=1)
         palette = ['#19adaf', '#008b8d', '#00696c', '#004a4d', '#002c30']
         plt.ylim([0, 60])
@@ -167,7 +175,7 @@ def validity_measure(measure):
         palette = ['#d2dbff', '#b2bcff', '#949ee0', '#7681c0', '#5865a2']
         plt.ylim([0, 50])
     for i in range(4):
-        test = scipy.stats.ttest_rel(mean_delta[0], mean_delta[i+1])
+        test = scipy.stats.ttest_rel(mean_delta[0], mean_delta[i + 1])
         print(test)
 
     df = pd.DataFrame(columns=[str(measure), 'Model', 'Metric'],
@@ -176,8 +184,9 @@ def validity_measure(measure):
     ax = sns.barplot(y=str(measure), x='Model', data=df, palette=palette)
     ax.set_title('Dorsal V1/V2/V3')
     sns.despine()
-    plt.savefig('fig5_validity_'+ str(measure)+'.svg')
+    plt.savefig('fig5_validity_' + str(measure) + '.svg')
     plt.show()
+
 
 validity_measure('Error')
 validity_measure('Individual variability')

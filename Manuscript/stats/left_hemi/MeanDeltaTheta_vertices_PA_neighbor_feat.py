@@ -37,22 +37,20 @@ def PA_difference(model='deepRetinotopy', number=None, feature=None):
         for node in nodes:
             mean_delta = []
             intact_predictions = torch.load(
-                '/home/uqfribe1/Desktop/Project3/testset-results'
-                '/testset_results_intactFeat/testset_results'
+                './../../../Models/generalizability'
+                '/testset_results'
                 '/testset-intactData_model' + str(number) + '.pt',
                 map_location='cpu')
             if feature == 'myelin':
                 new_predictions = torch.load(
-                    '/home/uqfribe1/Desktop/Project3/testset-results'
-                    '/testset_results_interpretability_myelin'
+                    './../../../Models/explainability'
                     '/testset_results_feature'
                     '/testset-node' + str(node) + '_neighborhood' + str(
                         j) + '_model' + str(number) + '_myelin.pt',
                     map_location='cpu')
             else:
                 new_predictions = torch.load(
-                    '/home/uqfribe1/Desktop/Project3/testset-results'
-                    '/testset_results_interpretability_curv'
+                    './../../../Models/explainability'
                     '/testset_results_feature'
                     '/testset-node' + str(node) + '_neighborhood' + str(
                         j) + '_model' + str(number) + '_curvature.pt',

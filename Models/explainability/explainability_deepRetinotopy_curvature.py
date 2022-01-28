@@ -11,7 +11,7 @@ sys.path.append('..')
 from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
-from Retinotopy.functions.neighborhood import node_neighbourhood_curv
+from Explainability.neighborhood import node_neighbourhood_curv
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../../Retinotopy', 'data')
 pre_transform = T.Compose([T.FaceToEdge()])

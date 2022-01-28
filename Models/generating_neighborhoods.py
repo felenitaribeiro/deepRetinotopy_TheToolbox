@@ -6,7 +6,7 @@ sys.path.append('..')
 
 from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
-from Retinotopy.functions.neighborhood import node_neighbourhood
+from Explainability.neighborhood import node_neighbourhood
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy',
                 'data')

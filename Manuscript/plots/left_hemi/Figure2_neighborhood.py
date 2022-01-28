@@ -32,9 +32,8 @@ final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(
 pred = np.zeros((32492, 1))
 pred[final_mask_L == 1] = 1 + threshold
 
-
 # List of nodes
-kernel = np.load('/home/uqfribe1/PycharmProjects/deepRetinotopy_explain/Models/'
+kernel = np.load('./../../../Models/'
                  '18hops_figure3.npz')['list']
 # kernel = np.load('/home/uqfribe1/PycharmProjects/deepRetinotopy_explain'
 #                  '/Models/nodes_earlyVisualCortex.npz')['list']
@@ -49,12 +48,12 @@ kernel = np.load('/home/uqfribe1/PycharmProjects/deepRetinotopy_explain/Models/'
 #        1883, 1884]
 
 # kernel = [2,   1,    5,    6, 1732, 2707]
-transform_kernel = np.where(final_mask_L==1)[0][kernel]
+transform_kernel = np.where(final_mask_L == 1)[0][kernel]
 
 # Neighborhood
 new_pred = np.zeros(np.shape(pred))
 for i in range(len(pred)):
-    if np.sum(transform_kernel==i)!=0:
+    if np.sum(transform_kernel == i) != 0:
         new_pred[i][0] = 300
         # print(new_pred[i][0])
     else:
@@ -62,7 +61,6 @@ for i in range(len(pred)):
 
 # Masking
 new_pred[final_mask_L != 1] = 0
-
 
 # Predicted map
 view = plotting.view_surf(

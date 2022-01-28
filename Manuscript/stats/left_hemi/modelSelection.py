@@ -18,8 +18,8 @@ def modelSelection(Model):
                 'above1below8ecc_LH.npz')['list'], (-1))
     for model in range(5):
         results = torch.load(
-            '/home/uqfribe1/Desktop/Project3/devset_results'
-            '/devset_results_final/devset_results'
+            './../../../Models/generalizability'
+            '/devset_results'
             '/devset-' + str(Model) + '_model' + str(model + 1) + '.pt',
             map_location='cpu')
 

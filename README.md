@@ -1,7 +1,7 @@
 # deepRetinotopy_explain
 
 This repository contains all source code necessary to replicate our recent work entitled "An explainability framework 
-for cortical surface-based deep learning" available on [arXiv](). Note that, it is an updated version of 
+for cortical surface-based deep learning" available on [arXiv](). Note that, this repo is an updated version of 
 [deepRetinotopy](https://github.com/Puckett-Lab/deepRetinotopy).
 
 ## Table of Contents
@@ -22,30 +22,31 @@ you follow the following steps to run our models locally:
 - Create a conda environment (or docker container)
 - Install torch first:
 
-	
+```bash
 	conda install pytorch==1.6.0 torchvision cpuonly -c pytorch
+```
 	
 - Install torch-scatter, torch-sparse, torch-cluster, torch-spline-conv and torch-geometric:
 	 
-	 
+```bash
     pip install --no-index torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
     pip install --no-index torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
     pip install --no-index torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
     pip install --no-index torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
     pip install torch-geometric
-
+```
 
 - Install the remaining required packages that are available at requirements.txt: 
 
-
+```bash
     pip install -r requirements.txt
+```
 
 - Install the following git repository for plots:
 
-
+```bash
     pip install git+https://github.com/felenitaribeiro/nilearn.git
-
-    
+```   
 
 
 ## Manuscript

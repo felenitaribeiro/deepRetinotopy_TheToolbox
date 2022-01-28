@@ -4,7 +4,6 @@ import torch
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 import sys
-import numpy as np
 
 sys.path.append('..')
 
@@ -12,7 +11,8 @@ from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '../../Retinotopy',
+                'data')
 pre_transform = T.Compose([T.FaceToEdge()])
 
 hemisphere = 'Left'  # or 'Right'
@@ -20,10 +20,11 @@ hemisphere = 'Left'  # or 'Right'
 norm_value = [None, 10, 50, 100, 500, 1000]
 for k in norm_value:
     # Loading test dataset
-    dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=k),
-                              pre_transform=pre_transform, n_examples=181,
-                              prediction='polarAngle', myelination=True,
-                              hemisphere=hemisphere)
+    dev_dataset = Retinotopy(path, 'Development',
+                             transform=T.Cartesian(max_value=k),
+                             pre_transform=pre_transform, n_examples=181,
+                             prediction='polarAngle', myelination=True,
+                             hemisphere=hemisphere)
     test_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
     test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(max_value=k),
                               pre_transform=pre_transform, n_examples=181,
@@ -125,13 +126,15 @@ for k in norm_value:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = Net().to(device)
         model.load_state_dict(
-            torch.load('./norm_output/deepRetinotopy_PA_LH_model' + str(i+1) + '_'+ str(k)+'Norm.pt',
+            torch.load('./../norm_output/deepRetinotopy_PA_LH_model' + str(
+                i + 1) + '_' + str(k) + 'Norm.pt',
                        map_location=device))
 
         # Create an output folder if it doesn't already exist
         directory = './testset_results_norm'
         if not osp.exists(directory):
             os.makedirs(directory)
+
 
         def test():
             model.eval()
@@ -157,4 +160,4 @@ for k in norm_value:
                    osp.join(osp.dirname(osp.realpath(__file__)),
                             'testset_results_norm',
                             'testset-intactData_model' + str(
-                                i + 1) + '_'+ str(k)+'Norm.pt'))
+                                i + 1) + '_' + str(k) + 'Norm.pt'))

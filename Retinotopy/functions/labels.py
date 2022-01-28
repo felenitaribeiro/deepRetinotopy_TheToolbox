@@ -8,14 +8,14 @@ def labels(input, labels):
     Args:
         input (.mat file): .mat file with the triangular faces composing the
             surface template
-        labels (numpy array): vertices index from the region of interest
+        labels (numpy array): vertices' indeces from the region of interest
 
     Returns:
         numpy array: triangular faces from the region of interest (number of
             faces, 3)
     """
 
-    # Append to faces_indexes from those faces containing nodes from the
+    # Append to faces_indexes the location of faces containing nodes from the
     # visual cortex
     faces_indexes = np.array([])
     for j in range(len(labels)):
@@ -27,13 +27,14 @@ def labels(input, labels):
     for i in range(len(faces_indexes)):
         faces.append(input[int(faces_indexes[i])])
 
-    # Change the nodes numbers (indexes) from the visual system to range
-    # from 0:len(index_mask)
+    # Change the nodes' indeces from the visual system to range
+    # from 0:len(labels)
     faces = np.array(faces) * 10000
     index = np.array(labels) * 10000
     for i in range(len(labels)):
         faces[np.where(faces == index[i])] = i
 
+    ### Old problematic code for future reference
     # faces = np.array(faces)
     # for i in range(len(labels)):
     #     index = np.array(labels)

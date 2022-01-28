@@ -4,35 +4,31 @@ import torch
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 import sys
-import numpy as np
 
 sys.path.append('..')
 
-from Retinotopy.dataset.HCP_3sets_ROI_ctePatch_curv import Retinotopy
+from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
-from Retinotopy.functions.neighborhood import node_neighbourhood
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '../../Retinotopy',
+                'data')
 pre_transform = T.Compose([T.FaceToEdge()])
-
 hemisphere = 'Left'  # or 'Right'
 norm_value = 70.4237
-# Defining patch
-kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
 
 # Loading test dataset
 dev_dataset = Retinotopy(path, 'Development',
                          transform=T.Cartesian(max_value=norm_value),
                          pre_transform=pre_transform, n_examples=181,
                          prediction='polarAngle', myelination=True,
-                         hemisphere=hemisphere, patch=kernel)
+                         hemisphere=hemisphere)
 dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 test_dataset = Retinotopy(path, 'Test',
                           transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
-                          hemisphere=hemisphere, patch=kernel)
+                          hemisphere=hemisphere)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 
@@ -129,9 +125,9 @@ for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(
-            i + 1) + '_cteCurvPatch.pt',
-                   map_location=device))
+        torch.load(
+            './../output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
+            map_location=device))
 
     # Create an output folder if it doesn't already exist
     directory = './devset_results'
@@ -162,5 +158,5 @@ for i in range(5):
                 'Measured_values': evaluation['Measured_values']},
                osp.join(osp.dirname(osp.realpath(__file__)),
                         'devset_results',
-                        'devset-cteCurvPatch_model' + str(
+                        'devset-intactData_model' + str(
                             i + 1) + '.pt'))

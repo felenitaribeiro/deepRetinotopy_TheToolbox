@@ -4,28 +4,26 @@ import os
 
 from Retinotopy.functions.def_ROIs_DorsalEarlyVisualCortex import roi as roi2
 from Retinotopy.functions.def_ROIs_WangParcelsPlusFovea import roi
-from Retinotopy.functions.plusFovea import add_fovea
 from Retinotopy.functions.error_metrics import smallest_angle
 
 
-def PA_difference(model):
-    """Function to determine the difference between intact new_predictions (
-    with
-    intact features) and knocked out new_predictions of polar angle values
-    for in
-    dorsal early visual cortex.
+def PA_difference(model='deepRetinotopy', number=None, feature=None):
+    """Function to determine the difference between predictions (PA) generated
+    with intact input features and the ones generated with occluded input
+    features
+    in dorsal early visual cortex.
 
-    Args: #TODO
-        model (str): 'deepRetinotopy' or 'average' or 'Benson14'
+    Args:
+        model (str): By default, model = 'deepRetinotopy'
+        number (int): Model number
+        feature (str): Occluded features ('both' or 'reverse')
 
-    Output: #TODO
-        .npz files in ./../output named:
-        'ErrorPerParticipant_PA_LH_WangParcels_' + str(model) + '_1-8.npz'
-        'ErrorPerParticipant_PA_LH_EarlyVisualCortex_' + str(model) +
-        '_1-8.npz'
-        'ErrorPerParticipant_PA_LH_dorsalV1-3_' + str(model) + '_1-8.npz'
+    Output:
+        output (.npz): Saves a .npz file in ./output with saliency scores for
+            each vertex early visual cortex
 
     """
+
     visual_areas = ['ROI']  # TODO
     eccentricity_mask = np.reshape(
         np.load('./../../plots/output/MaskEccentricity_'
@@ -33,22 +31,34 @@ def PA_difference(model):
 
     nodes = np.load('./../../Models/nodes_earlyVisualCortex.npz')['list']
 
-    for j in range(5):
+    neighborhoods = np.arange(1, 21, 1)
+    for j in neighborhoods:
         mean_error = []
         for node in nodes:
             mean_delta = []
             intact_predictions = torch.load(
-                '/home/uqfribe1/PycharmProjects/deepRetinotopy_explain'
-                '/testset_results/left_hemi/testset-intactData_model' + str(
-                    j + 1) + '.pt',
-                # TODO
+                '/home/uqfribe1/Desktop/Project3/testset-results'
+                '/testset_results_intactFeat/testset_results'
+                '/testset-intactData_model' + str(number) + '.pt',
                 map_location='cpu')
-            new_predictions = torch.load(
-                '/home/uqfribe1/Desktop/Project3/testset-results/'
-                'testset_results_interpretability_10neighbor/testset_results/'
-                'testset-node' + str(node) + '_neighborhood10_model' + str(
-                    j + 1) + '.pt',
-                map_location='cpu')
+            if feature == 'reverse':
+                new_predictions = torch.load(
+                    '/home/uqfribe1/Desktop/Project3/testset-results'
+                    '/testset_results_interpretability_' + str(
+                        j) + 'neighbor_reverse/testset_results_reverse'
+                             '/testset-node' + str(
+                        node) + '_neighborhood' + str(
+                        j) + '_reversed_model' + str(number) + '.pt',
+                    map_location='cpu')
+            else:
+                new_predictions = torch.load(
+                    '/home/uqfribe1/Desktop/Project3/testset-results'
+                    '/testset_results_interpretability_' + str(
+                        j) + 'neighbor/testset_results'
+                             '/testset-node' + str(
+                        node) + '_neighborhood' + str(
+                        j) + '_model' + str(number) + '.pt',
+                    map_location='cpu')
 
             # ROI settings
             label_primary_visual_areas = ['ROI']
@@ -107,8 +117,8 @@ def PA_difference(model):
 
             mean_error.append(np.mean(mean_delta))
         np.savez(
-            './../output/meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model' + str(
-                j + 1) + '.npz',
+            './../output/meanErrorVSnodes_dorsalEarlyVisualCortex_' + str(
+                j) + 'neighbor_model' + str(number) + '.npz',
             list=np.reshape(mean_error, (len(nodes), -1)))
 
 
@@ -117,4 +127,6 @@ directory = './../output'
 if not os.path.exists(directory):
     os.makedirs(directory)
 
-PA_difference('deepRetinotopy')
+for k in range(5):
+    PA_difference(number=k + 1, feature='both')
+    PA_difference(number=k + 1, feature='reverse')

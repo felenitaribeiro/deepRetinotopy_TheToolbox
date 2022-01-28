@@ -12,7 +12,7 @@ subject_index = 7 #7
 hcp_id = ['617748', '191336', '572045', '725751', '198653',
           '601127', '644246', '191841', '680957', '157336']
 
-path = './../../Retinotopy/data/raw/converted'
+path = './../../../Retinotopy/data/raw/converted'
 curv = scipy.io.loadmat(osp.join(path, 'cifti_curv_all.mat'))['cifti_curv']
 background = np.reshape(
     curv['x' + hcp_id[subject_index] + '_curvature'][0][0][0:32492], (-1))
@@ -50,22 +50,26 @@ error_map = np.zeros((32492, 1))
 
 # Loading error
 induced_error = np.load('./../../stats/output/'
-              'meanErrorVSnodes_dorsalEarlyVisualCortex_1neighbor_model3.npz')['list']
+              'meanErrorVSnodes_dorsalEarlyVisualCortex_10neighbor_model5.npz')['list']
 
 tmp = error_map[final_mask_L == 1]
-tmp[nodes] = induced_error + 1
+tmp[nodes] = induced_error
 error_map[final_mask_L == 1] = tmp + 1
 error_map[final_mask_L !=1] = 0
 
+# Location of highest and lowest saliency score
+print('Most important vertex is: ' +
+      str(nodes[np.where(induced_error==np.max(induced_error))[0]]))
 
-
+print('Least important vertex is: ' +
+      str(nodes[np.where(induced_error==np.min(induced_error))[0]]))
 
 # Predicted map
 view = plotting.view_surf(
-    surf_mesh=osp.join(osp.dirname(osp.realpath(__file__)), '../..',
+    surf_mesh=osp.join(osp.dirname(osp.realpath(__file__)), '../../..',
                        'Retinotopy/data/raw/surfaces'
                        '/S1200_7T_Retinotopy181.L.sphere.32k_fs_LR.surf.gii'),
     surf_map=np.reshape(error_map[0:32492], (-1)), bg_map=background,
-    cmap='hot', black_bg=False, symmetric_cmap=False,
+    cmap='inferno', black_bg=False, symmetric_cmap=False,
     threshold=threshold, vmax=15)
 view.open_in_browser()

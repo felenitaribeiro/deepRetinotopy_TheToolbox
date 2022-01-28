@@ -8,19 +8,31 @@ import numpy as np
 
 sys.path.append('..')
 
-from Retinotopy.dataset.HCP_3sets_ROI import Retinotopy
+from Retinotopy.dataset.HCP_3sets_ROI_ctePatch_curv import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '../Retinotopy', 'data')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '../../Retinotopy',
+                'data')
 pre_transform = T.Compose([T.FaceToEdge()])
 
 hemisphere = 'Left'  # or 'Right'
+norm_value = 70.4237
+# Defining patch
+kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
+
 # Loading test dataset
-test_dataset = Retinotopy(path, 'Test', transform=T.Cartesian(),
+dev_dataset = Retinotopy(path, 'Development',
+                         transform=T.Cartesian(max_value=norm_value),
+                         pre_transform=pre_transform, n_examples=181,
+                         prediction='polarAngle', myelination=True,
+                         hemisphere=hemisphere, patch=kernel)
+dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
+test_dataset = Retinotopy(path, 'Test',
+                          transform=T.Cartesian(max_value=norm_value),
                           pre_transform=pre_transform, n_examples=181,
                           prediction='polarAngle', myelination=True,
-                          hemisphere=hemisphere)
+                          hemisphere=hemisphere, patch=kernel)
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 
@@ -28,13 +40,13 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = SplineConv(2, 32, dim=3, kernel_size=25)
-        self.bn1 = torch.nn.BatchNorm1d(32)
+        self.conv1 = SplineConv(2, 8, dim=3, kernel_size=25)
+        self.bn1 = torch.nn.BatchNorm1d(8)
 
-        self.conv2 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn2 = torch.nn.BatchNorm1d(32)
+        self.conv2 = SplineConv(8, 16, dim=3, kernel_size=25)
+        self.bn2 = torch.nn.BatchNorm1d(16)
 
-        self.conv3 = SplineConv(32, 32, dim=3, kernel_size=25)
+        self.conv3 = SplineConv(16, 32, dim=3, kernel_size=25)
         self.bn3 = torch.nn.BatchNorm1d(32)
 
         self.conv4 = SplineConv(32, 32, dim=3, kernel_size=25)
@@ -117,11 +129,12 @@ for i in range(5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = Net().to(device)
     model.load_state_dict(
-        torch.load('./output/deepRetinotopy_PA_LH_model' + str(i + 1) + '.pt',
+        torch.load('./../output/deepRetinotopy_PA_LH_model' + str(
+            i + 1) + '_cteCurvPatch.pt',
                    map_location=device))
 
     # Create an output folder if it doesn't already exist
-    directory = './testset_results'
+    directory = './devset_results'
     if not osp.exists(directory):
         os.makedirs(directory)
 
@@ -131,13 +144,13 @@ for i in range(5):
         MeanAbsError = 0
         y = []
         y_hat = []
-        for data in test_loader:
+        for data in dev_loader:
             pred = model(data.to(device)).detach()
             y_hat.append(pred)
             y.append(data.to(device).y.view(-1))
             MAE = torch.mean(abs(data.to(device).y.view(-1) - pred)).item()
             MeanAbsError += MAE
-        test_MAE = MeanAbsError / len(test_loader)
+        test_MAE = MeanAbsError / len(dev_loader)
         output = {'Predicted_values': y_hat, 'Measured_values': y,
                   'MAE': test_MAE}
         return output
@@ -147,5 +160,7 @@ for i in range(5):
 
     torch.save({'Predicted_values': evaluation['Predicted_values'],
                 'Measured_values': evaluation['Measured_values']},
-               osp.join(osp.dirname(osp.realpath(__file__)), 'testset_results',
-                        'testset-intactData_model' + str(i + 1) + '.pt'))
+               osp.join(osp.dirname(osp.realpath(__file__)),
+                        'devset_results',
+                        'devset-cteCurvPatch_model' + str(
+                            i + 1) + '.pt'))

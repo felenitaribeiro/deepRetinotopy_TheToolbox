@@ -3,15 +3,28 @@ import numpy as np
 
 
 def node_neighbourhood(data, node, neighborhood_size):
+    """Function to occlude input features that fall within a specific node's
+    neighbourhood.
+
+    Args:
+        data (pytorch data object): Data object of a single individual
+
+        node (int): Node index
+
+        neighboorhood_size (int): Neighboorhood size for occlusion experiments
+
+    Returns:
+        data (pytorch data object): Data object of a single individual with
+            occluded features in the given node's neighborhood
+
+        neighbours (dictionary): Dictionary with neighbouring nodes' indices
+    """
+
     if neighborhood_size == 1:
         neighbor_nodes = data.edge_index[1][
             data.edge_index[0] == torch.tensor([int(node)])]
         neighbor_nodes = torch.cat((neighbor_nodes, torch.tensor([int(node)])))
         neighbors = {'level_1': neighbor_nodes}
-
-        # # zero out
-        # data.x[neighbors['level_1']] = torch.zeros(
-        #     data.x[neighbors['level_1']].shape)
 
         # constant
         data.x[neighbors['level_1']] = torch.ones(
@@ -36,11 +49,7 @@ def node_neighbourhood(data, node, neighborhood_size):
             neighbors['level_' + str(l + 2)] = torch.unique(torch.cat(
                 (neighbors['level_' + str(l + 1)], all_neighbors)))
 
-        # # zero out
-        # data.x[neighbors['level_' + str(neighborhood_size)]] = torch.zeros(
-        #     data.x[neighbors['level_' + str(neighborhood_size)]].shape)
-
-        # # constant
+        # constant
         data.x[neighbors['level_' + str(neighborhood_size)]] = torch.ones(
             data.x[neighbors[
                 'level_' + str(neighborhood_size)]].shape) * torch.tensor(
@@ -49,6 +58,23 @@ def node_neighbourhood(data, node, neighborhood_size):
 
 
 def node_neighbourhood_reverse(data, node, neighborhood_size):
+    """Function to occlude input features that fall outside a specific node's
+    neighbourhood.
+
+    Args:
+        data (pytorch data object): Data object of a single individual
+
+        node (int): Node index
+
+        neighboorhood_size (int): Neighboorhood size for occlusion experiments
+
+    Returns:
+        data (pytorch data object): Data object of a single individual with
+            occluded features outside the given node's neighborhood
+
+        neighbours (dictionary): Dictionary with neighbouring nodes' indices
+    """
+
     if neighborhood_size == 1:
         neighbor_nodes = data.edge_index[1][
             data.edge_index[0] == torch.tensor([int(node)])]
@@ -81,7 +107,7 @@ def node_neighbourhood_reverse(data, node, neighborhood_size):
             neighbors['level_' + str(l + 2)] = torch.unique(torch.cat(
                 (neighbors['level_' + str(l + 1)], all_neighbors)))
 
-        # # constant
+        # constant
         kernel = neighbors['level_' + str(neighborhood_size)]
         ROIminusPatch = [item for item in np.arange(0, 3267) if
                          item not in kernel]
@@ -92,20 +118,37 @@ def node_neighbourhood_reverse(data, node, neighborhood_size):
 
 
 def node_neighbourhood_curv(data, node, neighborhood_size):
+    """Function to occlude curvature features that fall within a specific node's
+    neighbourhood.
+
+    Args:
+        data (pytorch data object): Data object of a single individual
+
+        node (int): Node index
+
+        neighboorhood_size (int): Neighboorhood size for occlusion experiments
+
+    Returns:
+        data (pytorch data object): Data object of a single individual with
+            occluded curvature features in the given node's neighborhood
+
+        neighbours (dictionary): Dictionary with neighbouring nodes' indices
+    """
     if neighborhood_size == 1:
         neighbor_nodes = data.edge_index[1][
             data.edge_index[0] == torch.tensor([int(node)])]
         neighbor_nodes = torch.cat((neighbor_nodes, torch.tensor([int(node)])))
         neighbors = {'level_1': neighbor_nodes}
 
-        # # zero out
-        # data.x[neighbors['level_1']] = torch.zeros(
-        #     data.x[neighbors['level_1']].shape)
-
         # constant
-        data.x[neighbors['level_1']] = torch.ones(
-            data.x[neighbors['level_1']].shape) * torch.tensor(
-            [0.027303819, 1.4386905])
+        curvature = torch.ones(data.x[neighbors[
+            'level_1']].T[0].shape) * torch.tensor(
+            [0.027303819])
+        myelin = data.x[neighbors[
+            'level_1']].T[1]
+        patch = torch.cat((torch.reshape(curvature, (1, -1)),
+                           torch.reshape(myelin, (1, -1))), 0).T
+        data.x[neighbors['level_1']] = patch
 
     else:
         neighbor_nodes = data.edge_index[1][
@@ -125,11 +168,8 @@ def node_neighbourhood_curv(data, node, neighborhood_size):
             neighbors['level_' + str(l + 2)] = torch.unique(torch.cat(
                 (neighbors['level_' + str(l + 1)], all_neighbors)))
 
-        # # zero out
-        # data.x[neighbors['level_' + str(neighborhood_size)]] = torch.zeros(
-        #     data.x[neighbors['level_' + str(neighborhood_size)]].shape)
 
-        # # constant
+        # constant
         curvature = torch.ones(data.x[neighbors[
             'level_' + str(neighborhood_size)]].T[0].shape) * torch.tensor(
             [0.027303819])
@@ -141,20 +181,38 @@ def node_neighbourhood_curv(data, node, neighborhood_size):
     return data, neighbors
 
 def node_neighbourhood_myelin(data, node, neighborhood_size):
+    """Function to occlude myelin features that fall within a specific node's
+    neighbourhood.
+
+    Args:
+        data (pytorch data object): Data object of a single individual
+
+        node (int): Node index
+
+        neighboorhood_size (int): Neighboorhood size for occlusion experiments
+
+    Returns:
+        data (pytorch data object): Data object of a single individual with
+            occluded myelin features in the given node's neighborhood
+
+        neighbours (dictionary): Dictionary with neighbouring nodes' indices
+    """
     if neighborhood_size == 1:
         neighbor_nodes = data.edge_index[1][
             data.edge_index[0] == torch.tensor([int(node)])]
         neighbor_nodes = torch.cat((neighbor_nodes, torch.tensor([int(node)])))
         neighbors = {'level_1': neighbor_nodes}
 
-        # # zero out
-        # data.x[neighbors['level_1']] = torch.zeros(
-        #     data.x[neighbors['level_1']].shape)
-
         # constant
-        data.x[neighbors['level_1']] = torch.ones(
-            data.x[neighbors['level_1']].shape) * torch.tensor(
-            [0.027303819, 1.4386905])
+        curvature = data.x[neighbors[
+            'level_1']].T[0]
+        myelin = torch.ones(data.x[neighbors[
+            'level_1']].T[1].shape) * torch.tensor(
+            [1.4386905])
+        patch = torch.cat((torch.reshape(curvature, (1, -1)),
+                           torch.reshape(myelin, (1, -1))), 0).T
+        data.x[neighbors['level_1']] = patch
+
 
     else:
         neighbor_nodes = data.edge_index[1][
@@ -174,11 +232,8 @@ def node_neighbourhood_myelin(data, node, neighborhood_size):
             neighbors['level_' + str(l + 2)] = torch.unique(torch.cat(
                 (neighbors['level_' + str(l + 1)], all_neighbors)))
 
-        # # zero out
-        # data.x[neighbors['level_' + str(neighborhood_size)]] = torch.zeros(
-        #     data.x[neighbors['level_' + str(neighborhood_size)]].shape)
 
-        # # constant
+        # constant
         curvature = data.x[neighbors[
             'level_' + str(neighborhood_size)]].T[0]
         myelin = torch.ones(data.x[neighbors[

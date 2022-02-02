@@ -10,6 +10,7 @@ in which you can test our perturbation-based approach and visualize some of the 
 
 ## Table of Contents
 * [Installation and requirements](#installation-and-requirements)
+* [Explainability](#explainability)
 * [Manuscript](#manuscript)
 * [Models](#models)
 * [Retinotopy](#retinotopy)
@@ -27,18 +28,20 @@ you follow the following steps to run our models locally:
 - Install torch first:
 
 ```bash
-	conda install pytorch==1.6.0 torchvision cpuonly -c pytorch
+	conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch
 ```
 	
 - Install torch-scatter, torch-sparse, torch-cluster, torch-spline-conv and torch-geometric:
 	 
 ```bash
-    pip install --no-index torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
-    pip install --no-index torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
-    pip install --no-index torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
-    pip install --no-index torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+cu102.html
-    pip install torch-geometric
+    pip install --no-index torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
+    pip install --no-index torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
+    pip install --no-index torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
+    pip install --no-index torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
+    pip install torch-geometric==1.6.3
 ```
+
+Note, there are installations for different CUDA versions. For more: [PyTorch Geometric Installation](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
 
 - Install the remaining required packages that are available at requirements.txt: 
 
@@ -52,6 +55,8 @@ you follow the following steps to run our models locally:
     pip install git+https://github.com/felenitaribeiro/nilearn.git
 ```   
 
+## Explainability
+This folder contains functions for the occlusion of input features within a target vertex's neighborhood.
 
 ## Manuscript
 

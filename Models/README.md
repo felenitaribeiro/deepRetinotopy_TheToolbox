@@ -7,6 +7,14 @@ using our pre-trained models available at [Open Science Framework](https://osf.i
 Scripts for training new models are: 
 - ./deepRetinotopy_updated.py;
 
+
+## Validity 
+Scripts for training new models for validity experiments are: 
+- ./deepRetinotopy_validity_cte.py;
+- ./deepRetinotopy_validity_cte_curv.py;
+- ./deepRetinotopy_validity_cte_myelin.py;
+- ./deepRetinotopy_validity_semiSupervised.py;
+
 ## Generalization
 Scripts for loading our pre-trained models and generating predictions on the test dataset are:
 
@@ -16,7 +24,7 @@ Scripts for loading our pre-trained models and generating predictions on the tes
 - ./Generalizability/generalize_deepRetinotopy_cte_myelin.py;
 - ./Generalizability/generalize_deepRetinotopy_semiSupervised.py;
 
-Don't forget to download tpre-trained models on OSF, and to place them in ./output).
+Don't forget to download the pre-trained models on OSF, and to place them in ./output).
 
 ## Explainability
 Scripts for running our perturbation-based approach are:
@@ -24,15 +32,6 @@ Scripts for running our perturbation-based approach are:
 - ./explainability/explainability_deepRetinotopy_curvature.py;
 - ./explainability/explainability_deepRetinotopy_myelin.py;
 - ./explainability/explainability_deepRetinotopy_reverse.py;
-
-
-
-## Validity 
-Scripts for training new models for validity experiments are: 
-- ./deepRetinotopy_validity_cte.py;
-- ./deepRetinotopy_validity_cte_curv.py;
-- ./deepRetinotopy_validity_cte_myelin.py;
-- ./deepRetinotopy_validity_semiSupervised.py;
 
 
 ## Citation

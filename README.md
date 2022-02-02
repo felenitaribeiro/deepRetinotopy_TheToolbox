@@ -4,6 +4,10 @@ This repository contains all source code necessary to replicate our recent work 
 for cortical surface-based deep learning" available on [arXiv](). Note that, this repo is a modified version of 
 [deepRetinotopy](https://github.com/Puckett-Lab/deepRetinotopy).
 
+You can also check out our notebook available on 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/felenitaribeiro/explainability_CorticalSurfaceGDL/blob/main/DeepRetinotopy_explain.ipynb), 
+in which you can test our perturbation-based approach and visualize some of the figures in our manuscript.
+
 ## Table of Contents
 * [Installation and requirements](#installation-and-requirements)
 * [Manuscript](#manuscript)

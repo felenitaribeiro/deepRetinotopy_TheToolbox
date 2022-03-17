@@ -1,7 +1,7 @@
 # An explainability framework for cortical surface-based deep learning
 
 This repository contains all source code necessary to replicate our recent work entitled "An explainability framework 
-for cortical surface-based deep learning" available on [arXiv](). Note that, this repo is a modified version of 
+for cortical surface-based deep learning" available on [arXiv](https://arxiv.org/abs/2203.08312). Note that, this repo is a modified version of 
 [deepRetinotopy](https://github.com/Puckett-Lab/deepRetinotopy).
 
 You can also check out our notebook available on 
@@ -74,7 +74,18 @@ used for figures and models' evaluation.
 
 ## Citation
 
-Please cite our paper if you used our model or if it was somewhat helpful for you :wink:
+Please cite our papers if you used our model or if it was somewhat helpful for you :wink:
+
+	@article{Ribeiro2022,
+		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Cunnington, Ross and Puckett, Alexander M},
+		arxivId = {2203.08312},
+		journal = {arXiv},
+		keywords = {Geometric deep learning, high-resolution fMRI, vision, retinotopy, explainable AI},
+		title = {{An explainability framework for cortical surface-based deep learning}},
+		url = {https://arxiv.org/abs/2203.08312},
+		year = {2022}
+	}
+	
 
 	@article{Ribeiro2021,
 		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Puckett, Alexander M},

@@ -19,19 +19,21 @@ echo "Path: $dirSubs";
 echo "Hemisphere: $hemisphere";
 echo "Resampling native to fsaverage space...";
 
-for i in `ls $dirSubs`; 
+for dirSub in `ls $dirSubs`; 
 do 
- mris_expand -thickness $dirSubs/surf/"$hemisphere".white 0.5 graymid
- mris_curvature -w $dirSubs/surf/"$hemisphere".graymid
- wb_shortcuts -freesurfer-resample-prep $dirSubs/surf/"$hemisphere".white $dirSubs/surf/"$hemisphere".pial \
- $dirSubs/surf/"$hemisphere".sphere.reg ./$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
- $dirSubs/surf/"$hemisphere".midthickness.surf.gii $dirSubs/surf/"$dirSubs"."$hemisphere".midthickness.32k_fs_LR.surf.gii $dirSubs/surf/"$hemisphere".sphere.reg.surf.gii
- mris_convert -c $dirSubs/surf/"$hemisphere".graymid.H $dirSubs/surf/"$hemisphere".graymid $dirSubs/surf/"$hemisphere".graymid.H.gii
- wb_command -metric-resample $dirSubs/surf/"$hemisphere".graymid.H.gii \
- $dirSubs/surf/"$hemisphere".sphere.reg.surf.gii $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
- ADAP_BARY_AREA $dirSubs/surf/"$dirSubs".curvature-midthickness."$hemisphere".32k_fs_LR.func.gii \
- -area-surfs $dirSubs/surf/"$hemisphere".midthickness.surf.gii $dirSubs/surf/"$dirSubs"."$hemisphere".midthickness.32k_fs_LR.surf.gii
-
+    echo $dirSub;
+    cd $dirSubs/$dirSub # TO fix
+    mris_expand -thickness $dirSub/surf/"$hemisphere".white 0.5 graymid
+    mris_curvature -w $dirSub/surf/"$hemisphere".graymid
+    wb_shortcuts -freesurfer-resample-prep $dirSub/surf/"$hemisphere".white $dirSub/surf/"$hemisphere".pial \
+    $dirSub/surf/"$hemisphere".sphere.reg ./$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
+    $dirSub/surf/"$hemisphere".midthickness.surf.gii $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii $dirSub/surf/"$hemisphere".sphere.reg.surf.gii
+    mris_convert -c $dirSub/surf/"$hemisphere".graymid.H $dirSub/surf/"$hemisphere".graymid $dirSub/surf/"$hemisphere".graymid.H.gii
+    wb_command -metric-resample $dirSub/surf/"$hemisphere".graymid.H.gii \
+    $dirSub/surf/"$hemisphere".sphere.reg.surf.gii $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
+    ADAP_BARY_AREA $dirSub/surf/"$dirSub".curvature-midthickness."$hemisphere".32k_fs_LR.func.gii \
+    -area-surfs $dirSub/surf/"$hemisphere".midthickness.surf.gii $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii
+    
 done
 
 

@@ -1,5 +1,5 @@
 import numpy as np
-from Retinotopy.functions.def_ROIs_WangParcels import roi
+from utils.rois import def_ROIs_WangParcels as roi
 
 
 def add_fovea(list):

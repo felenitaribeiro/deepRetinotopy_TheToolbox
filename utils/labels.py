@@ -34,13 +34,6 @@ def labels(input, labels):
     for i in range(len(labels)):
         faces[np.where(faces == index[i])] = i
 
-    ### Old problematic code for future reference
-    # faces = np.array(faces)
-    # for i in range(len(labels)):
-    #     index = np.array(labels)
-    #     index.sort
-    #     faces[np.where(faces == index[i])] = i
-
     # Select only faces composed of vertices that are within the ROI
     final_faces = []
     for i in range(len(faces)):

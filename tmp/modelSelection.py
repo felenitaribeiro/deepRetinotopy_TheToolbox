@@ -3,32 +3,25 @@ import matplotlib.pyplot as plt
 import torch
 import seaborn as sns
 import pandas as pd
-import scipy
 
-from Retinotopy.functions.error_metrics import smallest_angle
-from Retinotopy.functions.def_ROIs_DorsalEarlyVisualCortex import roi as roi2
-from Retinotopy.functions.def_ROIs_WangParcelsPlusFovea import roi
+from Retinotopy.utils.error_metrics import smallest_angle
+from Retinotopy.utils.rois import roi as roi2
+from Retinotopy.utils.def_ROIs_WangParcelsPlusFovea import roi
 
 
-def validity_measure(measure):
-    data = pd.DataFrame(
-        columns=['Saliency', 'Nodes', 'Neighborhood', 'Feature'])
-    models = ['testset-intactData_model5.pt',
-              'testset-semiSupervised_model2.pt',
-              'testset-ctePatch_model4.pt',
-              'testset-cteCurvPatch_model2.pt',
-              'testset-cteMyelinPatch_model1.pt']
-
+def modelSelection(Model):
     sns.set_style("whitegrid")
     mean_across = []
     mean_delta = []
     eccentricity_mask = np.reshape(
-        np.load('./../output/MaskEccentricity_'
+        np.load('./../../plots/output/MaskEccentricity_'
                 'above1below8ecc_LH.npz')['list'], (-1))
-    for model in models:
+    for model in range(5):
         results = torch.load(
-            '/home/uqfribe1/Desktop/Project3/Figures/figure5/'
-            + str(model), map_location='cpu')
+            './../../../Models/generalizability'
+            '/devset_results'
+            '/devset-' + str(Model) + '_model' + str(model + 1) + '.pt',
+            map_location='cpu')
 
         theta_withinsubj = []
         theta_acrosssubj_pred = []
@@ -60,13 +53,9 @@ def validity_measure(measure):
                     # Loading predicted values
                     pred = np.reshape(np.array(results['Predicted_values'][i]),
                                       (-1, 1))
-                    temp = torch.load(
-                        './../../../Models/generalizability'
-                        '/testset-results'
-                        '/testset-intactData_model5.pt',
-                        map_location='cpu')
-                    measured = np.reshape(np.array(temp['Measured_values'][j]),
-                                          (-1, 1))
+                    measured = np.reshape(
+                        np.array(results['Measured_values'][j]),
+                        (-1, 1))
 
                     # Rescaling polar angles to match the right visual field
                     # (left hemisphere)
@@ -130,63 +119,53 @@ def validity_measure(measure):
     mean_across = np.reshape(np.array(mean_across), (5, -1))
 
     fig = plt.figure()
-    sns.set_style("ticks")
-    if measure == 'Error':
-        data = np.concatenate([[mean_delta[0], len(mean_delta[0]) * ['Intact'],
-                                len(mean_delta[0]) * [
-                                    'Error']],
-                               [mean_delta[2], len(mean_delta[2]) * ['Cte'],
-                                len(mean_delta[2]) * [
-                                    'Error']],
-                               [mean_delta[3],
-                                len(mean_delta[3]) * ['Cte curv'],
-                                len(mean_delta[3]) * [
-                                    'Error']],
-                               [mean_delta[4],
-                                len(mean_delta[4]) * ['Cte myelin'],
-                                len(mean_delta[4]) * [
-                                    'Error']],
-                               [mean_delta[1],
-                                len(mean_delta[1]) * ['Semi-supervised'],
-                                len(mean_delta[1]) * [
-                                    'Error']], ],
-                              axis=1)
-        palette = ['#19adaf', '#008b8d', '#00696c', '#004a4d', '#002c30']
-        plt.ylim([0, 60])
-
-    else:
-        data = np.concatenate(
-            [[mean_across[0], len(mean_across[0]) * ['Intact'],
-              len(mean_across[0]) * [
-                  'Individual variability']],
-             [mean_across[2], len(mean_across[2]) * ['Cte'],
-              len(mean_across[2]) * [
-                  'Individual variability']],
-             [mean_across[3], len(mean_across[3]) * ['Cte curv'],
-              len(mean_across[3]) * [
-                  'Individual variability']],
-             [mean_across[4], len(mean_across[4]) * ['Cte myelin'],
-              len(mean_across[4]) * [
-                  'Individual variability']],
-             [mean_across[1], len(mean_across[1]) * ['Semi-supervised'],
-              len(mean_across[1]) * [
-                  'Individual variability']], ],
-            axis=1)
-        palette = ['#d2dbff', '#b2bcff', '#949ee0', '#7681c0', '#5865a2']
-        plt.ylim([0, 50])
-    for i in range(4):
-        test = scipy.stats.ttest_rel(mean_delta[0], mean_delta[i + 1])
-        print(test)
-
-    df = pd.DataFrame(columns=[str(measure), 'Model', 'Metric'],
+    data = np.concatenate([[mean_across[0], len(mean_across[0]) * ['Model 1'],
+                            len(mean_across[0]) * ['Individual variability']],
+                           [mean_across[1], len(mean_across[1]) * ['Model 2'],
+                            len(mean_across[1]) * ['Individual variability']],
+                           [mean_across[2], len(mean_across[2]) * ['Model 3'],
+                            len(mean_across[2]) * ['Individual variability']],
+                           [mean_across[3], len(mean_across[3]) * ['Model 4'],
+                            len(mean_across[3]) * ['Individual variability']],
+                           [mean_across[4], len(mean_across[4]) * ['Model 5'],
+                            len(mean_across[4]) * ['Individual variability']],
+                           [mean_delta[0], len(mean_across[0]) * ['Model 1'],
+                            len(mean_across[0]) * [
+                                'Error']],
+                           [mean_delta[1], len(mean_across[1]) * ['Model 2'],
+                            len(mean_across[1]) * [
+                                'Error']],
+                           [mean_delta[2], len(mean_across[2]) * ['Model 3'],
+                            len(mean_across[2]) * [
+                                'Error']],
+                           [mean_delta[3], len(mean_across[3]) * ['Model 4'],
+                            len(mean_across[3]) * [
+                                'Error']],
+                           [mean_delta[4], len(mean_across[4]) * ['Model 5'],
+                            len(mean_across[4]) * [
+                                'Error']]],
+                          axis=1)
+    df = pd.DataFrame(columns=['$\Delta$$\t\Theta$', 'Model', 'Metric'],
                       data=data.T)
-    df[str(measure)] = df[str(measure)].astype(float)
-    ax = sns.barplot(y=str(measure), x='Model', data=df, palette=palette)
+
+    df['$\Delta$$\t\Theta$'] = df['$\Delta$$\t\Theta$'].astype(float)
+    print(np.mean(df['$\Delta$$\t\Theta$'][df['Metric'] == 'Error']))
+    palette = ['dimgray', 'lightgray']
+    ax = sns.pointplot(y='$\Delta$$\t\Theta$', x='Model',
+                       hue='Metric', data=df, palette=palette,
+                       join=False, dodge=True, ci=95)
     ax.set_title('Dorsal V1/V2/V3')
-    sns.despine()
-    plt.savefig('fig5_validity_' + str(measure) + '.svg')
+    # legend = plt.legend()
+    # legend.remove()
+    if str(Model) == 'semiSupervised':
+        plt.ylim([0, 70])
+    else:
+        plt.ylim([0, 30])
+    # plt.savefig('ModelSelection_DorsalV123.svg')
     plt.show()
 
 
-validity_measure('Error')
-validity_measure('Individual variability')
+models = ['intactData', 'semiSupervised', 'ctePatch', 'cteMyelinPatch',
+          'cteCurvPatch']
+for model in models:
+    modelSelection(model)

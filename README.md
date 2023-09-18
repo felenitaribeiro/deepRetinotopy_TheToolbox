@@ -1,22 +1,13 @@
-# An explainability framework for cortical surface-based deep learning
-
-This repository contains all source code necessary to replicate our recent work entitled "An explainability framework 
-for cortical surface-based deep learning" available on [arXiv](https://arxiv.org/abs/2203.08312). Note that, this repo is a modified version of 
-[deepRetinotopy](https://github.com/Puckett-Lab/deepRetinotopy).
-
-You can also check out our notebook available on 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/felenitaribeiro/explainability_CorticalSurfaceGDL/blob/main/DeepRetinotopy_explain.ipynb), 
-in which you can test our perturbation-based approach and visualize some of the figures in our manuscript.
+# DeepRetinotopy -- The toolbox
+This repository contains (restructured) code for the general use of deepRetinotopy using a command line interface.
 
 ## Table of Contents
 * [Installation and requirements](#installation-and-requirements)
-* [Explainability](#explainability)
-* [Manuscript](#manuscript)
-* [Models](#models)
-* [Retinotopy](#retinotopy)
+* [Software containers](#software-containers)
+* [Pre-trained models](#pre-trained-models)
 * [Citation](#citation)
+* [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
-
 
 ## Installation and requirements 
 
@@ -55,37 +46,23 @@ Note, there are installations for different CUDA versions. For more: [PyTorch Ge
     pip install git+https://github.com/felenitaribeiro/nilearn.git
 ```   
 
-## Explainability
-This folder contains functions for the occlusion of input features within a target vertex's neighborhood.
+Requirements:
+- Connectome workbench version XX
+- FreeSurfer version XX
+- HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 
-## Manuscript
 
-This folder contains all source code necessary to reproduce all figures and summary statistics in our manuscript.
+## Software containers
 
-## Models
+#TODO
 
-This folder contains all source code necessary to train a new model and to generate predictions on the test dataset 
-using our pre-trained models. Note, models were updated for PyTorch 1.6.0. 
+## Pre-trained models
 
-## Retinotopy
-
-This folder contains all source code necessary to replicate datasets generation, in addition to functions and labels 
-used for figures and models' evaluation. 
+#TODO
 
 ## Citation
 
-Please cite our papers if you used our model or if it was somewhat helpful for you :wink:
-
-	@article{Ribeiro2022,
-		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Cunnington, Ross and Puckett, Alexander M},
-		arxivId = {2203.08312},
-		journal = {arXiv},
-		keywords = {Geometric deep learning, high-resolution fMRI, vision, retinotopy, explainable AI},
-		title = {{An explainability framework for cortical surface-based deep learning}},
-		url = {https://arxiv.org/abs/2203.08312},
-		year = {2022}
-	}
-	
+Please cite our work if you used our model:
 
 	@article{Ribeiro2021,
 		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Puckett, Alexander M},
@@ -99,6 +76,9 @@ Please cite our papers if you used our model or if it was somewhat helpful for y
 		year = {2021}
 	}
 
+## Acknowledgements
+
+#TODO
 
 ## Contact
 Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>

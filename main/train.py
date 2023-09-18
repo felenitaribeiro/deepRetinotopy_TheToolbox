@@ -4,131 +4,34 @@ import torch
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 import sys
-import numpy as np
 import time
 
 sys.path.append('..')
 
-from Retinotopy.dataset.HCP_3sets_ROI_ctePatch import Retinotopy
+from Retinotopy.utils.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
 from torch_geometric.nn import SplineConv
+from utils.model import deepRetinotopy
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy',
-                'data')
-pre_transform = T.Compose([T.FaceToEdge()])
+path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
 norm_value = 70.4237
-# Defining patch
-kernel = np.load('./DorsalEarlyVisualCortex.npz')['list']
+pre_transform = T.Compose([T.FaceToEdge()])
 
-train_dataset = Retinotopy(path, 'Train',
-                           transform=T.Cartesian(max_value=norm_value),
+train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(max_value=norm_value),
                            pre_transform=pre_transform, n_examples=181,
                            prediction='polarAngle', myelination=True,
-                           hemisphere='Left',
-                           patch=kernel)  # Change to Right for the RH
-dev_dataset = Retinotopy(path, 'Development',
-                         transform=T.Cartesian(max_value=norm_value),
+                           hemisphere='Left') # Change to Right for the RH
+dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=norm_value),
                          pre_transform=pre_transform, n_examples=181,
                          prediction='polarAngle', myelination=True,
-                         hemisphere='Left',
-                         patch=kernel)  # Change to Right for the RH
+                         hemisphere='Left') # Change to Right for the RH
 train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
 dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
 
-# Model
-class Net(torch.nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = SplineConv(2, 8, dim=3, kernel_size=25)
-        self.bn1 = torch.nn.BatchNorm1d(8)
-
-        self.conv2 = SplineConv(8, 16, dim=3, kernel_size=25)
-        self.bn2 = torch.nn.BatchNorm1d(16)
-
-        self.conv3 = SplineConv(16, 32, dim=3, kernel_size=25)
-        self.bn3 = torch.nn.BatchNorm1d(32)
-
-        self.conv4 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn4 = torch.nn.BatchNorm1d(32)
-
-        self.conv5 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn5 = torch.nn.BatchNorm1d(32)
-
-        self.conv6 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn6 = torch.nn.BatchNorm1d(32)
-
-        self.conv7 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn7 = torch.nn.BatchNorm1d(32)
-
-        self.conv8 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn8 = torch.nn.BatchNorm1d(32)
-
-        self.conv9 = SplineConv(32, 32, dim=3, kernel_size=25)
-        self.bn9 = torch.nn.BatchNorm1d(32)
-
-        self.conv10 = SplineConv(32, 16, dim=3, kernel_size=25)
-        self.bn10 = torch.nn.BatchNorm1d(16)
-
-        self.conv11 = SplineConv(16, 8, dim=3, kernel_size=25)
-        self.bn11 = torch.nn.BatchNorm1d(8)
-
-        self.conv12 = SplineConv(8, 1, dim=3, kernel_size=25)
-
-    def forward(self, data):
-        x, edge_index, pseudo = data.x, data.edge_index, data.edge_attr
-        x = F.elu(self.conv1(x, edge_index, pseudo))
-        x = self.bn1(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv2(x, edge_index, pseudo))
-        x = self.bn2(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv3(x, edge_index, pseudo))
-        x = self.bn3(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv4(x, edge_index, pseudo))
-        x = self.bn4(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv5(x, edge_index, pseudo))
-        x = self.bn5(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv6(x, edge_index, pseudo))
-        x = self.bn6(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv7(x, edge_index, pseudo))
-        x = self.bn7(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv8(x, edge_index, pseudo))
-        x = self.bn8(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv9(x, edge_index, pseudo))
-        x = self.bn9(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv10(x, edge_index, pseudo))
-        x = self.bn10(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv11(x, edge_index, pseudo))
-        x = self.bn11(x)
-        x = F.dropout(x, p=.10, training=self.training)
-
-        x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
-        return x
-
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = Net().to(device)
+model = deepRetinotopy(num_features=2).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
 
 def train(epoch):
     model.train()
@@ -145,8 +48,7 @@ def train(epoch):
         threshold = R2.view(-1) > 2.2
 
         loss = torch.nn.SmoothL1Loss()
-        output_loss = loss(R2 * model(data),
-                           R2 * data.y.view(-1))
+        output_loss = loss(R2 * model(data), R2 * data.y.view(-1))
         output_loss.backward()
 
         MAE = torch.mean(abs(
@@ -224,8 +126,7 @@ for i in range(5):
     # Saving model's learned parameters
     torch.save(model.state_dict(),
                osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                        'deepRetinotopy_PA_LH_model' + str(
-                            i + 1) + '_ctePatch.pt'))  # Rename if RH
+                        'deepRetinotopy_PA_LH_model' + str(i+1) + '.pt')) # Rename if RH
 
 # end = time.time() # To find out how long it takes to train the model
 # time = (end - init) / 60

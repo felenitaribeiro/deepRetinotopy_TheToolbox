@@ -3,9 +3,9 @@ import scipy.io
 import torch
 
 from torch_geometric.data import InMemoryDataset
-from Retinotopy.read.read_HCPdata import read_HCP
-from Retinotopy.functions.labels import labels
-from Retinotopy.functions.def_ROIs_WangParcelsPlusFovea import roi
+from Retinotopy.utils.read_HCPdata import read_HCP
+from Retinotopy.utils.labels import labels
+from Retinotopy.utils.def_ROIs_WangParcelsPlusFovea import roi
 
 
 # Generates the training, dev and test set separately
@@ -134,9 +134,9 @@ class Retinotopy(InMemoryDataset):
             label_primary_visual_areas)
 
         faces_R = labels(scipy.io.loadmat(osp.join(path, 'tri_faces_R.mat'))[
-                             'tri_faces_R'] - 1, index_R_mask)
+            'tri_faces_R'] - 1, index_R_mask)
         faces_L = labels(scipy.io.loadmat(osp.join(path, 'tri_faces_L.mat'))[
-                             'tri_faces_L'] - 1, index_L_mask)
+            'tri_faces_L'] - 1, index_L_mask)
 
         for i in range(0, self.n_examples):
             data = read_HCP(path, Hemisphere=self.hemisphere, index=i,

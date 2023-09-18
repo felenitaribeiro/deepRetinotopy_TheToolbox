@@ -2,6 +2,7 @@ import scipy.io
 import numpy as np
 import torch
 import os.path as osp
+import nibabel as nib
 
 from numpy.random import seed
 from torch_geometric.data import Data
@@ -64,18 +65,16 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
     if shuffle == True:
         np.random.shuffle(subjects)
 
-
     if Hemisphere == 'Right':
         # Loading connectivity of triangles
-        faces = torch.tensor(faces_R.T, dtype=torch.long)  # Transforming data
-        # to torch data type
+        faces = torch.tensor(faces_R.T, dtype=torch.long)
 
         if surface == 'mid':
             # Coordinates of the Right hemisphere vertices
             pos = torch.tensor((scipy.io.loadmat(
                 osp.join(path, 'mid_pos_R.mat'))['mid_pos_R'].reshape(
                 (number_hemi_nodes, 3))[visual_mask_R == 1]),
-                               dtype=torch.float)
+                dtype=torch.float)
 
         if surface == 'sphere':
             pos = torch.tensor(curv['pos'][0][0][
@@ -85,35 +84,35 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
         # Measures for the Right hemisphere
         R2_values = torch.tensor(np.reshape(
             R2['x' + subjects[index] + '_fit1_r2_msmall'][0][0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
         myelin_values = torch.tensor(np.reshape(
             myelin['x' + subjects[index] + '_myelinmap'][0][0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
         curvature = torch.tensor(np.reshape(
             curv['x' + subjects[index] + '_curvature'][0][0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
         eccentricity_values = torch.tensor(np.reshape(
             eccentricity['x' + subjects[index] + '_fit1_eccentricity_msmall'][
                 0][0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
         polarAngle_values = torch.tensor(np.reshape(
             polarAngle['x' + subjects[index] + '_fit1_polarangle_msmall'][0][
                 0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
         pRFsize_values = torch.tensor(np.reshape(
             pRFsize['x' + subjects[index] + '_fit1_receptivefieldsize_msmall'][
                 0][0][
-            number_hemi_nodes:number_cortical_nodes].reshape(
+                number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
 
@@ -162,15 +161,14 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
 
     if Hemisphere == 'Left':
         # Loading connectivity of triangles
-        faces = torch.tensor(faces_L.T, dtype=torch.long)  # Transforming data
-        # to torch data type
+        faces = torch.tensor(faces_L.T, dtype=torch.long)
 
         # Coordinates of the Left hemisphere vertices
         if surface == 'mid':
             pos = torch.tensor((scipy.io.loadmat(
                 osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
                 (number_hemi_nodes, 3))[visual_mask_L == 1]),
-                               dtype=torch.float)
+                dtype=torch.float)
 
         if surface == 'sphere':
             pos = torch.tensor(curv['pos'][0][0][0:number_hemi_nodes].reshape(
@@ -179,16 +177,16 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
         # Measures for the Left hemisphere
         R2_values = torch.tensor(np.reshape(
             R2['x' + subjects[index] + '_fit1_r2_msmall'][0][0][
-            0:number_hemi_nodes].reshape((number_hemi_nodes))[
+                0:number_hemi_nodes].reshape((number_hemi_nodes))[
                 visual_mask_L == 1], (-1, 1)), dtype=torch.float)
         myelin_values = torch.tensor(np.reshape(
             myelin['x' + subjects[index] + '_myelinmap'][0][0][
-            0:number_hemi_nodes].reshape(
+                0:number_hemi_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
             dtype=torch.float)
         curvature = torch.tensor(np.reshape(
             curv['x' + subjects[index] + '_curvature'][0][0][
-            0:number_hemi_nodes].reshape(
+                0:number_hemi_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
             dtype=torch.float)
         eccentricity_values = torch.tensor(np.reshape(
@@ -253,4 +251,109 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
 
         data.face = faces
         data.R2 = R2_values
+    return data
+
+
+def read_gifti(path, Hemisphere=None, list_subs=None, index=None, surface='mid', threshold=None,
+               shuffle=False, visual_mask_L=None, visual_mask_R=None,
+               faces_L=None, faces_R=None, myelination=None, prediction=None):
+    """Read the data files and create a data object with attributes x, y, pos,
+        faces and R2.
+
+        Args:
+            path (string): Path to raw dataset
+            Hemisphere (string): 'Left' or 'Right' hemisphere
+            index (int): Index of the participant
+            surface (string): Surface template
+            threshold (float): threshold for selection of vertices in the
+                ROI based on the R2 of pRF modelling
+            shuffle (boolean): shuffle the participants' IDs list
+            visual_mask_L (numpy array): Mask of the region of interest from
+                left hemisphere (32492,)
+            visual_mask_R (numpy array): Mask of the region of interest from
+                right hemisphere (32492,)
+            faces_L (numpy array): triangular faces from the region of
+                interest (number of faces, 3) in the left hemisphere
+            faces_R (numpy array): triangular faces from the region of
+                interest (number of faces, 3) in the right hemisphere
+            myelination (boolean): True if myelin values will be used as an
+                additional feature
+            prediction (string): output of the model ('polarAngle' or
+                'eccentricity')
+
+        Returns:
+            data (object): object of class Data (from torch_geometric.data)
+                with attributes x, y, pos, faces and R2.
+        """
+    curv = scipy.io.loadmat(osp.join(path, 'cifti_curv_all.mat'))['cifti_curv']
+
+    # Defining number of nodes
+    number_cortical_nodes = int(64984)
+    number_hemi_nodes = int(number_cortical_nodes / 2)
+
+    seed(1)
+    if shuffle == True:
+        np.random.shuffle(list_subs)
+
+    if Hemisphere == 'Right':
+        # Loading connectivity of triangles
+        faces = torch.tensor(faces_R.T, dtype=torch.long)
+
+        if surface == 'mid':
+            # Coordinates of the Right hemisphere vertices
+            pos = torch.tensor((scipy.io.loadmat(
+                osp.join(path, 'mid_pos_R.mat'))['mid_pos_R'].reshape(
+                (number_hemi_nodes, 3))[visual_mask_R == 1]),
+                dtype=torch.float)
+
+        if surface == 'sphere':
+            pos = torch.tensor(curv['pos'][0][0][
+                               number_hemi_nodes:number_cortical_nodes].reshape(
+                (number_hemi_nodes, 3))[visual_mask_R == 1], dtype=torch.float)
+
+        curvature = torch.tensor(np.array(nib.load(osp.join(osp.dirname(osp.realpath(__file__)) + '/../data/',
+                                 list_subs[index] + '/' + list_subs[index] + '.curv-mid.rh.32k_fs_LR.func.gii')).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+
+        nocurv = np.isnan(curvature)
+        curvature[nocurv == 1] = 0
+
+        if myelination == False:
+            if prediction == 'polarAngle':
+                data = Data(x=curvature, pos=pos)
+            elif prediction == 'eccentricity':
+                data = Data(x=curvature, pos=pos)
+            else:
+                data = Data(x=curvature, pos=pos)
+        data.face = faces
+
+    if Hemisphere == 'Left':
+        # Loading connectivity of triangles
+        faces = torch.tensor(faces_L.T, dtype=torch.long)
+
+        # Coordinates of the Left hemisphere vertices
+        if surface == 'mid':
+            pos = torch.tensor((scipy.io.loadmat(
+                osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
+                (number_hemi_nodes, 3))[visual_mask_L == 1]),
+                dtype=torch.float)
+
+        if surface == 'sphere':
+            pos = torch.tensor(curv['pos'][0][0][0:number_hemi_nodes].reshape(
+                (number_hemi_nodes, 3))[visual_mask_L == 1], dtype=torch.float)
+
+        curvature = torch.tensor(np.array(nib.load(osp.join(osp.dirname(osp.realpath(__file__)) + '/../data/',
+                                 list_subs[index] + '/' + list_subs[index] + '.curv-mid.lh.32k_fs_LR.func.gii')).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
+
+        nocurv = np.isnan(curvature)
+        curvature[nocurv == 1] = 0
+
+        if myelination == False:
+            if prediction == 'polarAngle':
+                data = Data(x=curvature, pos=pos)
+            elif prediction == 'eccentricity':
+                data = Data(x=curvature, pos=pos)
+            else:
+                data = Data(x=curvature, pos=pos)
+        data.face = faces
+
     return data

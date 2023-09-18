@@ -9,8 +9,6 @@ from Retinotopy.utils.def_ROIs_WangParcelsPlusFovea import roi
 
 
 # Generates the training, dev and test set separately
-
-
 class Retinotopy(InMemoryDataset):
     url = 'https://balsa.wustl.edu/study/show/9Zkk'
 

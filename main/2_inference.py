@@ -9,7 +9,6 @@ sys.path.append('..')
 
 from utils.HCP_3sets_ROI import Retinotopy
 from torch_geometric.data import DataLoader
-from torch_geometric.nn import SplineConv
 from utils.model import deepRetinotopy
 
 path = osp.join(osp.dirname(osp.realpath(__file__)), '../../Retinotopy',

@@ -20,10 +20,11 @@ echo "Map: $map";
 echo "Model: $model";
 echo "Resampling fsaverage to native space...";
 
-for i in `ls $dirSubs`; 
+cd $dirSubs
+for dirSub in `ls $dirSubs`; 
 do 
-  wb_command -metric-resample $dirSubs/predictions/"$dirSubs"_fs_predicted_"$hemisphere"_"$map"_"$model".func.gii \
+  wb_command -metric-resample $dirSub/deepRetinotopy/"$dirSub".fs_predicted_"$map"_"$hemisphere"_curvatureFeat_"$model".func.gii \
   $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
-  $dirSubs/surf/"$hemisphere".sphere.reg.surf.gii ADAP_BARY_AREA $dirSubs/"$dirSubs".predicted_"$map"_"$model"."$hemisphere".native.func.gii \
-  -area-surfs $dirSubs/surf/"$dirSubs"."$hemisphere".midthickness.32k_fs_LR.surf.gii $dirSubs/surf/"$hemisphere".midthickness.surf.gii
+  $dirSub/surf/"$hemisphere".sphere.reg.surf.gii ADAP_BARY_AREA $dirSub/"$dirSub".predicted_"$map"_"$model"."$hemisphere".native.func.gii \
+  -area-surfs $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii $dirSub/surf/"$hemisphere".midthickness.surf.gii
 done

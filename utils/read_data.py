@@ -254,9 +254,9 @@ def read_HCP(path, Hemisphere=None, index=None, surface=None, threshold=None,
     return data
 
 
-def read_gifti(path, Hemisphere=None, list_subs=None, index=None, surface='mid', threshold=None,
+def read_gifti(path, Hemisphere=None, sub_id=None, surface='mid', 
                shuffle=False, visual_mask_L=None, visual_mask_R=None,
-               faces_L=None, faces_R=None, myelination=None, prediction=None):
+               faces_L=None, faces_R=None, myelination=False, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -285,35 +285,24 @@ def read_gifti(path, Hemisphere=None, list_subs=None, index=None, surface='mid',
             data (object): object of class Data (from torch_geometric.data)
                 with attributes x, y, pos, faces and R2.
         """
-    curv = scipy.io.loadmat(osp.join(path, 'cifti_curv_all.mat'))['cifti_curv']
 
     # Defining number of nodes
     number_cortical_nodes = int(64984)
     number_hemi_nodes = int(number_cortical_nodes / 2)
-
-    seed(1)
-    if shuffle == True:
-        np.random.shuffle(list_subs)
-
-    if Hemisphere == 'Right':
+    if Hemisphere == 'Left':
         # Loading connectivity of triangles
-        faces = torch.tensor(faces_R.T, dtype=torch.long)
+        faces = torch.tensor(faces_L.T, dtype=torch.long)
 
+        # Coordinates of the Left hemisphere vertices
         if surface == 'mid':
-            # Coordinates of the Right hemisphere vertices
             pos = torch.tensor((scipy.io.loadmat(
-                osp.join(path, 'mid_pos_R.mat'))['mid_pos_R'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_R == 1]),
+                osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_L.mat'))['mid_pos_L'].reshape(
+                (number_hemi_nodes, 3))[visual_mask_L == 1]),
                 dtype=torch.float)
-
-        if surface == 'sphere':
-            pos = torch.tensor(curv['pos'][0][0][
-                               number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes, 3))[visual_mask_R == 1], dtype=torch.float)
-
-        curvature = torch.tensor(np.array(nib.load(osp.join(osp.dirname(osp.realpath(__file__)) + '/../data/',
-                                 list_subs[index] + '/' + list_subs[index] + '.curv-mid.rh.32k_fs_LR.func.gii')).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
-
+        
+        curvature = torch.tensor(np.array(nib.load(osp.join(path,
+                                 sub_id + '/surf/' + sub_id + '.curvature-midthickness.lh.32k_fs_LR.func.gii')).agg_data()).reshape(
+                                 number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
@@ -325,25 +314,22 @@ def read_gifti(path, Hemisphere=None, list_subs=None, index=None, surface='mid',
             else:
                 data = Data(x=curvature, pos=pos)
         data.face = faces
-
-    if Hemisphere == 'Left':
+   
+    else:
         # Loading connectivity of triangles
-        faces = torch.tensor(faces_L.T, dtype=torch.long)
+        faces = torch.tensor(faces_R.T, dtype=torch.long)
 
-        # Coordinates of the Left hemisphere vertices
         if surface == 'mid':
+            # Coordinates of the Right hemisphere vertices
             pos = torch.tensor((scipy.io.loadmat(
-                osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_L == 1]),
+                osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_R.mat'))['mid_pos_R'].reshape(
+                (number_hemi_nodes, 3))[visual_mask_R == 1]),
                 dtype=torch.float)
 
-        if surface == 'sphere':
-            pos = torch.tensor(curv['pos'][0][0][0:number_hemi_nodes].reshape(
-                (number_hemi_nodes, 3))[visual_mask_L == 1], dtype=torch.float)
 
-        curvature = torch.tensor(np.array(nib.load(osp.join(osp.dirname(osp.realpath(__file__)) + '/../data/',
-                                 list_subs[index] + '/' + list_subs[index] + '.curv-mid.lh.32k_fs_LR.func.gii')).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
-
+        curvature = torch.tensor(np.array(nib.load(osp.join(path,
+                                 sub_id + '/surf/' + sub_id + '.curvature-midthickness.rh.32k_fs_LR.func.gii')).agg_data()).reshape(
+                                 number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 

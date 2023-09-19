@@ -1,39 +1,18 @@
 import os
 import os.path as osp
 import torch
-import torch.nn.functional as F
 import torch_geometric.transforms as T
 import sys
 import time
+import argparse
+from torch_geometric.data import DataLoader
 
 sys.path.append('..')
 
-from Retinotopy.utils.HCP_3sets_ROI import Retinotopy
-from torch_geometric.data import DataLoader
-from torch_geometric.nn import SplineConv
 from utils.model import deepRetinotopy
+from utils.dataset import Retinotopy
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..', 'Retinotopy', 'data')
-norm_value = 70.4237
-pre_transform = T.Compose([T.FaceToEdge()])
-
-train_dataset = Retinotopy(path, 'Train', transform=T.Cartesian(max_value=norm_value),
-                           pre_transform=pre_transform, n_examples=181,
-                           prediction='polarAngle', myelination=True,
-                           hemisphere='Left') # Change to Right for the RH
-dev_dataset = Retinotopy(path, 'Development', transform=T.Cartesian(max_value=norm_value),
-                         pre_transform=pre_transform, n_examples=181,
-                         prediction='polarAngle', myelination=True,
-                         hemisphere='Left') # Change to Right for the RH
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
-
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = deepRetinotopy(num_features=2).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-def train(epoch):
+def train(epoch, model, optimizer, train_loader, device):
     model.train()
 
     if epoch == 100:
@@ -53,14 +32,13 @@ def train(epoch):
 
         MAE = torch.mean(abs(
             data.to(device).y.view(-1)[threshold == 1] - model(data)[
-                threshold == 1])).item()  # To check the performance of the
-        # model while training
+                threshold == 1])).item() 
 
         optimizer.step()
     return output_loss.detach(), MAE
 
 
-def test():
+def test(model, dev_loader, device):
     model.eval()
 
     MeanAbsError = 0
@@ -80,12 +58,10 @@ def test():
         threshold2 = R2.view(-1) > 17
 
         MAE = torch.mean(abs(data.to(device).y.view(-1)[threshold == 1] - pred[
-            threshold == 1])).item()  # To check the performance of the
-        # model while training
+            threshold == 1])).item()  
         MAE_thr = torch.mean(abs(
             data.to(device).y.view(-1)[threshold2 == 1] - pred[
-                threshold2 == 1])).item()  # To check the performance of the
-        # model while training
+                threshold2 == 1])).item()  
         MeanAbsError_thr += MAE_thr
         MeanAbsError += MAE
 
@@ -95,39 +71,65 @@ def test():
               'MAE': test_MAE, 'MAE_thr': test_MAE_thr}
     return output
 
+def train_loop(args):
+    with open(osp.join(args.path2list)) as fp:
+        subjects = fp.read().split("\n")
+    if subjects[-1] == '':
+        subjects = subjects[0:len(subjects) - 1]    
 
-# init = time.time() # To find out how long it takes to train the model
+    path = osp.join(osp.dirname(osp.realpath(__file__)),
+                    '..', 'Retinotopy', 'data')
+    norm_value = 70.4237
+    pre_transform = T.Compose([T.FaceToEdge()])
 
-# Create an output folder if it doesn't already exist
-directory = './output'
-if not osp.exists(directory):
-    os.makedirs(directory)
+    train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
+                            pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
+                            prediction=args.prediction_type, hemisphere=args.hemisphere)  # Change to Right for the RH
+    dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
+                            pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
+                            prediction=args.prediction_type, hemisphere=args.hemisphere)
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+    dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
-# Model training
-for i in range(5):
-    for epoch in range(1, 201):
-        loss, MAE = train(epoch)
-        test_output = test()
-        print(
-            'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
-            '{:.4f}, Test_MAE_thr: {:.4f}'.format(
-                epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
-        # if epoch % 25 == 0:  # To save intermediate predictions
-        #     torch.save({'Epoch': epoch,
-        #                 'Predicted_values': test_output['Predicted_values'],
-        #                 'Measured_values': test_output['Measured_values'],
-        #                 'R2': test_output['R2'], 'Loss': loss,
-        #                 'Dev_MAE': test_output['MAE']},
-        #                osp.join(osp.dirname(osp.realpath(__file__)),
-        #                         'output',
-        #                         'deepRetinotopy_PA_LH_output_epoch' + str(
-        #                             epoch) + '.pt')) # Rename if RH
 
-    # Saving model's learned parameters
-    torch.save(model.state_dict(),
-               osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                        'deepRetinotopy_PA_LH_model' + str(i+1) + '.pt')) # Rename if RH
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = deepRetinotopy(num_features=args.num_features).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
-# end = time.time() # To find out how long it takes to train the model
-# time = (end - init) / 60
-# print(str(time) + ' minutes')
+    # Create an output folder if it doesn't already exist
+    directory = './output'
+    if not osp.exists(directory):
+        os.makedirs(directory)
+
+    # Model training
+    for i in range(5):
+        for epoch in range(1, 201):
+            loss, MAE = train(epoch, model, optimizer, train_loader, device)
+            test_output = test(model, dev_loader, device)
+            print(
+                'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
+                '{:.4f}, Test_MAE_thr: {:.4f}'.format(
+                    epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
+
+        torch.save(model.state_dict(),
+                osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                            'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
+
+def main():
+    parser = argparse.ArgumentParser(description='Train deepRetinotopy model')
+    parser.add_argument('--path', type=str, help='Path to the data folder')
+    parser.add_argument('--path2list', type=str, help='Path to the list of subjects')
+    parser.add_argument('--dataset', type=str, default='HCP', help='Dataset to use')
+    parser.add_argument('--prediction_type', type=str, default='polarAngle',
+                        choices=['polarAngle', 'eccentricity', 'pRFsize'], 
+                        help='Prediction type')
+    parser.add_argument('--hemisphere', type=str, default='Left',
+                        choices=['Left', 'Right'], help='Hemisphere to use')
+    parser.add_argument('--num_features', type=int, default=1, 
+                        help='Number of features')
+    args = parser.parse_args()
+    train_loop(args)
+
+
+if __name__ == '__main__':
+    main()

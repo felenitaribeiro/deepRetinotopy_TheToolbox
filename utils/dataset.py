@@ -52,7 +52,7 @@ class Retinotopy(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        if self.hemisphere == 'Left':
+        if self.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
             if self.myelination == True:
                 if self.prediction == 'eccentricity':
                     return [
@@ -150,7 +150,7 @@ class Retinotopy(InMemoryDataset):
             data_list = []
 
             for i in range(0, len(self.list_subs)):
-                data = read_HCP(path, Hemisphere=self.hemisphere, index=i,
+                data = read_HCP(path, hemisphere=self.hemisphere, sub_id=self.list_subs[i],
                                 surface='mid', visual_mask_L=final_mask_L,
                                 visual_mask_R=final_mask_R, faces_L=faces_L,
                                 faces_R=faces_R, myelination=self.myelination,
@@ -158,10 +158,10 @@ class Retinotopy(InMemoryDataset):
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 data_list.append(data)
-
-            train = data_list[0:int(161)]
-            dev = data_list[int(161):int(171)]
-            test = data_list[int(171):len(data_list)]
+            # TODO: split data into train, dev, test
+            train = data_list[0:int(len(data_list))] # int(161)
+            dev = data_list[0:int(len(data_list))] # to int(171)
+            test = data_list[0:int(len(data_list))] # to len(data_list)
 
             torch.save(self.collate(train), self.processed_paths[0])
             torch.save(self.collate(dev), self.processed_paths[1])
@@ -171,7 +171,7 @@ class Retinotopy(InMemoryDataset):
             data_list = []
 
             for i in range(0, len(self.list_subs)):
-                data = read_gifti(self.root, Hemisphere=self.hemisphere, 
+                data = read_gifti(self.root, hemisphere=self.hemisphere, 
                                   sub_id=self.list_subs[i], surface='mid', 
                                   visual_mask_L=final_mask_L, visual_mask_R=final_mask_R, 
                                   faces_L=faces_L, faces_R=faces_R, myelination=self.myelination,

@@ -47,10 +47,9 @@ Note, there are installations for different CUDA versions. For more: [PyTorch Ge
 ```   
 
 Requirements:
-- Connectome workbench version XX
-- FreeSurfer version XX
 - HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
-
+- FreeSurfer license
+- Docker / Singularity container
 
 ## Software containers
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export FREESURFER_HOME=/usr/local/freesurfer
-source $FREESURFER_HOME/SetUpFreeSurfer.sh
+# export FREESURFER_HOME=/usr/local/freesurfer
+# source $FREESURFER_HOME/SetUpFreeSurfer.sh
 
 while getopts s:t:h: flag
 do

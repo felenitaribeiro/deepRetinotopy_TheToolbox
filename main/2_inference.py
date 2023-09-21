@@ -13,6 +13,7 @@ from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.model import deepRetinotopy
 from torch_geometric.data import DataLoader
 from utils.dataset import Retinotopy
+from utils.metrics import average_prediction
 
 def test(model, data_loader, device):
     model.eval()
@@ -35,8 +36,11 @@ def inference(args):
                               list_subs=list_subs,
                               prediction=args.prediction_type, hemisphere=args.hemisphere)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+    num_of_models = 2
+    num_of_cortical_nodes = 32492
+    predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
 
-    for i in range(5):
+    for i in range(num_of_models):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = deepRetinotopy(num_features=args.num_features).to(device)
         if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
@@ -76,16 +80,18 @@ def inference(args):
             if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                     'lh.32k_fs_LR.func.gii')
-                pred = np.zeros((32492, 1))
+                pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_L == 1] = np.reshape(
                     np.array(evaluation['Predicted_values'][j]), (-1, 1))
-
+                
                 # rescaling the predicted values
                 minus = pred >= 180
                 sum = pred < 180
                 pred[minus] = pred[minus] - 180
                 pred[sum] = pred[sum] + 180
                 pred = np.array(pred)
+
+                predictions[j, i, :] = pred[:, 0]
 
                 pred[final_mask_L != 1] = -1
 
@@ -96,10 +102,11 @@ def inference(args):
             else:
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                     'rh.32k_fs_LR.func.gii')
-                pred = np.zeros((32492, 1))
+                pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_R == 1] = np.reshape(
                     np.array(evaluation['Predicted_values'][j]), (-1, 1))
                 pred = np.array(pred)
+                predictions[j, i, :] = pred[:, 0]
 
                 pred[final_mask_R != 1] = -1
 
@@ -107,7 +114,30 @@ def inference(args):
 
                 nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                         '_rh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+    # Average the predictions
+    average_predictions = average_prediction(predictions)
+    for j in range(len(list_subs)):
+        if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
+            template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
+                                'lh.32k_fs_LR.func.gii')
+            pred = average_predictions[j, :]
+            pred = np.reshape(pred, (num_of_cortical_nodes,1))
+            pred[final_mask_L != 1] = -1
+            template.agg_data()[:] = np.reshape(pred, (-1))
 
+            nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                    '_lh_curvatureFeat_average.func.gii')
+        else:
+            template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
+                                'rh.32k_fs_LR.func.gii')
+            pred = average_predictions[j, :]
+            pred = np.reshape(pred, (num_of_cortical_nodes,1))
+            pred[final_mask_R != 1] = -1
+            template.agg_data()[:] = np.reshape(pred, (-1))
+
+            nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                    '_rh_curvatureFeat_average.func.gii')            
+    
 
 def main():
     parser = argparse.ArgumentParser(description='Inference with deepRetinotopy')

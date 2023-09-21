@@ -37,7 +37,7 @@ do
         rm -r $dirSubs/processed
 
         echo "Resampling predictions to native space..."
-        for model in 1; #, 2, 3, 4, 5
+        for model in model1; #, model2, model3, model4, model5, average
         do
             bash 3_fsaverage2native.sh -s $dirSubs \
             -t $dirHCP -h $hemisphere -r $map -m $model

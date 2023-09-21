@@ -43,3 +43,19 @@ def distance_PolarCoord(radius1, radius2, theta1, theta2):
         radius1 ** 2 + radius2 ** 2 - 2 * radius1 * radius2 * np.cos(
             theta2 - theta1))
     return distance
+
+def average_prediction(predictions_array):
+    """Average the predictions across models.
+
+    Args:
+      predictions_array (numpy array): An array of shape 
+      ((len(list_subs), num_of_models, num_of_cortical_nodes)) 
+      containing the predictions of each model
+
+    Returns:
+      numpy array: the average prediction across models
+    """
+    predictions_array = predictions_array/180 * np.pi
+    average_predictions = np.mean(predictions_array, axis=1)
+    average_predictions = average_predictions * 180 / np.pi
+    return average_predictions

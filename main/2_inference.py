@@ -83,16 +83,14 @@ def inference(args):
                 pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_L == 1] = np.reshape(
                     np.array(evaluation['Predicted_values'][j]), (-1, 1))
-                
+                predictions[j, i, :] = pred[:, 0]
+
                 # rescaling the predicted values
                 minus = pred >= 180
                 sum = pred < 180
                 pred[minus] = pred[minus] - 180
                 pred[sum] = pred[sum] + 180
-                pred = np.array(pred)
-
-                predictions[j, i, :] = pred[:, 0]
-
+                
                 pred[final_mask_L != 1] = -1
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
@@ -105,7 +103,6 @@ def inference(args):
                 pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_R == 1] = np.reshape(
                     np.array(evaluation['Predicted_values'][j]), (-1, 1))
-                pred = np.array(pred)
                 predictions[j, i, :] = pred[:, 0]
 
                 pred[final_mask_R != 1] = -1
@@ -122,6 +119,12 @@ def inference(args):
                                 'lh.32k_fs_LR.func.gii')
             pred = average_predictions[j, :]
             pred = np.reshape(pred, (num_of_cortical_nodes,1))
+            # rescaling the predicted values
+            minus = pred >= 180
+            sum = pred < 180
+            pred[minus] = pred[minus] - 180
+            pred[sum] = pred[sum] + 180
+            
             pred[final_mask_L != 1] = -1
             template.agg_data()[:] = np.reshape(pred, (-1))
 

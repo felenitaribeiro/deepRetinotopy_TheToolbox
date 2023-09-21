@@ -22,7 +22,7 @@ cd $dirSubs
 for dirSub in `ls .`; 
 do 
     echo "Generating mid-thickness surface and curvature data..."
-    mris_expand -thickness $dirSub/surf/"$hemisphere".white 0.5 graymid
+    mris_expand -thickness $dirSub/surf/"$hemisphere".white 0.5 $dirSub/surf/"$hemisphere".graymid
     mris_curvature -w $dirSub/surf/"$hemisphere".graymid
     
     echo "Preparing native surfaces for resampling..."

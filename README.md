@@ -1,59 +1,38 @@
 # DeepRetinotopy -- The toolbox
-This repository contains (restructured) code for the general use of deepRetinotopy using a command line interface.
+This repository contains (restructured) code for the general use of deepRetinotopy with a command line interface.
 
 ## Table of Contents
-* [Installation and requirements](#installation-and-requirements)
+* [Requirements](#installation-and-requirements)
 * [Software containers](#software-containers)
 * [Pre-trained models](#pre-trained-models)
 * [Citation](#citation)
 * [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
 
-## Installation and requirements 
-
-Models were generated using [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/). Since this package 
-is under constant updates, we highly recommend that 
-you follow the following steps to run our models locally:
-
-- Create a conda environment (or docker container)
-- Install torch first:
-
-```bash
-	conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch
-```
-	
-- Install torch-scatter, torch-sparse, torch-cluster, torch-spline-conv and torch-geometric:
-	 
-```bash
-    pip install --no-index torch-scatter -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-    pip install --no-index torch-sparse -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-    pip install --no-index torch-cluster -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-    pip install --no-index torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.6.0+cu101.html
-    pip install torch-geometric==1.6.3
-```
-
-Note, there are installations for different CUDA versions. For more: [PyTorch Geometric Installation](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html)
-
-- Install the remaining required packages that are available at requirements.txt: 
-
-```bash
-    pip install -r requirements.txt
-```
-
-- Install the following git repository for plots:
-
-```bash
-    pip install git+https://github.com/felenitaribeiro/nilearn.git
-```   
+## Requirements 
 
 Requirements:
 - HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
-- FreeSurfer license
 - Docker / Singularity container
 
 ## Software containers
 
-#TODO
+### Docker
+To pull, run, and execute a Docker container, run the following:
+
+```bash
+docker pull vnmd/deepretinotopy_1.0.1:latest
+docker run -it -v ~:/tmp/ --name deepret2 -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.1:latest
+docker exec -it deepret bash
+```
+
+In the container, you can run **deepRetinotopy.sh**: 
+```bash
+cd $path/deepRetinotopy_TheToolbox
+bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
+```
+### Singularity
+
 
 ## Pre-trained models
 
@@ -77,7 +56,7 @@ Please cite our work if you used our model:
 
 ## Acknowledgements
 
-#TODO
+Docker and Singularity containers were generated and are available through the [Neurodesk](https://www.neurodesk.org/). 
 
 ## Contact
 Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>

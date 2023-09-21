@@ -11,7 +11,6 @@ This repository contains (restructured) code for the general use of deepRetinoto
 
 ## Requirements 
 
-Requirements:
 - HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 - Docker / Singularity container
 
@@ -56,7 +55,7 @@ Please cite our work if you used our model:
 
 ## Acknowledgements
 
-Docker and Singularity containers were generated and are available through the [Neurodesk](https://www.neurodesk.org/). 
+Docker and Singularity containers were generated and are available through [Neurodesk](https://www.neurodesk.org/). 
 
 ## Contact
 Fernanda Ribeiro <[fernanda.ribeiro@uq.edu.au](fernanda.ribeiro@uq.edu.au)>

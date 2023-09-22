@@ -53,7 +53,7 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
     number_cortical_nodes = int(64984)
     number_hemi_nodes = int(number_cortical_nodes / 2)
 
-    if hemisphere == 'Right':
+    if (hemisphere == 'Right' or hemisphere == 'RH' or hemisphere == 'right' or hemisphere == 'rh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_R.T, dtype=torch.long)
 
@@ -151,7 +151,7 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
         data.face = faces
         data.R2 = R2_values
 
-    if hemisphere == 'Left':
+    if (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_L.T, dtype=torch.long)
 
@@ -282,7 +282,7 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
     # Defining number of nodes
     number_cortical_nodes = int(64984)
     number_hemi_nodes = int(number_cortical_nodes / 2)
-    if hemisphere == 'Left':
+    if (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_L.T, dtype=torch.long)
 

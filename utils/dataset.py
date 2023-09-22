@@ -52,7 +52,7 @@ class Retinotopy(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        if self.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
+        if (self.hemisphere == 'Left' or self.hemisphere == 'LH' or self.hemisphere == 'left' or self.hemisphere == 'lh'):
             if self.myelination == True:
                 if self.prediction == 'eccentricity':
                     return [

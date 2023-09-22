@@ -22,7 +22,7 @@ To pull, run, and execute a Docker container, run the following:
 ```bash
 docker pull vnmd/deepretinotopy_1.0.1:latest
 docker run -it -v ~:/tmp/ --name deepret2 -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.1:latest
-docker exec -it deepret bash
+# docker exec -it deepret bash
 ```
 
 In the container, you can run **deepRetinotopy.sh**: 

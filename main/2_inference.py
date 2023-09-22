@@ -36,10 +36,10 @@ def inference(args):
                               list_subs=list_subs,
                               prediction=args.prediction_type, hemisphere=args.hemisphere)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-    num_of_models = 2
+    num_of_models = 5
     num_of_cortical_nodes = 32492
     predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
-
+    
     for i in range(num_of_models):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = deepRetinotopy(num_features=args.num_features).to(device)
@@ -62,7 +62,7 @@ def inference(args):
         torch.save({'Predicted_values': evaluation['Predicted_values']},
                    osp.join(osp.dirname(osp.realpath(__file__)),
                             '../predictions/',
-                            str(args.dataset) + '_curvatureFeat_' + args.prediction_type + '_model' + str(
+                            str(args.dataset) + '_curvatureFeat_' + args.hemisphere + '_' + args.prediction_type + '_model' + str(
                                 i + 1) + '.pt'))
 
         # Setting the ROI
@@ -72,12 +72,12 @@ def inference(args):
 
         for j in range(len(list_subs)):
             print('Saving .gii files in: ' + args.path +
-                  '/' + list_subs[j] + '/deepRetinotopy/')
+                  list_subs[j] + '/deepRetinotopy/')
             if not osp.exists(args.path + '/' + list_subs[j] + '/deepRetinotopy/'):
                 os.makedirs(args.path + '/' +
                             list_subs[j] + '/deepRetinotopy/')
-
-            if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
+            
+            if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                     'lh.32k_fs_LR.func.gii')
                 pred = np.zeros((num_of_cortical_nodes, 1))
@@ -95,7 +95,7 @@ def inference(args):
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
 
-                nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                         '_lh_curvatureFeat_model' + str(i + 1) + '.func.gii')
             else:
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
@@ -109,12 +109,12 @@ def inference(args):
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
 
-                nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                         '_rh_curvatureFeat_model' + str(i + 1) + '.func.gii')
     # Average the predictions
     average_predictions = average_prediction(predictions)
     for j in range(len(list_subs)):
-        if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
+        if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                 'lh.32k_fs_LR.func.gii')
             pred = average_predictions[j, :]
@@ -128,7 +128,7 @@ def inference(args):
             pred[final_mask_L != 1] = -1
             template.agg_data()[:] = np.reshape(pred, (-1))
 
-            nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+            nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                     '_lh_curvatureFeat_average.func.gii')
         else:
             template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
@@ -138,7 +138,7 @@ def inference(args):
             pred[final_mask_R != 1] = -1
             template.agg_data()[:] = np.reshape(pred, (-1))
 
-            nib.gifti.giftiio.write(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+            nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                     '_rh_curvatureFeat_average.func.gii')            
     
 
@@ -150,7 +150,7 @@ def main():
                         choices=['polarAngle', 'eccentricity', 'pRFsize'],
                         help='Prediction type')
     parser.add_argument('--hemisphere', type=str,
-                        default='Left', choices=['Left', 'Right'], help='Hemisphere to use')
+                        default='lh', choices=['lh', 'rh'], help='Hemisphere to use')
     parser.add_argument('--num_features', type=int, default=1, help='Number of features')
     args = parser.parse_args()
     inference(args)

@@ -16,28 +16,23 @@ echo "Path subs directory: $dirSubs";
 echo "Path to fs_LR-deformed_to-fsaverage surfaces: $dirHCP";
 
 cd main
-for hemisphere in 'lh'; #'rh'
+for hemisphere in 'lh' 'rh';
 do 
     for map in 'polarAngle'; #, 'eccentricity', 'pRFsize'
     do
         # Inside the container
-        echo $hemisphere
         echo "Generating mid-thickness surface and curvature data..."
         bash 1_native2fsaverage.sh -s $dirSubs \
         -t $dirHCP -h $hemisphere 
 
         echo "Retinotopy prediction..."
-        if [ "$hemisphere" == 'lh' ]; then
-            python 2_inference.py --path $dirSubs \
-        --dataset $datasetName --prediction_type $map --hemisphere Left
-        else
-            python 2_inference.py --path $dirSubs \
-        --dataset $datasetName --prediction_type $map --hemisphere Right
-        fi
+        python 2_inference.py --path $dirSubs \
+        --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+
         rm -r $dirSubs/processed
 
         echo "Resampling predictions to native space..."
-        for model in model1; #, model2, model3, model4, model5, average
+        for model in model1 model2 model3 model4 model5 average;
         do
             bash 3_fsaverage2native.sh -s $dirSubs \
             -t $dirHCP -h $hemisphere -r $map -m $model

@@ -43,7 +43,7 @@ def inference(args):
     for i in range(num_of_models):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = deepRetinotopy(num_features=args.num_features).to(device)
-        if args.hemisphere == 'Left' or 'LH' or 'left' or 'lh':
+        if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             model.load_state_dict(
                 torch.load('./../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + '.pt',
                            map_location=device))

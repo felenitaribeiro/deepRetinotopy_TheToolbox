@@ -15,19 +15,24 @@ This repository contains (restructured) code for the general use of deepRetinoto
 - Docker / Singularity container
 
 ## Software containers
+Before running the code, you need to install Docker or Singularity and clone this repository.
+
+```bash
+git clone https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git
+```
 
 ### Docker
 To pull, run, and execute a Docker container, run the following:
 
 ```bash
 docker pull vnmd/deepretinotopy_1.0.1:latest
-docker run -it -v ~:/tmp/ --name deepret2 -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.1:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.1:latest
 # docker exec -it deepret bash
 ```
 
 In the container, you can run **deepRetinotopy.sh**: 
 ```bash
-cd $path/deepRetinotopy_TheToolbox
+cd $path_to_tool/deepRetinotopy_TheToolbox
 bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
 ```
 ### Singularity

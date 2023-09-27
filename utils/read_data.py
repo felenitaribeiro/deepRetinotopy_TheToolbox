@@ -85,7 +85,7 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
         #         number_hemi_nodes:number_cortical_nodes].reshape(
         #         (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
         #     dtype=torch.float) # curvature provided by HCP is not the same as freesurfer
-        curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/' + sub_id +
+        curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
                                                     '.curvature-midthickness.rh.32k_fs_LR.func.gii')
                                                     ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
 
@@ -181,7 +181,7 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
         #         0:number_hemi_nodes].reshape(
         #         (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
         #     dtype=torch.float)
-        curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/' + sub_id +
+        curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
                                                     '.curvature-midthickness.lh.32k_fs_LR.func.gii')
                                                     ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
 

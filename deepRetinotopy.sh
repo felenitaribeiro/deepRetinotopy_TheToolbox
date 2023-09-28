@@ -18,12 +18,13 @@ echo "Path to fs_LR-deformed_to-fsaverage surfaces: $dirHCP";
 cd main
 for hemisphere in 'lh' 'rh';
 do 
-    for map in 'polarAngle'; #, 'eccentricity', 'pRFsize'
+    # Inside the container
+    echo "Generating mid-thickness surface and curvature data..."
+    bash 1_native2fsaverage.sh -s $dirSubs \
+    -t $dirHCP -h $hemisphere 
+
+    for map in 'polarAngle' 'eccentricity' 'pRFsize';
     do
-        # Inside the container
-        echo "Generating mid-thickness surface and curvature data..."
-        bash 1_native2fsaverage.sh -s $dirSubs \
-        -t $dirHCP -h $hemisphere 
 
         echo "Retinotopy prediction..."
         python 2_inference.py --path $dirSubs \

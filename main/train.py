@@ -123,8 +123,8 @@ def main():
     parser.add_argument('--prediction_type', type=str, default='polarAngle',
                         choices=['polarAngle', 'eccentricity', 'pRFsize'], 
                         help='Prediction type')
-    parser.add_argument('--hemisphere', type=str, default='Left',
-                        choices=['Left', 'Right'], help='Hemisphere to use')
+    parser.add_argument('--hemisphere', type=str, default='LH',
+                        choices=['LH', 'RH'], help='Hemisphere to use')
     parser.add_argument('--num_features', type=int, default=1, 
                         help='Number of features')
     args = parser.parse_args()

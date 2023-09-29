@@ -15,7 +15,7 @@ This repository contains (restructured) code for the general use of deepRetinoto
 - Docker / Singularity container
 
 ## Software containers
-Before running the code, you need to install Docker or Singularity and clone this repository.
+Before running deepRetinotopy, you need to install Docker or Singularity and clone this repository.
 
 ```bash
 git clone https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git
@@ -36,11 +36,26 @@ cd $path_to_tool/deepRetinotopy_TheToolbox
 bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
 ```
 ### Singularity
+First, you can download our Singularity container using the following command (for Asian/Australian locations):
 
+```bash
+cd $path_to_tool/deepRetinotopy_TheToolbox
+export container=deepretinotopy_1.0.1_20230922
+curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
+```
+
+Then, you can run the container (so long Singularity is already available on your computing environment) using the following command:
+
+```bash
+singularity exec --nv ./deepretinotopy_1.0.1_20230922.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
+```
+
+For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
 ## Pre-trained models
 
-#TODO
+Our pre-trained models are available on [OSF](https://osf.io/ermbz/).
+
 
 ## Citation
 

@@ -1,0 +1,36 @@
+name: test midthickness surface generation and curvature resampling
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - deepRetinotopy.sh
+      - ./main/1_native2fsaverage.sh
+
+
+  pull_request:
+    branches: [ master ]
+    paths:
+      - deepRetinotopy.sh
+      - ./main/1_native2fsaverage.sh
+      
+jobs:
+  test_module1:
+    runs-on: ubuntu-20.04
+    container: 
+      image: vnmd/deepretinotopy_1.0.1
+      volumes:
+        - ./:./
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.9.5
+    - name: test inference module
+      env:
+        OSF_TOKEN_: ${{ secrets.OSF_KEY }}
+        OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID_: 
+      run: |
+        /bin/bash tests/test_module1.sh

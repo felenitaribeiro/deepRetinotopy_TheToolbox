@@ -24,13 +24,9 @@ jobs:
         - ./:./
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
-      with:
-        python-version: 3.9.5
-    - name: test inference module
+    - name: test module 1
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}
         OSF_USERNAME_: ${{ secrets.OSF_USERNAME }}
-        OSF_PROJECT_ID_: 
       run: |
         /bin/bash tests/test_module1.sh

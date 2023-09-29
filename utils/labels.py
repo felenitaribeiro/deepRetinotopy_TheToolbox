@@ -1,5 +1,12 @@
 import numpy as np
-
+import os.path as osp
+import sys
+import scipy.io
+import torch_geometric.transforms as T
+from torch_geometric.data import Data
+import torch
+sys.path.append('.')
+from utils.rois import ROI_WangParcelsPlusFovea
 
 def labels(input, labels):
     """Function for the selection of triangular faces from the region of
@@ -41,3 +48,17 @@ def labels(input, labels):
             final_faces.append(faces[i])
 
     return np.reshape(final_faces, (len(final_faces), 3))
+
+if __name__=='__main__':
+    list_of_labels = ['ROI']
+    final_mask_L, final_mask_R, index_L_mask, index_R_mask = ROI_WangParcelsPlusFovea(list_of_labels)
+
+    faces_R = labels(scipy.io.loadmat(osp.join(osp.dirname(osp.realpath(__file__)), '../utils/templates/tri_faces_R.mat'))[
+        'tri_faces_R'] - 1, index_R_mask)
+    faces_L = labels(scipy.io.loadmat(osp.join(osp.dirname(osp.realpath(__file__)), '../utils/templates/tri_faces_L.mat'))[
+        'tri_faces_L'] - 1, index_L_mask)
+    for faces in [faces_L, faces_R]:
+        data = Data(face=torch.tensor(faces.T, dtype=torch.long))
+        transform = T.FaceToEdge()
+        data = transform(data)
+        assert np.unique(data.edge_index, return_counts=True)[1].max() <= 12 # 12 is the maximum number of edges per node as it is an undirected graph

@@ -15,9 +15,9 @@ cd deepRetinotopy_TheToolbox
 mkdir ./data/
 
 # pip install osfclient
-
-
 #TODO: repo with data
+
+
 $dirSubs="./data/"
 echo "Path to freesurfer data: "$dirSubs""
 

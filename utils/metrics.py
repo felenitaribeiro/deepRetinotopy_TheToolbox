@@ -39,12 +39,13 @@ def distance_PolarCoord(radius1, radius2, theta1, theta2):
       numpy array: the difference between predicted and empirical pRF center
         locations
     """
-    assert theta1 >= -np.pi and theta1 <= 2 * np.pi
-    assert theta2 >= -np.pi and theta2 <= 2 * np.pi
+    assert theta1.min() >= -np.pi and theta1.max() <= 2 * np.pi
+    assert theta2.min() >= -np.pi and theta2.max() <= 2 * np.pi
     distance = np.sqrt(
         radius1 ** 2 + radius2 ** 2 - 2 * radius1 * radius2 * np.cos(
             theta2 - theta1))
     return distance
+
 
 def average_prediction(predictions_array):
     """Average the predictions across models.

@@ -8,7 +8,7 @@ from numpy.random import seed
 from torch_geometric.data import Data
 
 
-def read_HCP(path, hemisphere=None, sub_id=None, surface=None, 
+def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
              visual_mask_L=None, visual_mask_R=None,
              faces_L=None, faces_R=None, myelination=None, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
@@ -86,8 +86,8 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
         #         (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
         #     dtype=torch.float) # curvature provided by HCP is not the same as freesurfer
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
-                                                    '.curvature-midthickness.rh.32k_fs_LR.func.gii')
-                                                    ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+                                                            '.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                                                   ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
 
         eccentricity_values = torch.tensor(np.reshape(
             eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
@@ -182,8 +182,8 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
         #         (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
         #     dtype=torch.float)
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
-                                                    '.curvature-midthickness.lh.32k_fs_LR.func.gii')
-                                                    ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
+                                                            '.curvature-midthickness.lh.32k_fs_LR.func.gii')
+                                                   ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
 
         eccentricity_values = torch.tensor(np.reshape(
             eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
@@ -250,7 +250,7 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
     return data
 
 
-def read_gifti(path, hemisphere=None, sub_id=None, surface='mid', 
+def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
                visual_mask_L=None, visual_mask_R=None,
                faces_L=None, faces_R=None, myelination=False, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
@@ -292,7 +292,7 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
                 osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_L.mat'))['mid_pos_L'].reshape(
                 (number_hemi_nodes, 3))[visual_mask_L == 1]),
                 dtype=torch.float)
-        
+
         curvature = torch.tensor(np.array(nib.load(osp.join(path,
                                  sub_id + '/surf/' + sub_id + '.curvature-midthickness.lh.32k_fs_LR.func.gii')).agg_data()).reshape(
                                  number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
@@ -307,7 +307,7 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
             else:
                 data = Data(x=curvature, pos=pos)
         data.face = faces
-   
+
     else:
         # Loading connectivity of triangles
         faces = torch.tensor(faces_R.T, dtype=torch.long)
@@ -318,7 +318,6 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
                 osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_R.mat'))['mid_pos_R'].reshape(
                 (number_hemi_nodes, 3))[visual_mask_R == 1]),
                 dtype=torch.float)
-
 
         curvature = torch.tensor(np.array(nib.load(osp.join(path,
                                  sub_id + '/surf/' + sub_id + '.curvature-midthickness.rh.32k_fs_LR.func.gii')).agg_data()).reshape(

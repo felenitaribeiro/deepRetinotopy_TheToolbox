@@ -8,7 +8,7 @@ from numpy.random import seed
 from torch_geometric.data import Data
 
 
-def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
+def read_HCP(path, hemisphere=None, sub_id=None, 
              visual_mask_L=None, visual_mask_R=None,
              faces_L=None, faces_R=None, myelination=None, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
@@ -18,7 +18,6 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
             path (string): Path to raw dataset
             hemisphere (string): 'Left' or 'Right' hemisphere
             sub_id (string): ID of the participant
-            surface (string): Surface template
             visual_mask_L (numpy array): Mask of the region of interest from
                 left hemisphere (32492,)
             visual_mask_R (numpy array): Mask of the region of interest from
@@ -30,24 +29,27 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
             myelination (boolean): True if myelin values will be used as an
                 additional feature
             prediction (string): output of the model ('polarAngle' or
-                'eccentricity')
+                'eccentricity' or 'pRFsize')
 
         Returns:
             data (object): object of class Data (from torch_geometric.data)
                 with attributes x, y, pos, faces and R2.
         """
     # Loading the measures
-    curv = scipy.io.loadmat(osp.join(path, 'cifti_curv_all.mat'))['cifti_curv']
-    eccentricity = \
-        scipy.io.loadmat(osp.join(path, 'cifti_eccentricity_all.mat'))[
-            'cifti_eccentricity']
-    polarAngle = scipy.io.loadmat(osp.join(path, 'cifti_polarAngle_all.mat'))[
-        'cifti_polarAngle']
-    pRFsize = scipy.io.loadmat(osp.join(path, 'cifti_pRFsize_all.mat'))[
-        'cifti_pRFsize']
     R2 = scipy.io.loadmat(osp.join(path, 'cifti_R2_all.mat'))['cifti_R2']
-    myelin = scipy.io.loadmat(osp.join(path, 'cifti_myelin_all.mat'))[
-        'cifti_myelin']
+    if prediction == 'polarAngle':
+        polarAngle = scipy.io.loadmat(osp.join(path, 'cifti_polarAngle_all.mat'))[
+            'cifti_polarAngle']
+    elif prediction == 'eccentricity':
+        eccentricity = \
+            scipy.io.loadmat(osp.join(path, 'cifti_eccentricity_all.mat'))[
+                'cifti_eccentricity']
+    elif prediction == 'pRFsize':
+        pRFsize = scipy.io.loadmat(osp.join(path, 'cifti_pRFsize_all.mat'))[
+            'cifti_pRFsize']
+    if myelination == True:
+        myelin = scipy.io.loadmat(osp.join(path, 'cifti_myelin_all.mat'))[
+            'cifti_myelin']
 
     # Defining number of nodes
     number_cortical_nodes = int(64984)
@@ -56,203 +58,148 @@ def read_HCP(path, hemisphere=None, sub_id=None, surface=None,
     if (hemisphere == 'Right' or hemisphere == 'RH' or hemisphere == 'right' or hemisphere == 'rh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_R.T, dtype=torch.long)
+        # 3D position of the right hemisphere vertices
+        pos = torch.tensor((scipy.io.loadmat(
+            osp.join(path, 'mid_pos_R.mat'))['mid_pos_R'].reshape(
+            (number_hemi_nodes, 3))[visual_mask_R == 1]),
+            dtype=torch.float)
 
-        if surface == 'mid':
-            # Coordinates of the Right hemisphere vertices
-            pos = torch.tensor((scipy.io.loadmat(
-                osp.join(path, 'mid_pos_R.mat'))['mid_pos_R'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_R == 1]),
-                dtype=torch.float)
-
-        if surface == 'sphere':
-            pos = torch.tensor(curv['pos'][0][0][
-                               number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes, 3))[visual_mask_R == 1], dtype=torch.float)
-
-        # Measures for the Right hemisphere
+        # Measures for the right hemisphere
+        # Functional
         R2_values = torch.tensor(np.reshape(
             R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
                 number_hemi_nodes:number_cortical_nodes].reshape(
                 (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
             dtype=torch.float)
-        myelin_values = torch.tensor(np.reshape(
-            myelin['x' + str(sub_id) + '_myelinmap'][0][0][
-                number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-            dtype=torch.float)
-        # curvature = torch.tensor(np.reshape(
-        #     curv['x' + str(sub_id) + '_curvature'][0][0][
-        #         number_hemi_nodes:number_cortical_nodes].reshape(
-        #         (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-        #     dtype=torch.float) # curvature provided by HCP is not the same as freesurfer
+        if prediction == 'polarAngle':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
+                    0][
+                    number_hemi_nodes:number_cortical_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+        elif prediction == 'eccentricity':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
+                    0][0][
+                    number_hemi_nodes:number_cortical_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+        elif prediction == 'pRFsize':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
+                    0][0][
+                    number_hemi_nodes:number_cortical_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+        # Anatomical
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
-                                                            '.curvature-midthickness.rh.32k_fs_LR.func.gii')
-                                                   ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+                                                    '.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                                            ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+        if myelination == True:
+            myelin_values = torch.tensor(np.reshape(
+                myelin['x' + str(sub_id) + '_myelinmap'][0][0][
+                    number_hemi_nodes:number_cortical_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
 
-        eccentricity_values = torch.tensor(np.reshape(
-            eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
-                0][0][
-                number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-            dtype=torch.float)
-        polarAngle_values = torch.tensor(np.reshape(
-            polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
-                0][
-                number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-            dtype=torch.float)
-        pRFsize_values = torch.tensor(np.reshape(
-            pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
-                0][0][
-                number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-            dtype=torch.float)
-
+        # Removing NaN values
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
-
-        nomyelin = np.isnan(myelin_values)
-        myelin_values[nomyelin == 1] = 0
-
+ 
         noR2 = np.isnan(R2_values)
         R2_values[noR2 == 1] = 0
 
-        # condition=R2_values < threshold
-        condition2 = np.isnan(eccentricity_values)
-        condition3 = np.isnan(polarAngle_values)
-        condition4 = np.isnan(pRFsize_values)
-
-        # eccentricity_values[condition == 1] = -1
-        eccentricity_values[condition2 == 1] = -1
-
-        # polarAngle_values[condition==1] = -1
-        polarAngle_values[condition3 == 1] = -1
-
-        pRFsize_values[condition4 == 1] = -1
+        condition = np.isnan(retinotopicMap_values)
+        retinotopicMap_values[condition == 1] = -1
 
         if myelination == False:
-            if prediction == 'polarAngle':
-                data = Data(x=curvature, y=polarAngle_values, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=curvature, y=eccentricity_values, pos=pos)
-            else:
-                data = Data(x=curvature, y=pRFsize_values, pos=pos)
+            data = Data(x=curvature, y=retinotopicMap_values, pos=pos)
+
         else:
-            if prediction == 'polarAngle':
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=polarAngle_values, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=eccentricity_values, pos=pos)
-            else:
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=pRFsize_values, pos=pos)
+            data = Data(x=torch.cat((curvature, myelin_values), 1),
+                        y=retinotopicMap_values, pos=pos)
 
         data.face = faces
         data.R2 = R2_values
 
-    if (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
+    elif (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_L.T, dtype=torch.long)
-
-        # Coordinates of the Left hemisphere vertices
-        if surface == 'mid':
-            pos = torch.tensor((scipy.io.loadmat(
-                osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_L == 1]),
-                dtype=torch.float)
-
-        if surface == 'sphere':
-            pos = torch.tensor(curv['pos'][0][0][0:number_hemi_nodes].reshape(
-                (number_hemi_nodes, 3))[visual_mask_L == 1], dtype=torch.float)
-
-        # Measures for the Left hemisphere
+        # 3D position of the left hemisphere vertices
+        pos = torch.tensor((scipy.io.loadmat(
+            osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
+            (number_hemi_nodes, 3))[visual_mask_L == 1]),
+            dtype=torch.float)
+        
+        # Measures for the feft hemisphere
+        # Functional
         R2_values = torch.tensor(np.reshape(
             R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
                 0:number_hemi_nodes].reshape((number_hemi_nodes))[
                 visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        myelin_values = torch.tensor(np.reshape(
-            myelin['x' + str(sub_id) + '_myelinmap'][0][0][
-                0:number_hemi_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
-            dtype=torch.float)
-        # curvature = torch.tensor(np.reshape(
-        #     curv['x' + str(sub_id) + '_curvature'][0][0][
-        #         0:number_hemi_nodes].reshape(
-        #         (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
-        #     dtype=torch.float)
+        if prediction == 'polarAngle':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
+                    0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
+                    visual_mask_L == 1], (-1, 1)), dtype=torch.float)
+        elif prediction == 'eccentricity':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
+                    0][0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
+                    visual_mask_L == 1], (-1, 1)), dtype=torch.float)
+        elif prediction == 'pRFsize':
+            retinotopicMap_values = torch.tensor(np.reshape(
+                pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
+                    0][0][0:number_hemi_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float)
+        # Anatomical
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
                                                             '.curvature-midthickness.lh.32k_fs_LR.func.gii')
                                                    ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
+        if myelination == True:
+            myelin_values = torch.tensor(np.reshape(
+                myelin['x' + str(sub_id) + '_myelinmap'][0][0][
+                    0:number_hemi_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
 
-        eccentricity_values = torch.tensor(np.reshape(
-            eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
-                0][0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
-                visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        polarAngle_values = torch.tensor(np.reshape(
-            polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
-                0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
-                visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        pRFsize_values = torch.tensor(np.reshape(
-            pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
-                0][0][0:number_hemi_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
-            dtype=torch.float)
-
+        # Removing NaN values
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
         noR2 = np.isnan(R2_values)
         R2_values[noR2 == 1] = 0
 
-        nomyelin = np.isnan(myelin_values)
-        myelin_values[nomyelin == 1] = 0
+        condition = np.isnan(retinotopicMap_values)
+        retinotopicMap_values[condition == 1] = -1
 
-        # condition=R2_values < threshold
-        condition2 = np.isnan(eccentricity_values)
-        condition3 = np.isnan(polarAngle_values)
-        condition4 = np.isnan(pRFsize_values)
-
-        # eccentricity_values[condition == 1] = -1
-        eccentricity_values[condition2 == 1] = -1
-
-        # polarAngle_values[condition==1] = -1
-        polarAngle_values[condition3 == 1] = -1
-
-        pRFsize_values[condition4 == 1] = -1
-
-        # translating polar angle values
-        sum = polarAngle_values < 180
-        minus = polarAngle_values > 180
-        polarAngle_values[sum] = polarAngle_values[sum] + 180
-        polarAngle_values[minus] = polarAngle_values[minus] - 180
+        if prediction == 'polarAngle':
+        # Rescaling polar angle values
+            sum = retinotopicMap_values < 180
+            minus = retinotopicMap_values > 180
+            retinotopicMap_values[sum] = retinotopicMap_values[sum] + 180
+            retinotopicMap_values[minus] = retinotopicMap_values[minus] - 180
 
         if myelination == False:
-            if prediction == 'polarAngle':
-                data = Data(x=curvature, y=polarAngle_values, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=curvature, y=eccentricity_values, pos=pos)
-            else:
-                data = Data(x=curvature, y=pRFsize_values, pos=pos)
+            data = Data(x=curvature, y=retinotopicMap_values, pos=pos)
         else:
-            if prediction == 'polarAngle':
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=polarAngle_values, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=eccentricity_values, pos=pos)
-            else:
-                data = Data(x=torch.cat((curvature, myelin_values), 1),
-                            y=pRFsize_values, pos=pos)
+            data = Data(x=torch.cat((curvature, myelin_values), 1),
+                        y=retinotopicMap_values, pos=pos)
 
         data.face = faces
         data.R2 = R2_values
     return data
 
 
-def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
+def read_gifti(path, hemisphere=None, sub_id=None,
                visual_mask_L=None, visual_mask_R=None,
-               faces_L=None, faces_R=None, myelination=False, prediction=None):
+               faces_L=None, faces_R=None, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -269,8 +216,6 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
                 interest (number of faces, 3) in the left hemisphere
             faces_R (numpy array): triangular faces from the region of
                 interest (number of faces, 3) in the right hemisphere
-            myelination (boolean): True if myelin values will be used as an
-                additional feature
             prediction (string): output of the model ('polarAngle' or
                 'eccentricity')
 
@@ -286,12 +231,11 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
         # Loading connectivity of triangles
         faces = torch.tensor(faces_L.T, dtype=torch.long)
 
-        # Coordinates of the Left hemisphere vertices
-        if surface == 'mid':
-            pos = torch.tensor((scipy.io.loadmat(
-                osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_L.mat'))['mid_pos_L'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_L == 1]),
-                dtype=torch.float)
+        # Coordinates of the left hemisphere vertices
+        pos = torch.tensor((scipy.io.loadmat(
+            osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_L.mat'))['mid_pos_L'].reshape(
+            (number_hemi_nodes, 3))[visual_mask_L == 1]),
+            dtype=torch.float)
 
         curvature = torch.tensor(np.array(nib.load(osp.join(path,
                                  sub_id + '/surf/' + sub_id + '.curvature-midthickness.lh.32k_fs_LR.func.gii')).agg_data()).reshape(
@@ -299,25 +243,18 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        if myelination == False:
-            if prediction == 'polarAngle':
-                data = Data(x=curvature, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=curvature, pos=pos)
-            else:
-                data = Data(x=curvature, pos=pos)
+        data = Data(x=curvature, pos=pos)
         data.face = faces
 
-    else:
+    elif (hemisphere == 'Right' or hemisphere == 'RH' or hemisphere == 'right' or hemisphere == 'rh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_R.T, dtype=torch.long)
 
-        if surface == 'mid':
-            # Coordinates of the Right hemisphere vertices
-            pos = torch.tensor((scipy.io.loadmat(
-                osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_R.mat'))['mid_pos_R'].reshape(
-                (number_hemi_nodes, 3))[visual_mask_R == 1]),
-                dtype=torch.float)
+        # Coordinates of the right hemisphere vertices
+        pos = torch.tensor((scipy.io.loadmat(
+            osp.join(osp.dirname(osp.realpath(__file__)), 'templates/mid_pos_R.mat'))['mid_pos_R'].reshape(
+            (number_hemi_nodes, 3))[visual_mask_R == 1]),
+            dtype=torch.float)
 
         curvature = torch.tensor(np.array(nib.load(osp.join(path,
                                  sub_id + '/surf/' + sub_id + '.curvature-midthickness.rh.32k_fs_LR.func.gii')).agg_data()).reshape(
@@ -325,13 +262,7 @@ def read_gifti(path, hemisphere=None, sub_id=None, surface='mid',
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        if myelination == False:
-            if prediction == 'polarAngle':
-                data = Data(x=curvature, pos=pos)
-            elif prediction == 'eccentricity':
-                data = Data(x=curvature, pos=pos)
-            else:
-                data = Data(x=curvature, pos=pos)
+        data = Data(x=curvature, pos=pos)
         data.face = faces
 
     return data

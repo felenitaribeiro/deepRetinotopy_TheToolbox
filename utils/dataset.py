@@ -168,10 +168,13 @@ class Retinotopy(InMemoryDataset):
             data_list = []
 
             for i in range(0, len(self.list_subs)):
-                data = read_HCP(path, hemisphere=self.hemisphere, sub_id=self.list_subs[i],
-                                surface='mid', visual_mask_L=final_mask_L,
-                                visual_mask_R=final_mask_R, faces_L=faces_L,
-                                faces_R=faces_R, myelination=self.myelination,
+                data = read_HCP(path, hemisphere=self.hemisphere, 
+                                sub_id=self.list_subs[i],
+                                visual_mask_L=final_mask_L,
+                                visual_mask_R=final_mask_R, 
+                                faces_L=faces_L,
+                                faces_R=faces_R, 
+                                myelination=self.myelination,
                                 prediction=self.prediction)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
@@ -190,9 +193,11 @@ class Retinotopy(InMemoryDataset):
 
             for i in range(0, len(self.list_subs)):
                 data = read_gifti(self.root, hemisphere=self.hemisphere,
-                                  sub_id=self.list_subs[i], surface='mid',
-                                  visual_mask_L=final_mask_L, visual_mask_R=final_mask_R,
-                                  faces_L=faces_L, faces_R=faces_R, myelination=self.myelination,
+                                  sub_id=self.list_subs[i],
+                                  visual_mask_L=final_mask_L, 
+                                  visual_mask_R=final_mask_R,
+                                  faces_L=faces_L, 
+                                  faces_R=faces_R,
                                   prediction=self.prediction)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)

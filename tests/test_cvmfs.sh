@@ -69,17 +69,11 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1
 mris_expand
 
-
-# Tmp
-sudo apt install python3-pip
-pip install osfclient
-
 echo "[DEBUG]: osf setup"
 mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-cd ./paper/
 
-echo "[DEBUG]: saving data to osf"
+echo "[DEBUG]: data download from osf"
 osf -p $OSF_PROJECT_ID fetch /osfstorage/data/1/surf/lh.pial /data/1/surf/lh.pial 
 
 echo "Testing done!"

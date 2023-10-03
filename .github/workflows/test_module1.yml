@@ -18,12 +18,14 @@ on:
 jobs:
   test_module1:
     runs-on: "cirun-nectar-large--${{ github.run_id }}"
-    container: 
-      image: vnmd/deepretinotopy_1.0.1
-      volumes:
-        - ./:./
+
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+    - name: Set up neurocommand
+      run: /bin/bash /home/uqfribe1/Projects/deepRetinotopy_TheToolbox/tests/test_cvmfs.sh
     - name: test module 1
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}

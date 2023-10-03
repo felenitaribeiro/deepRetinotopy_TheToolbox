@@ -1,4 +1,5 @@
-wget https://github.com/apptainer/apptainer/releases/download/v1.1.5/apptainer_1.1.5_amd64.deb
+export DEBIAN_FRONTEND=noninteractive
+sudo wget https://github.com/apptainer/apptainer/releases/download/v1.1.5/apptainer_1.1.5_amd64.deb
 sudo apt-get install -y ./apptainer_1.1.5_amd64.deb
 
 echo "checking if CVMFS part works:"
@@ -11,7 +12,7 @@ sudo dpkg -i cvmfs-release-latest_all.deb
 echo "[DEBUG]: apt-get update"
 sudo apt-get update --allow-unauthenticated
 echo "[DEBUG]: apt-get install cvmfs"
-sudo apt-get install cvmfs lmod --allow-unauthenticated 
+sudo apt-get install -y cvmfs lmod --allow-unauthenticated 
 
 sudo mkdir -p /etc/cvmfs/keys/ardc.edu.au/
 
@@ -43,10 +44,27 @@ ls /cvmfs/neurodesk.ardc.edu.au/containers
 
 cvmfs_config stat -v neurodesk.ardc.edu.au
 
-bash run_transparent_singularity.sh --container deepretinotopy_1.0.1_20230922.simg
+sudo mkdir /data
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data'
+sudo chmod 777 /data
 
-export SINGULARITY_BINDPATH='/cvmfs,/mnt,/home,/data'
+echo "# system-wide profile.modules                                          #
+# Initialize modules for all sh-derivative shells                      #
+#----------------------------------------------------------------------#
+trap "" 1 2 3
 
+case "$0" in
+    -bash|bash|*/bash) . /usr/share/lmod/6.6/init/bash ;;
+       -ksh|ksh|*/ksh) . /usr/share/lmod/6.6/init/ksh ;;
+       -zsh|zsh|*/zsh) . /usr/share/lmod/6.6/init/zsh ;;
+          -sh|sh|*/sh) . /usr/share/lmod/6.6/init/sh ;;
+                    *) . /usr/share/lmod/6.6/init/sh ;;  # default for scripts
+esac
+
+trap - 1 2 3
+" | sudo tee /usr/share/module.sh
+
+source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1
 mris_expand

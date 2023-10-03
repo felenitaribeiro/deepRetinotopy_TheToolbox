@@ -7,6 +7,8 @@ on:
     paths:
       - deepRetinotopy.sh
       - ./main/1_native2fsaverage.sh
+      - tests/test_cvmfs.sh
+      - tests/test_module1.sh
 
 
   pull_request:
@@ -14,6 +16,8 @@ on:
     paths:
       - deepRetinotopy.sh
       - ./main/1_native2fsaverage.sh
+      - tests/test_cvmfs.sh
+      - tests/test_module1.sh
       
 jobs:
   test_module1:

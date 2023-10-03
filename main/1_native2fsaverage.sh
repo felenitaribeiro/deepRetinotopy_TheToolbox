@@ -23,6 +23,7 @@ do
     mris_curvature -w $dirSub/surf/"$hemisphere".graymid
     
     echo "Preparing native surfaces for resampling..."
+    # TODO: change the deformed surface for different hemispheres
     wb_shortcuts -freesurfer-resample-prep $dirSub/surf/"$hemisphere".white $dirSub/surf/"$hemisphere".pial \
     $dirSub/surf/"$hemisphere".sphere.reg $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
     $dirSub/surf/"$hemisphere".midthickness.surf.gii $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii \

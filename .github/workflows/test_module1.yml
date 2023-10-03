@@ -17,7 +17,7 @@ on:
       
 jobs:
   test_module1:
-    runs-on: ubuntu-20.04
+    runs-on: "cirun-nectar-large--${{ github.run_id }}"
     container: 
       image: vnmd/deepretinotopy_1.0.1
       volumes:

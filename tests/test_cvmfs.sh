@@ -74,7 +74,7 @@ mkdir -p ~/.osfcli
 echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 
 echo "[DEBUG]: data download from osf"
-sudo mkdir /data/1/surf/
+sudo mkdir -p /data/1/surf/
 osf -p $OSF_PROJECT_ID fetch /osfstorage/data/1/surf/lh.pial /data/1/surf/lh.pial 
 
 echo "Testing done!"

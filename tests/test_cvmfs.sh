@@ -75,6 +75,6 @@ echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcl
 
 echo "[DEBUG]: data download from osf"
 sudo mkdir -p /data/1/surf/
-osf -p $OSF_PROJECT_ID fetch /osfstorage/data/1/surf/lh.pial /data/1/surf/lh.pial 
+osf -p 4p6yk fetch /osfstorage/data/1/surf/lh.pial /data/1/surf/lh.pial 
 
 echo "Testing done!"

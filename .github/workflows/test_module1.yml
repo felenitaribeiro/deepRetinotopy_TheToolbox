@@ -25,7 +25,7 @@ jobs:
       with:
         python-version: 3.8
     - name: Set up neurocommand
-      run: /bin/bash /home/uqfribe1/Projects/deepRetinotopy_TheToolbox/tests/test_cvmfs.sh
+      run: /bin/bash tests/test_cvmfs.sh
     - name: test module 1
       env:
         OSF_TOKEN_: ${{ secrets.OSF_KEY }}

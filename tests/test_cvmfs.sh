@@ -70,8 +70,9 @@ ml deepretinotopy/1.0.1
 mris_expand
 
 echo "[DEBUG]: osf setup"
-mkdir -p ~/.osfcli
-echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
+osf -p $OSF_PROJECT_ID -u $OSF_USERNAME -k $OSF_TOKEN init
+#mkdir -p ~/.osfcli
+#echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
 
 echo "[DEBUG]: data download from osf"
 sudo mkdir -p /data/1/surf/

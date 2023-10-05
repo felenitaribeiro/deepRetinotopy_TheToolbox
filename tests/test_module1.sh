@@ -19,14 +19,13 @@ echo "Path to freesurfer data: "$dirSubs""
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-
+cd main
 for hemisphere in lh rh; do
     echo "Hemisphere: "$hemisphere""
     echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
-    clone_command=`cat deepRetinotopy.sh | grep 1_native2fsaverage.sh`
+    clone_command=`cat ../deepRetinotopy.sh | grep 1_native2fsaverage.sh`
     echo $clone_command
-    cd main
-    $clone_command
+    eval $clone_command
 
     if find /data -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
         echo "midthickness surface generated"

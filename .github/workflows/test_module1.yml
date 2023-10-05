@@ -3,7 +3,7 @@ name: test midthickness surface generation and curvature resampling
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - deepRetinotopy.sh
       - ./main/1_native2fsaverage.sh
@@ -13,7 +13,7 @@ on:
 
 
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - deepRetinotopy.sh
       - ./main/1_native2fsaverage.sh

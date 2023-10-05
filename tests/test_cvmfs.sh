@@ -2,15 +2,17 @@ export DEBIAN_FRONTEND=noninteractive
 sudo wget https://github.com/apptainer/apptainer/releases/download/v1.1.5/apptainer_1.1.5_amd64.deb
 sudo apt-get install -y ./apptainer_1.1.5_amd64.deb
 
-echo "checking if CVMFS part works:"
+echo "[DEBUG]: CVMFS set up"
 
 sudo apt-get install lsb-release
 wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
 
-echo "[DEBUG]: adding cfms repo"
+echo "[DEBUG]: adding cvmfs repo"
 sudo dpkg -i cvmfs-release-latest_all.deb
+
 echo "[DEBUG]: apt-get update"
 sudo apt-get update --allow-unauthenticated
+
 echo "[DEBUG]: apt-get install cvmfs"
 sudo apt-get install -y cvmfs lmod --allow-unauthenticated 
 
@@ -29,11 +31,8 @@ NQIDAQAB
 
 
 echo "CVMFS_USE_GEOAPI=yes" | sudo tee /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
-
 echo 'CVMFS_SERVER_URL="http://cvmfs1.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-cvmfs2.neurodesk.org/cvmfs/@fqrn@;http://cvmfs-cvmfs3.neurodesk.org/cvmfs/@fqrn@"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf 
-
 echo 'CVMFS_KEYS_DIR="/etc/cvmfs/keys/ardc.edu.au/"' | sudo tee -a /etc/cvmfs/config.d/neurodesk.ardc.edu.au.conf
-
 echo "CVMFS_HTTP_PROXY=DIRECT" | sudo tee  /etc/cvmfs/default.local
 echo "CVMFS_QUOTA_LIMIT=5000" | sudo tee -a  /etc/cvmfs/default.local
 
@@ -44,10 +43,14 @@ ls /cvmfs/neurodesk.ardc.edu.au/containers
 
 cvmfs_config stat -v neurodesk.ardc.edu.au
 
+echo "[DEBUG]: mkdir directories for bind mounts"
 sudo mkdir /data
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data'
+sudo mkdir /templates
 sudo chmod 777 /data
+sudo chmod 777 /templates
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 
+echo "[DEBUG]: module setup"
 echo "# system-wide profile.modules                                          #
 # Initialize modules for all sh-derivative shells                      #
 #----------------------------------------------------------------------#
@@ -69,13 +72,16 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1
 mris_expand
 
-echo "[DEBUG]: osf setup"
-osf -p $OSF_PROJECT_ID -u $OSF_USERNAME -k $OSF_TOKEN init
-#mkdir -p ~/.osfcli
-#echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = \$OSF_USERNAME" > ~/.osfcli/osfcli.config
-
 echo "[DEBUG]: data download from osf"
-sudo mkdir -p /data/1/surf/
-osf -p 4p6yk fetch /osfstorage/data/1/surf/lh.pial /data/1/surf/lh.pial 
+echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = $OSF_USERNAME" > ~/.osfcli.config
+osf -p 4p6yk list > /tmp/osf_list.txt
+for i in $(cat /tmp/osf_list.txt);
+do
+   path=${i:10} 
+   sudo mkdir -p ${path%/*}
+   sudo chmod 777 ${path%/*}
 
-echo "Testing done!"
+   osf -p 4p6yk fetch $i ${i:10} 
+   echo $i
+done
+echo "Testing general settings done!"

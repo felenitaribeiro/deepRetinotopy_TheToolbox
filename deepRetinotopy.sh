@@ -20,8 +20,7 @@ for hemisphere in 'lh' 'rh';
 do 
     # Inside the container
     echo "Generating mid-thickness surface and curvature data..."
-    bash 1_native2fsaverage.sh -s $dirSubs \
-    -t $dirHCP -h $hemisphere 
+    bash 1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere 
 
     for map in 'polarAngle' 'eccentricity' 'pRFsize';
     do

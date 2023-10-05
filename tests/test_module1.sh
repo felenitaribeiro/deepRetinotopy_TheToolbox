@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+source /usr/share/module.sh
+module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+ml deepretinotopy/1.0.1
+
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 ls
 cp -r . /tmp/deepRetinotopy_TheToolbox

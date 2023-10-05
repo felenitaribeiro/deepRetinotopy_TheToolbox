@@ -52,6 +52,6 @@ do
         ADAP_BARY_AREA $dirSub/surf/"$dirSub".curvature-midthickness."$hemisphere".32k_fs_LR.func.gii \
         -area-surfs $dirSub/surf/"$hemisphere".midthickness.surf.gii $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii
     fi
-  done
+done
 
 

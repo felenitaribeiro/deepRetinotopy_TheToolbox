@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1

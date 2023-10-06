@@ -52,18 +52,8 @@ def inference(args):
                 torch.load('./../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + '.pt',
                            map_location=device))
 
-        # Create an output folder if it doesn't already exist
-        directory = args.path + '/predictions'
-        if not osp.exists(directory):
-            os.makedirs(directory)
-
         # Run the model on the test set
         evaluation = test(model=model, data_loader=test_loader, device=device)
-        torch.save({'Predicted_values': evaluation['Predicted_values']},
-                   osp.join(osp.dirname(osp.realpath(__file__)),
-                            '../predictions/',
-                            str(args.dataset) + '_curvatureFeat_' + args.hemisphere + '_' + args.prediction_type + '_model' + str(
-                                i + 1) + '.pt'))
 
         # Setting the ROI
         label_primary_visual_areas = ['ROI']

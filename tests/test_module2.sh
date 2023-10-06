@@ -1,35 +1,31 @@
 #!/usr/bin/env bash
 set -e
 
-cp -r . /tmp/deepRetinotopy_TheToolbox
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
+source /usr/share/module.sh
+module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+ml deepretinotopy/1.0.1
 
-# test readme
-echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/deepRetinotopy_TheToolbox/README.md | grep https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git`
-echo $clone_command
-$clone_command
+echo "[DEBUG]: test deepRetinotopy on the Singularity container"
+cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_20231005/deepretinotopy_1.0.1_20231005.simg/opt/deepRetinotopy_TheToolbox
 
-cd deepRetinotopy_TheToolbox
+dirSubs="/data/"
+echo "Path to freesurfer data: "$dirSubs""
 
-# settings for data download
-mkdir ./data/
-mkdir ./models/
+dirHCP="/templates/"
+echo "Path to template surfaces: "$dirHCP""
 
-pip install osfclient
-for i in {1..5};
-do
-    osf -p ermbz fetch /osfstorage/models/deepRetinotopy_polarAngle_LH_model"$i".pt ./model/deepRetinotopy_polarAngle_LH_model"$i".pt
+datasetName="TEST"
+echo "Dataset name: "$datasetName""
+
+cd 
+for hemisphere in 'lh' 'rh';
+do 
+    for map in 'polarAngle' 'eccentricity' 'pRFsize';
+    do
+        echo "Hemisphere: "$hemisphere""
+        python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+        rm -r $dirSubs/processed
+
+    done
 done
-
-osf -p ermbz fetch /osfstorage/models/deepRetinotopy_polarAngle_LH_* ./models/*
-#TODO: repo with data
-
-path_freesurfer_dir="./data/"
-echo "Path to freesurfer data: "$path_freesurfer_dir""
-
-path_hcp_templates_surfaces="./templates/"
-echo "Path to template surfaces: "$path_hcp_templates_surfaces""
-
-dataset_name="HCP"
-echo "Dataset name: "$dataset_name""
-

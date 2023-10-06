@@ -53,7 +53,7 @@ def inference(args):
                            map_location=device))
 
         # Create an output folder if it doesn't already exist
-        directory = './../predictions'
+        directory = args.path + '/predictions'
         if not osp.exists(directory):
             os.makedirs(directory)
 

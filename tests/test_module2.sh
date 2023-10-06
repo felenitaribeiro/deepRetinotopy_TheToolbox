@@ -18,10 +18,10 @@ echo "Path to template surfaces: "$dirHCP""
 datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
-cd 
+cd main
 for hemisphere in 'lh' 'rh';
 do 
-    for map in 'polarAngle' 'eccentricity' 'pRFsize';
+    for map in 'polarAngle'; #'eccentricity' 'pRFsize';
     do
         echo "Hemisphere: "$hemisphere""
         python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere

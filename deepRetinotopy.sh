@@ -26,16 +26,14 @@ do
     do
 
         echo "Retinotopy prediction..."
-        python 2_inference.py --path $dirSubs \
-        --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+        python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
 
         rm -r $dirSubs/processed
 
         echo "Resampling predictions to native space..."
         for model in model1 model2 model3 model4 model5 average;
         do
-            bash 3_fsaverage2native.sh -s $dirSubs \
-            -t $dirHCP -h $hemisphere -r $map -m $model
+            bash 3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
         done
     done
 done

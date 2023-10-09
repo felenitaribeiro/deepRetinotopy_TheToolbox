@@ -49,6 +49,7 @@ do
             echo "retinotopic map in native surface space generated"
         else
             echo "retinotopic map in native surface space not generated"
+            ls -R /data
         fi
 
     done

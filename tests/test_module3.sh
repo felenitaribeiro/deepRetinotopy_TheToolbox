@@ -26,7 +26,7 @@ model=average
 echo "Model: "$model""
 
 echo "[DEBUG]: data download for resampling:"
-mdkir /data/1/deepRetinotopy/
+mkdir /data/1/deepRetinotopy/
 cd /resampling/
 unzip resampling.zip
 sudo chmod 777 -R /resampling/

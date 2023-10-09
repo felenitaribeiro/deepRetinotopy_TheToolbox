@@ -10,6 +10,7 @@ ml deepretinotopy/1.0.1
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 ls
 cp -r . /tmp/deepRetinotopy_TheToolbox
+cd ~
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"

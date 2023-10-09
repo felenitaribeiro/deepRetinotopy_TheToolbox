@@ -51,5 +51,5 @@ do
             echo "retinotopic map in native surface space not generated"
         fi
 
-    do
+    done
 done

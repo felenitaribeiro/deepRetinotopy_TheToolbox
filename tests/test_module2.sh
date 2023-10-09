@@ -31,7 +31,7 @@ echo "Path to template surfaces: "$dirHCP""
 datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
-
+echo "[DEBUG]: deepRetinotopy inference:"
 cd ~/deepRetinotopy_TheToolbox/main
 for hemisphere in 'lh'; # 'rh';
 do 
@@ -39,8 +39,9 @@ do
     do
         echo "Hemisphere: "$hemisphere""
         for i in $(ls "$dirSubs"); do
-            sudo chmod u+w $i
-            sudo mkdir -p $i/deepRetinotopy/
+            sudo chmod 777 $dirSubs/$i
+            sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
+            sudo chmod 777  $dirSubs/$i/deepRetinotopy/
         done
         python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
         rm -r $dirSubs/processed

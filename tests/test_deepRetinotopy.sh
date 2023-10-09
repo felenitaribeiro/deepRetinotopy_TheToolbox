@@ -39,6 +39,7 @@ sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 echo "[DEBUG]: testing deepRetinotopy:.sh"
 cd ~/deepRetinotopy_TheToolbox/
 for map in $maps;
+do
     sudo cp -r models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
     for i in $(ls "$dirSubs"); do
         sudo chmod 777 $dirSubs/$i

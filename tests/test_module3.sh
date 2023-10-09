@@ -38,16 +38,11 @@ do
         echo $clone_command
         eval $clone_command
 
-        if find /data -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
-            echo "midthickness surface generated"
+        if find /data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii " -size +0 | grep -q '.'; then
+            echo "retinotopic map in native surface space generated"
         else
-            echo "midthickness surface not generated"
+            echo "retinotopic map in native surface space not generated"
         fi
 
-        if find /data -name "*curvature-midthickness.${hemisphere}.32k_fs_LR.func.gii" -size +0 | grep -q '.'; then
-            echo "curvature data generated"
-        else
-            echo "curvature data not generated"
-        fi
     do
 done

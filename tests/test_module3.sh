@@ -45,7 +45,7 @@ do
         echo $clone_command
         eval $clone_command
 
-        if find /data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii " -size +0 | grep -q '.'; then
+        if find /data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii" -size +0 | grep -q '.'; then
             echo "retinotopic map in native surface space generated"
         else
             echo "retinotopic map in native surface space not generated"

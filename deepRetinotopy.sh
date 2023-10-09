@@ -1,19 +1,22 @@
 #!/bin/sh
 
-while getopts s:t:d: flag
+while getopts s:t:d:m: flag
 do
     case "${flag}" in
         s) dirSubs=${OPTARG};;
         t) dirHCP=${OPTARG};;
         d) datasetName=${OPTARG};;
+        m) IFS=',' read -ra maps <<< "${OPTARG}";;
 	?)
-		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset]" >&2
+		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps]" >&2
 		exit 1
 	esac
 done
 
 echo "Path subs directory: $dirSubs";
 echo "Path to fs_LR-deformed_to-fsaverage surfaces: $dirHCP";
+echo "Dataset name: $datasetName";
+echo "Maps: ${maps[@]}";
 
 cd main
 for hemisphere in 'lh' 'rh';
@@ -22,7 +25,7 @@ do
     echo "Generating mid-thickness surface and curvature data..."
     bash 1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere 
 
-    for map in 'polarAngle' 'eccentricity' 'pRFsize';
+    for map in "${maps[@]}";
     do
 
         echo "Retinotopy prediction..."

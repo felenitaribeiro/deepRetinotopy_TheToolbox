@@ -9,6 +9,7 @@ ml deepretinotopy/1.0.1
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 ls
 cp -r . /tmp/deepRetinotopy_TheToolbox
+cd ~
 
 # test readme
 echo "[DEBUG]: testing the clone command from the README:"
@@ -33,7 +34,7 @@ sudo chmod 777 -R /resampling/
 sudo chmod 777 -R /data
 mv /resampling/resampling/* /data/1/deepRetinotopy/
 
-cd deepRetinotopy_TheToolbox/main
+cd ~/deepRetinotopy_TheToolbox/main
 for hemisphere in lh; # rh; 
 do
     for map in 'polarAngle'; #'eccentricity' 'pRFsize';

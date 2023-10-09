@@ -16,7 +16,7 @@ $clone_command
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
 cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_20231006/deepretinotopy_1.0.1_20231006.simg/opt/deepRetinotopy_TheToolbox
 mkdir ~/deepRetinotopy_TheToolbox/models/
-cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/
+cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""

@@ -24,7 +24,6 @@ cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
-sudo chmod u+w "$dirSubs"*
 
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
@@ -39,6 +38,10 @@ do
     for map in 'polarAngle'; #'eccentricity' 'pRFsize';
     do
         echo "Hemisphere: "$hemisphere""
+        for i in $(ls "$dirSubs"); do
+            sudo chmod u+w $i
+            sudo mkdir -p $i/deepRetinotopy/
+        done
         python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
         rm -r $dirSubs/processed
     done

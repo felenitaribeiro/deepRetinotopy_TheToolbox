@@ -1,4 +1,4 @@
-name: test inference
+name: test resampling
 
 on:
   workflow_dispatch:

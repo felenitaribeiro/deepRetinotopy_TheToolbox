@@ -32,7 +32,6 @@ maps="polarAngle,eccentricity,pRFsize"
 echo "Maps: "$maps""
 
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_20231006/deepretinotopy_1.0.1_20231006.simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 
@@ -40,7 +39,7 @@ echo "[DEBUG]: testing deepRetinotopy:.sh"
 cd ~/deepRetinotopy_TheToolbox/
 for map in $maps;
 do
-    sudo cp -r models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
+    sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_20231006/deepretinotopy_1.0.1_20231006.simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
     for i in $(ls "$dirSubs"); do
         sudo chmod 777 $dirSubs/$i
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/

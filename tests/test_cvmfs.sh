@@ -80,8 +80,13 @@ do
    path=${i:10} 
    sudo mkdir -p ${path%/*}
    sudo chmod 777 ${path%/*}
-
    osf -p 4p6yk fetch $i ${i:10} 
    echo $i
 done
+
+cd /data/1/
+unzip surf.zip
+rm surf.zip
+sudo chmod 777 -R /data/
+
 echo "Testing general settings done!"

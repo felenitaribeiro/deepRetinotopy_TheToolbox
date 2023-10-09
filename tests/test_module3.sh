@@ -16,8 +16,6 @@ clone_command=`cat /tmp/deepRetinotopy_TheToolbox/README.md | grep https://githu
 echo $clone_command
 $clone_command
 
-cd deepRetinotopy_TheToolbox
-
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
@@ -27,7 +25,13 @@ echo "Path to template surfaces: "$dirHCP""
 model=average
 echo "Model: "$model""
 
-cd main
+echo "[DEBUG]: data download for resampling:"
+cd /resampling/
+unzip resampling.zip
+sudo chmod 777 -R /resampling/
+mv /resampling/resampling/* /data/1/deepRetinotopy/
+
+cd deepRetinotopy_TheToolbox/main
 for hemisphere in lh; # rh; 
 do
     for map in 'polarAngle'; #'eccentricity' 'pRFsize';

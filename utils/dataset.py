@@ -179,7 +179,6 @@ class Retinotopy(InMemoryDataset):
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 data_list.append(data)
-            # TODO: split data into train, dev, test
             train = data_list[0:int(161)]
             dev = data_list[int(161):int(171)]
             test = data_list[int(171):int(len(data_list))]

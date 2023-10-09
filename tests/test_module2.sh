@@ -20,6 +20,7 @@ cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
+sudo chmod u+w "$dirSubs"*
 
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""

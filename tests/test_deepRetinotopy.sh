@@ -47,5 +47,5 @@ do
         sudo chmod 777  $dirSubs/$i/deepRetinotopy/
     done
     bash deepRetinotopy.sh -s $dirSubs -t $dirHCP -d $datasetName -m $map
-    rm -r models/
+    sudo rm -r models/
 done

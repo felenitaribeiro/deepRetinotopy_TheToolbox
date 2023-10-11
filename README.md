@@ -51,7 +51,6 @@ bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d
 You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
 
 ```bash
-date_tag=20231006
 export container=deepretinotopy_1.0.1_$date_tag
 curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
 ```

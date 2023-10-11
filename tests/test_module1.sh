@@ -14,7 +14,7 @@ else
 fi
 cp -r . ~/deepRetinotopy_TheToolbox/
 
-cd deepRetinotopy_TheToolbox
+cd ~/deepRetinotopy_TheToolbox
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""

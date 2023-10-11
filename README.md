@@ -4,25 +4,22 @@ This repository contains (restructured) code for the general use of deepRetinoto
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
 * [Software containers](#software-containers)
-* [Pre-trained models](#pre-trained-models)
+* [Contributors](#contributors)
 * [Citation](#citation)
 * [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
 
 ## Requirements 
 
-- HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 - Docker / Singularity container
+- freesurfer directory
+- HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 
 ## Software containers
-Before running deepRetinotopy, you need to install Docker or Singularity and clone this repository.
-
-```bash
-git clone https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git
-```
+DeepRetinotopy, pre-trained models, and required software are packaged in software containers available through Dockerhub and Neurodesk.
 
 ### Docker
-To pull, run, and execute a Docker container, run the following:
+If you want to run deepRetinotopy locally, you can install Docker and pull our container from Dockerhub using the following command:
 
 ```bash
 docker pull vnmd/deepretinotopy_1.0.1:latest
@@ -30,32 +27,45 @@ docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotop
 # docker exec -it deepret bash
 ```
 
-In the container, you can run **deepRetinotopy.sh**: 
+Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy.sh**: 
 ```bash
-cd $path_to_tool/deepRetinotopy_TheToolbox
-bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
+bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $model
 ```
+
 ### Singularity
-First, you can download our Singularity container using the following command (for Asian/Australian locations):
+Alternatevely, you can run your analysis on [Neurodesk]() through the following commands:
 
 ```bash
-cd $path_to_tool/deepRetinotopy_TheToolbox
-export container=deepretinotopy_1.0.1_20230922
+date_tag=20231006
+ml deepretinotopy/1.0.1
+cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_"$date_tag"/deepretinotopy_1.0.1_$date_tag.simg/opt/deepRetinotopy_TheToolbox/
+bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $model
+```
+
+You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
+
+```bash
+date_tag=20231006
+export container=deepretinotopy_1.0.1_$date_tag
 curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
 ```
 
-Then, you can run the container (so long Singularity is already available on your computing environment) using the following command:
+Then, you can execute the container (so long Singularity is already available on your computing environment) using the following command:
 
 ```bash
-singularity exec --nv ./deepretinotopy_1.0.1_20230922.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
+singularity exec --nv ./deepretinotopy_1.0.1_$date_tag.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
 ```
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
-## Pre-trained models
+## Contributors
+If you want to contribute to this repository, please follow the instructions below:
 
-Our pre-trained models are available on [OSF](https://osf.io/ermbz/).
-
+1. Fork the repository
+2. Create a new branch (e.g. `git checkout -b my-new-branch`)
+3. Commit your changes (e.g. `git commit -am 'Add some feature'`)
+4. Push the branch (e.g. `git push origin my-new-branch`)
+5. Create a new Pull Request
 
 ## Citation
 

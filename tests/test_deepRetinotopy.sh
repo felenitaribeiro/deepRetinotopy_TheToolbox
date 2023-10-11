@@ -8,15 +8,12 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-ls
-cp -r . /tmp/deepRetinotopy_TheToolbox
-cd ~
-
-# test readme
-echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/deepRetinotopy_TheToolbox/README.md | grep https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git`
-echo $clone_command
-$clone_command
+if find .-name "deepRetinotopy.sh" -size +0 | grep -q '.'; then
+    echo "deepRetinotopy repo is cloned"
+else
+    echo "deepRetinotopy repo is not cloned"
+fi
+cp -r . ~/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
 dirSubs="/data/"

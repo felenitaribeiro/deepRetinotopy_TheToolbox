@@ -8,18 +8,18 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.1
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-ls
-cp -r . /tmp/deepRetinotopy_TheToolbox
-cd ~
-
-# test readme
-echo "[DEBUG]: testing the clone command from the README:"
-clone_command=`cat /tmp/deepRetinotopy_TheToolbox/README.md | grep https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox.git`
-echo $clone_command
-$clone_command
+if find .-name "deepRetinotopy.sh" -size +0 | grep -q '.'; then
+    echo "deepRetinotopy repo is cloned"
+else
+    echo "deepRetinotopy repo is not cloned"
+fi
+cp -r . ~/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_20231006/deepretinotopy_1.0.1_20231006.simg/opt/deepRetinotopy_TheToolbox
+date_tag=`cat ./README.md | grep date_tag`
+echo $date_tag
+
+cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_"$date_tag"/deepretinotopy_1.0.1_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 sudo cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models/

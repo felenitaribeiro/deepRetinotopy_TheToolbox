@@ -16,8 +16,9 @@ fi
 cp -r . ~/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-date_tag=`cat ./README.md | grep date_tag`
-echo $date_tag
+var=`cat ./README.md | grep date_tag=`
+echo $var
+$var
 
 cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_"$date_tag"/deepretinotopy_1.0.1_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/

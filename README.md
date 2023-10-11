@@ -43,6 +43,9 @@ Alternatevely, you can run your analysis on [Neurodesk]() through the following 
 
 ```bash
 date_tag=20231006
+```
+
+```bash
 ml deepretinotopy/1.0.1
 cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_"$date_tag"/deepretinotopy_1.0.1_$date_tag.simg/opt/deepRetinotopy_TheToolbox/
 bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps

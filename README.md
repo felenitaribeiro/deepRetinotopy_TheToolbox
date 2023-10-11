@@ -29,8 +29,14 @@ docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotop
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy.sh**: 
 ```bash
-bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $model
+bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
+
+The following arguments are required:
+- **-s** path to the freesurfer directory
+- **-t** path to the HCP "fs_LR-deformed_to-fsaverage" surfaces
+- **-d** dataset name (e.g. "HCP")
+- **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ### Singularity
 Alternatevely, you can run your analysis on [Neurodesk]() through the following commands:
@@ -39,7 +45,7 @@ Alternatevely, you can run your analysis on [Neurodesk]() through the following 
 date_tag=20231006
 ml deepretinotopy/1.0.1
 cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.1_"$date_tag"/deepretinotopy_1.0.1_$date_tag.simg/opt/deepRetinotopy_TheToolbox/
-bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $model
+bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
@@ -53,7 +59,7 @@ curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/n
 Then, you can execute the container (so long Singularity is already available on your computing environment) using the following command:
 
 ```bash
-singularity exec --nv ./deepretinotopy_1.0.1_$date_tag.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
+singularity exec --nv ./deepretinotopy_1.0.1_$date_tag.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).

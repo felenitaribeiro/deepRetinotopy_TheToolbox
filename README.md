@@ -42,7 +42,7 @@ The following arguments are required:
 Alternatevely, you can run your analysis on [Neurodesk]() through the following commands:
 
 ```bash
-date_tag=20231012
+date_tag=20231011
 ```
 
 ```bash

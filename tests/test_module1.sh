@@ -18,6 +18,8 @@ cd ~/deepRetinotopy_TheToolbox
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
+rm /data/*/surf/*curvature-midthickness*
+rm /data/*/surf/*graymid
 
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""

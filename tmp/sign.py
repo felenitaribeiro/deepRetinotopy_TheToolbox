@@ -14,7 +14,7 @@ from utils.rois import ROIs_DorsalEarlyVisualCortex as ROI
 from utils.rois import ROIs_WangParcels as parcels
 from utils.dataset import Retinotopy
 #%%
-path = '~/Desktop/freesurfer'
+path = '/home/uqfribe1/Desktop/freesurfer'
 list_subs = os.listdir(path)
 norm_value = 70.4237 
 pre_transform = T.Compose([T.FaceToEdge(remove_faces=False)])
@@ -69,13 +69,13 @@ def field_sign(path, edges, faces, hemisphere, polarAngle_file, eccentricity_fil
         else:
             sign[i] = np.sign(np.sum(signs))
 
-    template = nib.load(path + '101_surf.fs_predicted_polarAngle_' + hemisphere + '_curvatureFeat_average.func.gii')
+    template = nib.load(path + polarAngle_file)
     final_sign_map = np.zeros((32492, 1))
     final_sign_map[final_mask_L == 1] = np.reshape(sign, (-1, 1))
     final_sign_map[final_mask_L == 0] = -10
     template.agg_data()[:] = np.reshape(final_sign_map, (-1))
 
-    nib.save(template, './signmap_' + hemisphere + '.func.gii')
+    nib.save(template, './' + polarAngle_file[0:7] + 'signmap_' + hemisphere + '.func.gii')
     return 
 
 # Load edges and faces
@@ -89,11 +89,21 @@ faces = faces.T
 label_primary_visual_areas = ['ROI']
 final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(
     label_primary_visual_areas)
-path = '~/PycharmProjects/deepRetinotopy_TheToolbox/tmp/'
+path = '/home/uqfribe1/Desktop/freesurfer/101_surf'
 
 field_sign(path, edges, faces, 'lh',
-           '102_surf.fs_predicted_polarAngle_lh_curvatureFeat_average.func.gii', 
-           '102_surf.fs_predicted_eccentricity_lh_curvatureFeat_average.func.gii',
+           '101_surf.fs_predicted_polarAngle_lh_curvatureFeat_average.func.gii', 
+           '101_surf.fs_predicted_eccentricity_lh_curvatureFeat_average.func.gii',
             final_mask_L, final_mask_R)
 
+# %%
+subs = ['114823', '157336', '581450']
+
+for sub in subs:
+    
+    path = '/home/uqfribe1/PycharmProjects/deepRetinotopy_TheToolbox/grant/' + sub + '/deepRetinotopy/'
+    field_sign(path, edges, faces, 'lh',
+            sub + '.fs_predicted_polarAngle_lh_curvatureFeat_average.func.gii', 
+            sub + '.fs_predicted_eccentricity_lh_curvatureFeat_average.func.gii',
+            final_mask_L, final_mask_R)
 # %%

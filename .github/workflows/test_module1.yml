@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - deepRetinotopy.sh
-      - ./main/1_native2fsaverage.sh
+      - main/1_native2fsaverage.sh
       - tests/test_cvmfs.sh
       - tests/test_module1.sh
       - .github/workflows/test_module1.yml
@@ -16,7 +16,7 @@ on:
     branches: [ main ]
     paths:
       - deepRetinotopy.sh
-      - ./main/1_native2fsaverage.sh
+      - main/1_native2fsaverage.sh
       - tests/test_cvmfs.sh
       - tests/test_module1.sh
       - .github/workflows/test_module1.yml

@@ -72,6 +72,7 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
             sign[i] = np.sign(np.sum(signs))
 
     template = nib.load(path + polarAngle_file)
+    template = nib.load(path + polarAngle_file)
     final_sign_map = np.zeros((32492, 1))
     final_sign_map[final_mask == 1] = np.reshape(sign, (-1, 1))
     final_sign_map[final_mask == 0] = -10

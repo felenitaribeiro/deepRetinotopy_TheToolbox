@@ -7,31 +7,21 @@ import nibabel as nib
 import numpy as np
 import argparse
 import sys
+import torch
+import scipy
 sys.path.append('./../')
 
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.rois import ROIs_DorsalEarlyVisualCortex as ROI
 from utils.rois import ROIs_WangParcels as parcels
 from utils.dataset import Retinotopy
-#%%
-path = '~/Desktop/freesurfer'
-list_subs = os.listdir(path)
-norm_value = 70.4237 
-pre_transform = T.Compose([T.FaceToEdge(remove_faces=False)])
-data = Retinotopy(path, 'Test',
-                            transform=T.Cartesian(max_value=norm_value),
-                            pre_transform=pre_transform, dataset='other',
-                            list_subs=list_subs,
-                            prediction='polarAngle', hemisphere='lh')
-#%%
-
-def field_sign(path, edges, faces, hemisphere, polarAngle_file, eccentricity_file, mask_L, mask_R):
+from utils.labels import labels
+def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
     """
     This function computes the visual field sign for each node in the cortical surface.
     
     Args:
         path (str): Path to the folder where the predicted polar angle and eccentricity maps are saved.
-        edges (numpy.ndarray): The edges of the cortical surface.
         faces (numpy.ndarray): The faces of the cortical surface.
         polarAngle (str): file name of the predicted polar angle map.
         eccentricity (numpy.ndarray): file name of the predicted eccentricity map.
@@ -39,15 +29,27 @@ def field_sign(path, edges, faces, hemisphere, polarAngle_file, eccentricity_fil
     Returns:
         None
     """
-    # for hemisphere in ['lh', 'rh']:
+    
+    # Mask
+    label_primary_visual_areas = ['ROI']
+    mask_L, mask_R, index_L_mask, index_R_mask = roi(
+        label_primary_visual_areas)
+    
     if hemisphere == 'lh':
         final_mask = mask_L
+        faces_L = labels(scipy.io.loadmat(osp.join(osp.dirname(osp.realpath(__file__)), '../utils/templates/tri_faces_L.mat'))[
+            'tri_faces_L'] - 1, index_L_mask)
+        faces = torch.tensor(faces_L, dtype=torch.long)
     else:
         final_mask = mask_R
-    print(path + polarAngle_file)
+        faces_R = labels(scipy.io.loadmat(osp.join(osp.dirname(osp.realpath(__file__)), '../utils/templates/tri_faces_R.mat'))[
+            'tri_faces_R'] - 1, index_R_mask)
+        faces = torch.tensor(faces_R, dtype=torch.long)
+    
+    
     polarAngle = nib.load(path + polarAngle_file).agg_data()[final_mask == 1]
     eccentricity = nib.load(path + eccentricity_file).agg_data()[final_mask == 1]
-
+    
     cross_product_faces = []
     for face in faces:
         x1 = eccentricity[face[0]] * np.cos(polarAngle[face[0]]/180*np.pi)
@@ -69,31 +71,24 @@ def field_sign(path, edges, faces, hemisphere, polarAngle_file, eccentricity_fil
         else:
             sign[i] = np.sign(np.sum(signs))
 
-    template = nib.load(path + '101_surf.fs_predicted_polarAngle_' + hemisphere + '_curvatureFeat_average.func.gii')
+    template = nib.load(path + polarAngle_file)
     final_sign_map = np.zeros((32492, 1))
-    final_sign_map[final_mask_L == 1] = np.reshape(sign, (-1, 1))
-    final_sign_map[final_mask_L == 0] = -10
+    final_sign_map[final_mask == 1] = np.reshape(sign, (-1, 1))
+    final_sign_map[final_mask == 0] = -10
     template.agg_data()[:] = np.reshape(final_sign_map, (-1))
+    name = polarAngle_file.split('.')[0]
+    nib.save(template, './' + name + '.fieldSignMap_' + hemisphere + '.func.gii')
+    return 'Visual field sign maps has been saved in ' + path
 
-    nib.save(template, './signmap_' + hemisphere + '.func.gii')
-    return 
 
-# Load edges and faces
-edge_index = data[0].edge_index
-faces = data[0].face
+if __name__ == '__main__':
 
-edges = edge_index.T
-faces = faces.T
+    args = argparse.ArgumentParser()
+    args.add_argument('--path', type=str)
+    args.add_argument('--hemisphere', type=str)
+    args.add_argument('--polarAngle_file', type=str)
+    args.add_argument('--eccentricity_file', type=str)
+    args = args.parse_args()
 
-# Mask
-label_primary_visual_areas = ['ROI']
-final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(
-    label_primary_visual_areas)
-path = '~/PycharmProjects/deepRetinotopy_TheToolbox/tmp/'
-
-field_sign(path, edges, faces, 'lh',
-           '102_surf.fs_predicted_polarAngle_lh_curvatureFeat_average.func.gii', 
-           '102_surf.fs_predicted_eccentricity_lh_curvatureFeat_average.func.gii',
-            final_mask_L, final_mask_R)
-
-# %%
+    for hemisphere in ['lh']:
+        field_sign(args.path, args.hemisphere, args.polarAngle_file, args.eccentricity_file)

@@ -10,6 +10,7 @@ from utils.metrics import *
 from utils.model import *
 from utils.rois import *
 from utils.read_data import *
+from utils.fieldSign import *
 
 # ROIs
 def test_ROIs_DorsalEarlyVisualCortex():
@@ -160,6 +161,17 @@ def test_read_gifti():
                           prediction=prediction)
         assert data.x.shape == data_R.x.shape
         assert data.pos.shape == data_R.pos.shape
+
+def test_fieldSign():
+    path = osp.join(osp.dirname(osp.realpath(__file__)), '../data/')
+    hemispheres = ['lh', 'rh']
+    sub_id = '101'
+    for hemisphere in hemispheres:
+        polarAngle_file = sub_id + '.fs_predicted_polarAngle_'+ hemisphere +'_curvatureFeat_average.func.gii'
+        eccentricity_file = sub_id + '.fs_predicted_eccentricity_' + hemisphere + '_curvatureFeat_average.func.gii'
+        save_message = field_sign(path, hemisphere, polarAngle_file, eccentricity_file)
+        assert save_message == print('Visual field sign map has been saved as ' + path + polarAngle_file.split('.')[0] + '.fieldSignMap_' + hemisphere + '.func.gii')
+
 
 # def test_read_HCP():
 #     path = osp.join(osp.dirname(osp.realpath(__file__)), 'data/')

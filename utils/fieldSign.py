@@ -12,9 +12,6 @@ import scipy
 sys.path.append('./../')
 
 from utils.rois import ROI_WangParcelsPlusFovea as roi
-from utils.rois import ROIs_DorsalEarlyVisualCortex as ROI
-from utils.rois import ROIs_WangParcels as parcels
-from utils.dataset import Retinotopy
 from utils.labels import labels
 def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
     """
@@ -22,12 +19,11 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
     
     Args:
         path (str): Path to the folder where the predicted polar angle and eccentricity maps are saved.
-        faces (numpy.ndarray): The faces of the cortical surface.
+        hemisphere (str): Hemisphere of the cortical surface. It can be 'lh' or 'rh'.
         polarAngle (str): file name of the predicted polar angle map.
         eccentricity (numpy.ndarray): file name of the predicted eccentricity map.
-        region_of_interest (numpy.ndarray): The region of interest (ROI) of the cortical surface.
     Returns:
-        None
+        print: The visual field sign map is saved in the same folder as the predicted polar angle and eccentricity maps.
     """
     
     # Mask
@@ -72,14 +68,14 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
             sign[i] = np.sign(np.sum(signs))
 
     template = nib.load(path + polarAngle_file)
-    template = nib.load(path + polarAngle_file)
     final_sign_map = np.zeros((32492, 1))
     final_sign_map[final_mask == 1] = np.reshape(sign, (-1, 1))
     final_sign_map[final_mask == 0] = -10
     template.agg_data()[:] = np.reshape(final_sign_map, (-1))
     name = polarAngle_file.split('.')[0]
-    nib.save(template, './' + name + '.fieldSignMap_' + hemisphere + '.func.gii')
-    return 'Visual field sign maps has been saved in ' + path
+    save_path = path + name + '.fieldSignMap_' + hemisphere + '.func.gii'
+    nib.save(template, save_path)
+    return print('Visual field sign map has been saved as ' + save_path)
 
 
 if __name__ == '__main__':
@@ -91,5 +87,4 @@ if __name__ == '__main__':
     args.add_argument('--eccentricity_file', type=str)
     args = args.parse_args()
 
-    for hemisphere in ['lh']:
-        field_sign(args.path, args.hemisphere, args.polarAngle_file, args.eccentricity_file)
+    field_sign(args.path, args.hemisphere, args.polarAngle_file, args.eccentricity_file)

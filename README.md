@@ -66,6 +66,13 @@ singularity exec --nv ./deepretinotopy_1.0.1_$date_tag.simg bash deepRetinotopy.
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
+## Output
+
+The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesurfer subject folder, containing the following files:
+- ***sub-id**.predicted_eccentricity(**polarAngle** or **pRFsize**)_average(**model1** to **model5**).lh(**rh**).native.func.gii*: GIFTI files containing the predicted maps in the native space of the subject.
+- ***sub-id**.fs_predicted_eccentricity(**polarAngle** or **pRFsize**)_lh(**rh**)_curvatureFeat_average(**model1** to **model5**).func.gii*: GIFTI files containing the predicted maps in the 32k fsaverage space.
+
+
 ## Contributors
 If you want to contribute to this repository, please follow the instructions below:
 

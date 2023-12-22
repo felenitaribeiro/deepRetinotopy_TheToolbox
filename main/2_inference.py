@@ -6,6 +6,7 @@ import sys
 import nibabel as nib
 import numpy as np
 import argparse
+import time
 
 sys.path.append('..')
 
@@ -30,17 +31,24 @@ def inference(args):
     norm_value = 70.4237  # normalization parameter for distance between nodes
     pre_transform = T.Compose([T.FaceToEdge()])
     # Load the dataset
+    print('Loading the dataset')
+    init_time = time.time() / 60
     test_dataset = Retinotopy(args.path, 'Test',
                               transform=T.Cartesian(max_value=norm_value),
                               pre_transform=pre_transform, dataset=args.dataset,
                               list_subs=list_subs,
                               prediction=args.prediction_type, hemisphere=args.hemisphere)
+    print('Dataset loaded')
+    end_time = time.time() / 60
+    print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
     num_of_models = 5
     num_of_cortical_nodes = 32492
     predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
     
     for i in range(num_of_models):
+        init_time = time.time() / 60
+        print('Loading model ' + str(i + 1))
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = deepRetinotopy(num_features=args.num_features).to(device)
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
@@ -102,8 +110,13 @@ def inference(args):
 
                 nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                         '_rh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+        print('Predictions from model ' + str(i + 1) + ' were saved')
+        end_time = time.time() / 60
+        print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
+    
     # Average the predictions
     average_predictions = average_prediction(predictions)
+    print('Saving average predictions')
     for j in range(len(list_subs)):
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
@@ -132,7 +145,9 @@ def inference(args):
             template.agg_data()[:] = np.reshape(pred, (-1))
 
             nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                    '_rh_curvatureFeat_average.func.gii')            
+                                    '_rh_curvatureFeat_average.func.gii')  
+    print('Average predictions were saved')
+    return          
     
 
 def main():

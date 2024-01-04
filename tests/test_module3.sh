@@ -4,7 +4,7 @@ set -e
 export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.1
+ml deepretinotopy/1.0.2
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy.sh" -size +0 | grep -q '.'; then

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 exec > >(tee -a deepRetinotopy_output.log)
 exec 2> >(tee -a deepRetinotopy_error.log >&2)
 

@@ -8,7 +8,7 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.2
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy.sh" -size +0 | grep -q '.'; then
+if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
     echo "deepRetinotopy repo is cloned"
 else
     echo "deepRetinotopy repo is not cloned"
@@ -47,6 +47,6 @@ do
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
         sudo chmod 777  $dirSubs/$i/deepRetinotopy/
     done
-    bash deepRetinotopy.sh -s $dirSubs -t $dirHCP -d $datasetName -m $map
+    deepRetinotopy -s $dirSubs -t $dirHCP -d $datasetName -m $map
     sudo rm -r ~/deepRetinotopy_TheToolbox/models/*
 done

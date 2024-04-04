@@ -7,7 +7,7 @@ module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy/1.0.2
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy.sh" -size +0 | grep -q '.'; then
+if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
     echo "deepRetinotopy repo is cloned"
 else
     echo "deepRetinotopy repo is not cloned"
@@ -39,7 +39,7 @@ do
     do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 3: Resampling data back to native space..."
-        clone_command=`cat ../deepRetinotopy.sh | grep 3_fsaverage2native.sh`
+        clone_command=`cat ../deepRetinotopy | grep 3_fsaverage2native.sh`
         echo $clone_command
         eval $clone_command
 

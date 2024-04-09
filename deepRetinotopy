@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-exec > >(tee -a deepRetinotopy_output.log)
-exec 2> >(tee -a deepRetinotopy_error.log >&2)
+exec > >(tee -a ~/deepRetinotopy_output.log)
+exec 2> >(tee -a ~/deepRetinotopy_error.log >&2)
 
 while getopts s:t:d:m: flag
 do

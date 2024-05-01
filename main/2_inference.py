@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import os.path as osp
 import torch
@@ -8,7 +10,7 @@ import numpy as np
 import argparse
 import time
 
-sys.path.append('..')
+sys.path.append(osp.dirname(osp.realpath(__file__))+'/..')
 
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.model import deepRetinotopy

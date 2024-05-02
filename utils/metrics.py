@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def smallest_angle(x, y):
     """Least difference between two angles.
 

@@ -4,7 +4,7 @@ import sys
 import scipy.io
 import torch_geometric.transforms as T
 import torch
-sys.path.append('.')
+sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import ROI_WangParcelsPlusFovea
 from torch_geometric.data import Data
 

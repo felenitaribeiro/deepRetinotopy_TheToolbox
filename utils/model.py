@@ -1,9 +1,7 @@
 import torch
 import torch.nn.functional as F
 import sys
-
 from torch_geometric.nn import SplineConv
-
 
 class deepRetinotopy(torch.nn.Module):
     def __init__(self, num_features):

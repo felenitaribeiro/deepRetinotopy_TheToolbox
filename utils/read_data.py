@@ -3,10 +3,8 @@ import numpy as np
 import torch
 import os.path as osp
 import nibabel as nib
-
 from numpy.random import seed
 from torch_geometric.data import Data
-
 
 def read_HCP(path, hemisphere=None, sub_id=None, 
              visual_mask_L=None, visual_mask_R=None,

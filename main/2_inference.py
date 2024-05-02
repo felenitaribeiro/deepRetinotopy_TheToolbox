@@ -10,7 +10,7 @@ import numpy as np
 import argparse
 import time
 
-sys.path.append(osp.dirname(osp.realpath(__file__))+'/..')
+sys.path.append(osp.dirname(osp.realpath(__file__)) + '/..')
 
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.model import deepRetinotopy
@@ -55,11 +55,11 @@ def inference(args):
         model = deepRetinotopy(num_features=args.num_features).to(device)
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             model.load_state_dict(
-                torch.load('./../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + '.pt',
+                torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + '.pt',
                            map_location=device))
         else:
             model.load_state_dict(
-                torch.load('./../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + '.pt',
+                torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + '.pt',
                            map_location=device))
 
         # Run the model on the test set

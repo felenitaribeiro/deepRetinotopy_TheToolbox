@@ -1,6 +1,8 @@
 import numpy as np
+import os.path as osp
+import sys
+sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import def_ROIs_WangParcels as roi
-
 
 def add_fovea(list):
     """Adding fovea to the left hemisphere V1, V2 and V3 parcels

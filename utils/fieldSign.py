@@ -9,8 +9,7 @@ import argparse
 import sys
 import torch
 import scipy
-sys.path.append('./../')
-
+sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.labels import labels
 def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):

@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import sys
 import os
-sys.path.append('..')
+sys.path.append(osp.dirname(osp.realpath(__file__)))
 from numpy.random import seed
 from torch_geometric.data import InMemoryDataset
 from utils.read_data import read_gifti, read_HCP

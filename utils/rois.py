@@ -2,7 +2,6 @@ import numpy as np
 import os.path as osp
 import scipy.io
 
-
 def ROIs_DorsalEarlyVisualCortex(list_of_labels):
     """Mask for the selection of the region of interest in the surface
     template.

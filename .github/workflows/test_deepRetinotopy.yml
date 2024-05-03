@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - deepRetinotopy.sh
+      - deepRetinotopy
       - tests/test_cvmfs.sh
       - tests/test_deepRetinotopy.sh
       - .github/workflows/test_deepRetinotopy.yml
@@ -14,7 +14,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - deepRetinotopy.sh
+      - deepRetinotopy
       - tests/test_cvmfs.sh
       - tests/test_deepRetinotopy.sh
       - .github/workflows/test_deepRetinotopy.yml
@@ -34,6 +34,6 @@ jobs:
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
       run: /bin/bash tests/test_cvmfs.sh
-    - name: test deepRetinotopy.sh
+    - name: test deepRetinotopy
       run: |
         /bin/bash tests/test_deepRetinotopy.sh

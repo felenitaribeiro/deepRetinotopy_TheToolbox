@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - deepRetinotopy.sh
+      - deepRetinotopy
       - main/2_inference.py
       - tests/test_cvmfs.sh
       - tests/test_module2.sh
@@ -15,7 +15,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - deepRetinotopy.sh
+      - deepRetinotopy
       - main/2_inference.py
       - tests/test_cvmfs.sh
       - tests/test_module2.sh

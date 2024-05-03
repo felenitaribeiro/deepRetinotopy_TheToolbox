@@ -33,7 +33,7 @@ echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 
-echo "[DEBUG]: testing deepRetinotopy:.sh"
+echo "[DEBUG]: testing deepRetinotopy:"
 cd ~/deepRetinotopy_TheToolbox/
 var=`cat ./README.md | grep date_tag=`
 echo $var

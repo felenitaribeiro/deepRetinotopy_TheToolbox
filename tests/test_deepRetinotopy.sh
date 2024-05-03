@@ -47,6 +47,7 @@ do
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
         sudo chmod 777  $dirSubs/$i/deepRetinotopy/
     done
+    export PATH=$PATH:~/deepRetinotopy_TheToolbox/main/
     deepRetinotopy -s $dirSubs -t $dirHCP -d $datasetName -m $map
     sudo rm -r ~/deepRetinotopy_TheToolbox/models/*
 done

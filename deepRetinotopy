@@ -20,7 +20,6 @@ echo "Path to fs_LR-deformed_to-fsaverage surfaces: $dirHCP";
 echo "Dataset name: $datasetName";
 echo "Maps: ${maps[@]}";
 
-cd main
 for hemisphere in 'lh' 'rh';
 do 
     echo "Generating mid-thickness surface and curvature data..."

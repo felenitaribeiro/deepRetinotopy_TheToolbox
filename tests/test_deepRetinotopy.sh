@@ -39,6 +39,11 @@ var=`cat ./README.md | grep date_tag=`
 echo $var
 export $var
 
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/main/
+pwd
+echo $PATH
+which deepRetinotopy
+
 for map in "${maps[@]}";
 do
     sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.2_"$date_tag"/deepretinotopy_1.0.2_"$date_tag".simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
@@ -47,7 +52,7 @@ do
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
         sudo chmod 777  $dirSubs/$i/deepRetinotopy/
     done
-    export PATH=$PATH:~/deepRetinotopy_TheToolbox/main/
+    
     deepRetinotopy -s $dirSubs -t $dirHCP -d $datasetName -m $map
     sudo rm -r ~/deepRetinotopy_TheToolbox/models/*
 done

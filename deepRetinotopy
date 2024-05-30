@@ -23,7 +23,7 @@ echo "Maps: ${maps[@]}";
 for hemisphere in 'lh' 'rh';
 do 
     echo "Generating mid-thickness surface and curvature data..."
-    bash 1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere 
+    1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere 
 
     if [ $? -eq 1 ]; then
         echo "Error in 1_native2fsaverage.sh"
@@ -33,14 +33,14 @@ do
         do
 
             echo "Retinotopy prediction..."
-            python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+            2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
 
             rm -r $dirSubs/processed
 
             echo "Resampling predictions to native space..."
             for model in model1 model2 model3 model4 model5 average;
             do
-                bash 3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
+                3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
             done
             echo "$map predictions for $hemisphere are done!"
         done

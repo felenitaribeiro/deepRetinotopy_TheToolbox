@@ -24,6 +24,8 @@ rm /data/*/surf/*graymid
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
+
 cd main
 for hemisphere in lh rh; do
     echo "Hemisphere: "$hemisphere""

@@ -33,6 +33,8 @@ sudo chmod 777 -R /data
 mv /resampling/resampling/* /data/1/deepRetinotopy/
 
 cd ~/deepRetinotopy_TheToolbox/main
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
+
 for hemisphere in lh; # rh; 
 do
     for map in 'polarAngle'; #'eccentricity' 'pRFsize';

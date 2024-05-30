@@ -35,6 +35,8 @@ datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
 echo "[DEBUG]: deepRetinotopy inference:"
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
+
 cd ~/deepRetinotopy_TheToolbox/main
 for hemisphere in 'lh'; # 'rh';
 do 

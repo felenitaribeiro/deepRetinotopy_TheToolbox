@@ -12,7 +12,8 @@ import scipy
 sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.labels import labels
-def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
+
+def field_sign(path, hemisphere, polarAngle_file, eccentricity_file, map = 'fs_predicted', model = 'average'):
     """
     This function computes the visual field sign for each node in the cortical surface.
     
@@ -21,6 +22,8 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
         hemisphere (str): Hemisphere of the cortical surface. It can be 'lh' or 'rh'.
         polarAngle (str): file name of the predicted polar angle map.
         eccentricity (numpy.ndarray): file name of the predicted eccentricity map.
+        map (str): Type of the map. It can be 'fs_predicted' or 'fs_empirical'.
+        model (str): Type of the model. It can be 'model1', 'model2', 'model3', 'model4', 'model5', and 'average'.
     Returns:
         print: The visual field sign map is saved in the same folder as the predicted polar angle and eccentricity maps.
     """
@@ -72,7 +75,7 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file):
     final_sign_map[final_mask == 0] = -10
     template.agg_data()[:] = np.reshape(final_sign_map, (-1))
     name = polarAngle_file.split('.')[0]
-    save_path = path + name + '.fieldSignMap_' + hemisphere + '.func.gii'
+    save_path = path + name + '.' + map + '_' + 'fieldSignMap_' + hemisphere + '_' + model + '.func.gii'
     nib.save(template, save_path)
     return print('Visual field sign map has been saved as ' + save_path)
 

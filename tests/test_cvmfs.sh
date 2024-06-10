@@ -69,7 +69,7 @@ trap - 1 2 3
 
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.2
+ml deepretinotopy/1.0.5
 mris_expand
 
 echo "[DEBUG]: data download from osf"

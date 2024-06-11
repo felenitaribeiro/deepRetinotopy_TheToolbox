@@ -23,8 +23,8 @@ export $var
 cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
-sudo cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models/
-sudo cp -r models/deepRetinotopy_eccentricity_LH_* ~/deepRetinotopy_TheToolbox/models/
+sudo cp -r models/deepRetinotopy_polarAngle_* ~/deepRetinotopy_TheToolbox/models/
+sudo cp -r models/deepRetinotopy_eccentricity_* ~/deepRetinotopy_TheToolbox/models/
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""

@@ -5,7 +5,7 @@ echo "[DEBUG]: test deepRetinotopy on the Singularity container"
 export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.2
+ml deepretinotopy/1.0.5
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
@@ -44,7 +44,7 @@ which deepRetinotopy
 
 for map in "${maps[@]}";
 do
-    sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.2_"$date_tag"/deepretinotopy_1.0.2_"$date_tag".simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
+    sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* ~/deepRetinotopy_TheToolbox/models/
     for i in $(ls "$dirSubs"); do
         sudo chmod 777 $dirSubs/$i
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/

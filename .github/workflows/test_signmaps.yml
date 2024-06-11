@@ -1,0 +1,49 @@
+name: test sign map generation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - deepRetinotopy
+      - signMaps
+      - main/2_inference.py
+      - main/4_signmaps.py
+      - tests/test_cvmfs.sh
+      - tests/test_module2.sh
+      - tests/test_signmaps.sh
+      - .github/workflows/test_module2.yml
+      - .github/workflows/test_signmaps.yml
+
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - deepRetinotopy
+      - signMaps
+      - main/2_inference.py
+      - main/4_signmaps.py
+      - tests/test_cvmfs.sh
+      - tests/test_module2.sh
+      - tests/test_signmaps.sh
+      - .github/workflows/test_module2.yml
+      - .github/workflows/test_signmaps.yml
+      
+jobs:
+  test_module2:
+    runs-on: "cirun-nectar-large--${{ github.run_id }}"
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+    - name: Set up neurocommand
+      env:
+        OSF_TOKEN: ${{ secrets.OSF_TOKEN }}
+        OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
+      run: /bin/bash tests/test_cvmfs.sh
+    - name: test visual field sign maps generation
+      run: |
+        /bin/bash tests/test_signmaps.sh

@@ -22,14 +22,14 @@ DeepRetinotopy, pre-trained models, and required software are packaged in softwa
 If you want to run deepRetinotopy locally, you can install Docker and pull our container from Dockerhub using the following command:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.2:latest
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.2:latest
+docker pull vnmd/deepretinotopy_1.0.5:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.5:latest
 # docker exec -it deepret bash
 ```
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy.sh**: 
 ```bash
-bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 The following arguments are required:
@@ -42,26 +42,22 @@ The following arguments are required:
 Alternatevely, you can run your analysis on [Neurodesk]() through the following commands:
 
 ```bash
-date_tag=20231223
-```
-
-```bash
-ml deepretinotopy/1.0.2
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.2_"$date_tag"/deepretinotopy_1.0.2_$date_tag.simg/opt/deepRetinotopy_TheToolbox/
-bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+ml deepretinotopy/1.0.5
+deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
 
 ```bash
-export container=deepretinotopy_1.0.2_$date_tag
+date_tag=20240609
+export container=deepretinotopy_1.0.5_$date_tag
 curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
 ```
 
 Then, you can execute the container (so long Singularity is already available on your computing environment) using the following command:
 
 ```bash
-singularity exec --nv ./deepretinotopy_1.0.2_$date_tag.simg bash deepRetinotopy.sh -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+singularity exec --nv ./deepretinotopy_1.0.5_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).

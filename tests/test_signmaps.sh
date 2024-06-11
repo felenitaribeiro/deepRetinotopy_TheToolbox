@@ -24,6 +24,7 @@ cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deep
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 sudo cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models/
+sudo cp -r models/deepRetinotopy_eccentricity_LH_* ~/deepRetinotopy_TheToolbox/models/
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
@@ -38,9 +39,9 @@ echo "[DEBUG]: deepRetinotopy inference:"
 export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
 
 cd ~/deepRetinotopy_TheToolbox/main
-for hemisphere in 'lh'; # 'rh';
+for hemisphere in 'lh' 'rh';
 do 
-    for map in 'polarAngle'; #'eccentricity' 'pRFsize';
+    for map in 'polarAngle' 'eccentricity'; # 'pRFsize';
     do
         echo "Hemisphere: "$hemisphere""
         for i in $(ls "$dirSubs"); do
@@ -52,3 +53,7 @@ do
         rm -r $dirSubs/processed
     done
 done
+
+echo "[DEBUG]: Visual field sign maps generation"
+signMaps -s $dirSubs -t $dirHCP -d $datasetName 
+ls -R test_data/100610/deepRetinotopy/*Sign*

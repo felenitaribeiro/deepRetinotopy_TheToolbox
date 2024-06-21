@@ -20,12 +20,12 @@ var=`cat ./README.md | grep date_tag=`
 echo $var
 export $var
 
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
-sudo cp -r models/deepRetinotopy_polarAngle_* ~/deepRetinotopy_TheToolbox/models/
-sudo cp -r models/deepRetinotopy_eccentricity_* ~/deepRetinotopy_TheToolbox/models/
+sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_polarAngle_* ~/deepRetinotopy_TheToolbox/models/
+sudo cp -r /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_eccentricity_* ~/deepRetinotopy_TheToolbox/models/
 
+echo "[DEBUG]: general settings:"
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
@@ -36,7 +36,8 @@ datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
 echo "[DEBUG]: deepRetinotopy inference:"
-export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
+export PATH=~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:$PATH
+which deepRetinotopy
 
 cd ~/deepRetinotopy_TheToolbox/main
 for hemisphere in 'lh' 'rh';

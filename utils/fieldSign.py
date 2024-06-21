@@ -75,7 +75,10 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file, map = 'fs_p
     final_sign_map[final_mask == 0] = -10
     template.agg_data()[:] = np.reshape(final_sign_map, (-1))
     name = polarAngle_file.split('.')[0]
-    save_path = path + name + '.' + map + '_' + 'fieldSignMap_' + hemisphere + '_' + model + '.func.gii'
+    if map == 'fs_predicted':
+        save_path = path + name + '.' + map + '_' + 'fieldSignMap_' + hemisphere + '_' + model + '.func.gii'
+    else:
+        save_path = path + name + '.' + map + '_' + 'fieldSignMap_' + hemisphere + '.func.gii'
     nib.save(template, save_path)
     return print('Visual field sign map has been saved as ' + save_path)
 

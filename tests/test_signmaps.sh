@@ -15,17 +15,6 @@ else
 fi
 cp -r . ~/deepRetinotopy_TheToolbox/
 
-echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-var=`cat ./README.md | grep date_tag=`
-echo $var
-export $var
-
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
-sudo mkdir ~/deepRetinotopy_TheToolbox/models/
-sudo chmod 777 ~/deepRetinotopy_TheToolbox/
-sudo cp -r models/deepRetinotopy_polarAngle_* ~/deepRetinotopy_TheToolbox/models/
-sudo cp -r models/deepRetinotopy_eccentricity_* ~/deepRetinotopy_TheToolbox/models/
-
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
@@ -35,25 +24,19 @@ echo "Path to template surfaces: "$dirHCP""
 datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
-echo "[DEBUG]: deepRetinotopy inference:"
+echo "[DEBUG]: Visual field sign maps generation"
 export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
+cd /data/1/
+unzip deepRetinotopy.zip
+rm deepRetinotopy.zip
+sudo chmod 777 -R /data/1/deepRetinotopy/
 
 cd ~/deepRetinotopy_TheToolbox/main
-for hemisphere in 'lh' 'rh';
-do 
-    for map in 'polarAngle' 'eccentricity'; # 'pRFsize';
-    do
-        echo "Hemisphere: "$hemisphere""
-        for i in $(ls "$dirSubs"); do
-            sudo chmod 777 $dirSubs/$i
-            sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
-            sudo chmod 777  $dirSubs/$i/deepRetinotopy/
-        done
-        python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
-        rm -r $dirSubs/processed
-    done
-done
-
-echo "[DEBUG]: Visual field sign maps generation"
 signMaps -s $dirSubs -t $dirHCP -d $datasetName 
-ls -R test_data/100610/deepRetinotopy/*Sign*
+
+file_path=$dirSubs/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_average.func.gii
+if [ ! -f "$file_path" ]; then
+    echo "Error: File does not exist."
+    exit 1
+fi
+

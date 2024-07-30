@@ -10,9 +10,7 @@ on:
       - main/2_inference.py
       - main/4_signmaps.py
       - tests/test_cvmfs.sh
-      - tests/test_module2.sh
       - tests/test_signmaps.sh
-      - .github/workflows/test_module2.yml
       - .github/workflows/test_signmaps.yml
 
 
@@ -24,13 +22,11 @@ on:
       - main/2_inference.py
       - main/4_signmaps.py
       - tests/test_cvmfs.sh
-      - tests/test_module2.sh
       - tests/test_signmaps.sh
-      - .github/workflows/test_module2.yml
       - .github/workflows/test_signmaps.yml
       
 jobs:
-  test_module2:
+  test_signMapsGeneration:
     runs-on: "cirun-nectar-large--${{ github.run_id }}"
 
     steps:

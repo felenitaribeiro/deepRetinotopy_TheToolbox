@@ -62,6 +62,16 @@ singularity exec --nv ./deepretinotopy_1.0.5_$date_tag.simg deepRetinotopy -s $p
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
+## Usage
+
+### Visual field sign maps
+
+You can also generate visual field sign maps from the predicted maps with the following command:
+
+```bash
+signMaps -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name 
+```
+
 ## Output
 
 The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesurfer subject folder, containing the following files:

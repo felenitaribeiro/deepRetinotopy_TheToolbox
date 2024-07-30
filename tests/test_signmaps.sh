@@ -38,22 +38,18 @@ echo "Dataset name: "$datasetName""
 echo "[DEBUG]: deepRetinotopy inference:"
 export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
 
-cd ~/deepRetinotopy_TheToolbox/main
-for hemisphere in 'lh' 'rh';
-do 
-    for map in 'polarAngle' 'eccentricity'; # 'pRFsize';
-    do
-        echo "Hemisphere: "$hemisphere""
-        for i in $(ls "$dirSubs"); do
-            sudo chmod 777 $dirSubs/$i
-            sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
-            sudo chmod 777  $dirSubs/$i/deepRetinotopy/
-        done
-        python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
-        rm -r $dirSubs/processed
-    done
-done
-
 echo "[DEBUG]: Visual field sign maps generation"
+cd /data/1/
+unzip deepRetinotopy.zip
+rm deepRetinotopy.zip
+sudo chmod 777 -R /data/1/deepRetinotopy/
+
+cd ~/deepRetinotopy_TheToolbox/main
 signMaps -s $dirSubs -t $dirHCP -d $datasetName 
-ls -R test_data/100610/deepRetinotopy/*Sign*
+
+file_path=$dirSubs/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_average.func.gii
+if [ ! -f "$file_path" ]; then
+    echo "Error: File does not exist."
+    exit 1
+fi
+

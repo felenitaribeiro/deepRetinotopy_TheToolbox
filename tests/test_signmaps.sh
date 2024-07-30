@@ -15,17 +15,6 @@ else
 fi
 cp -r . ~/deepRetinotopy_TheToolbox/
 
-echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-var=`cat ./README.md | grep date_tag=`
-echo $var
-export $var
-
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.5_"$date_tag"/deepretinotopy_1.0.5_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
-sudo mkdir ~/deepRetinotopy_TheToolbox/models/
-sudo chmod 777 ~/deepRetinotopy_TheToolbox/
-sudo cp -r models/deepRetinotopy_polarAngle_* ~/deepRetinotopy_TheToolbox/models/
-sudo cp -r models/deepRetinotopy_eccentricity_* ~/deepRetinotopy_TheToolbox/models/
-
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
@@ -35,10 +24,8 @@ echo "Path to template surfaces: "$dirHCP""
 datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
-echo "[DEBUG]: deepRetinotopy inference:"
-export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
-
 echo "[DEBUG]: Visual field sign maps generation"
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
 cd /data/1/
 unzip deepRetinotopy.zip
 rm deepRetinotopy.zip

@@ -9,6 +9,8 @@ import nibabel as nib
 import numpy as np
 import argparse
 import time
+import warnings
+warnings.filterwarnings("ignore")
 
 sys.path.append(osp.dirname(osp.realpath(__file__)) + '/..')
 
@@ -30,10 +32,11 @@ def test(model, data_loader, device):
 
 def inference(args):
     list_subs = os.listdir(args.path)
+    list_subs.remove('fsaverage')
     norm_value = 70.4237  # normalization parameter for distance between nodes
     pre_transform = T.Compose([T.FaceToEdge()])
     # Load the dataset
-    print('Loading the dataset')
+    print('[Step 2.1] Loading the dataset')
     init_time = time.time() / 60
     test_dataset = Retinotopy(args.path, 'Test',
                               transform=T.Cartesian(max_value=norm_value),
@@ -48,6 +51,7 @@ def inference(args):
     num_of_cortical_nodes = 32492
     predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
     
+    print('[Step 2.2] Generating predictions with pre-trained models')
     for i in range(num_of_models):
         init_time = time.time() / 60
         print('Loading model ' + str(i + 1))
@@ -84,14 +88,6 @@ def inference(args):
                 pred[final_mask_L == 1] = np.reshape(
                     np.array(evaluation['Predicted_values'][j]), (-1, 1))
                 predictions[j, i, :] = pred[:, 0]
-
-                # if args.prediction_type == 'polarAngle':
-                    # # rescaling the predicted values
-                    # minus = pred >= 180
-                    # sum = pred < 180
-                    # pred[minus] = pred[minus] - 180
-                    # pred[sum] = pred[sum] + 180
-                
                 pred[final_mask_L != 1] = -1
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
@@ -118,20 +114,13 @@ def inference(args):
     
     # Average the predictions
     average_predictions = average_prediction(predictions)
-    print('Saving average predictions')
+    print('Saving average prediction')
     for j in range(len(list_subs)):
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                 'lh.32k_fs_LR.func.gii')
             pred = average_predictions[j, :]
             pred = np.reshape(pred, (num_of_cortical_nodes,1))
-
-            # if args.prediction_type == 'polarAngle':
-                # # rescaling the predicted values
-                # minus = pred >= 180
-                # sum = pred < 180
-                # pred[minus] = pred[minus] - 180
-                # pred[sum] = pred[sum] + 180
             
             pred[final_mask_L != 1] = -1
             template.agg_data()[:] = np.reshape(pred, (-1))
@@ -148,7 +137,7 @@ def inference(args):
 
             nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                     '_rh_curvatureFeat_average.func.gii')  
-    print('Average predictions were saved')
+    print('Average prediction has been saved')
     return          
     
 

@@ -27,7 +27,10 @@ docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotop
 # docker exec -it deepret bash
 ```
 
-Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy.sh**: 
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.5:latest').
+
+
+Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
 ```bash
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```

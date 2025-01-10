@@ -28,21 +28,24 @@ export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/
 
 cd main
 for hemisphere in lh rh; do
-    echo "Hemisphere: "$hemisphere""
-    echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
-    clone_command=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
-    echo $clone_command
-    eval $clone_command
+    for fast in 'yes' 'no'; do
+        echo "Hemisphere: "$hemisphere""
+        echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
+        # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
+        pwd
+        clone_command=`./../main/1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast`
+        echo $clone_command
+        eval $clone_command
 
-    if find /data -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
-        echo "midthickness surface generated"
-    else
-        echo "midthickness surface not generated"
-    fi
+        if find /data -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
+            echo "midthickness surface generated"
+        else
+            echo "midthickness surface not generated"
+        fi
 
-    if find /data -name "*curvature-midthickness.${hemisphere}.32k_fs_LR.func.gii" -size +0 | grep -q '.'; then
-        echo "curvature data generated"
-    else
-        echo "curvature data not generated"
-    fi
+        if find /data -name "*curvature-midthickness.${hemisphere}.32k_fs_LR.func.gii" -size +0 | grep -q '.'; then
+            echo "curvature data generated"
+        else
+            echo "curvature data not generated"
+        fi
 done

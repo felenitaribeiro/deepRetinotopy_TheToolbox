@@ -1,4 +1,4 @@
-name: test deepRetinotopy pipeline
+name: test deepRetinotopy container pipeline
 
 on:
   workflow_dispatch:

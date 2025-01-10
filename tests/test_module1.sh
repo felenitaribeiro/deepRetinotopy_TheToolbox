@@ -48,4 +48,6 @@ for hemisphere in lh rh; do
         else
             echo "curvature data not generated"
         fi
+        
+    done
 done

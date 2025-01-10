@@ -17,30 +17,30 @@ def transform(args):
     numpy.ndarray
         The transformed polar angle in degrees.
     """
-    for prediction in ['model1', 'model2', 'model3', 'model4', 'model5', 'average']:
-        path_dirs = args.path.split('/')
-        index_sub = path_dirs.index('deepRetinotopy') - 1
-        subject = path_dirs[index_sub]
+    path_dirs = args.path.split('/')
+    index_sub = path_dirs.index('deepRetinotopy') - 1
+    subject = path_dirs[index_sub]
 
-        data = nib.load(args.path + subject + 
-                              '.predicted_polarAngle_' +  prediction + '.lh.native.func.gii')
-        polarAngle = data.agg_data()
-        
-        # Transform the polar angle map form the left hemisphere to cover the right visual field,
-        # i.e., from 270 (LVM) to 360/0 (HM) to 90 (UVM) degrees.
-        add_180 = polarAngle <= 180
-        subtract_180 = polarAngle > 180
-        polarAngle[add_180] += 180
-        polarAngle[subtract_180] -= 180
+    data = nib.load(args.path + subject + 
+                            '.predicted_polarAngle_' +  args.model + '.lh.native.func.gii')
+    polarAngle = data.agg_data()
+    
+    # Transform the polar angle map form the left hemisphere to cover the right visual field,
+    # i.e., from 270 (LVM) to 360/0 (HM) to 90 (UVM) degrees.
+    add_180 = polarAngle <= 180
+    subtract_180 = polarAngle > 180
+    polarAngle[add_180] += 180
+    polarAngle[subtract_180] -= 180
 
-        data.agg_data()[:] = polarAngle
-        nib.save(data, args.path + subject + 
-                              '.predicted_polarAngle_' +  prediction + 'test.lh.native.func.gii')
+    data.agg_data()[:] = polarAngle
+    nib.save(data, args.path + subject + 
+                            '.predicted_polarAngle_' +  args.model + 'test.lh.native.func.gii')
     return polarAngle
     
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transform the polar angle map for the left hemisphere')
     parser.add_argument('--path', type=str, help='Path to the polar angle maps')
+    parser.add_argument('--model', type=str, help='Model number')
     args = parser.parse_args()
     transform(args)

@@ -32,7 +32,8 @@ def test(model, data_loader, device):
 
 def inference(args):
     list_subs = os.listdir(args.path)
-    list_subs.remove('fsaverage')
+    if 'fsaverage' in list_subs:
+        list_subs.remove('fsaverage')
     norm_value = 70.4237  # normalization parameter for distance between nodes
     pre_transform = T.Compose([T.FaceToEdge()])
     # Load the dataset

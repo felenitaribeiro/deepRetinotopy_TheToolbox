@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import nibabel as nib
 import os.path as osp
 import numpy as np

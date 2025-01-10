@@ -1,0 +1,39 @@
+name: test deepRetinotopy pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - README.md
+      - tests/test_cvmfs.sh
+      - tests/test_deepRetinotopy_container.sh
+      - .github/workflows/test_deepRetinotopy_container.yml
+
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - README.md
+      - tests/test_cvmfs.sh
+      - tests/test_deepRetinotopy_container.sh
+      - .github/workflows/test_deepRetinotopy_container.yml
+      
+jobs:
+  test_deepRetinotopy_container:
+    runs-on: "cirun-nectar-large--${{ github.run_id }}"
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+    - name: Set up neurocommand
+      env:
+        OSF_TOKEN: ${{ secrets.OSF_TOKEN }}
+        OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
+        OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
+      run: /bin/bash tests/test_cvmfs.sh
+    - name: test deepRetinotopy
+      run: |
+        /bin/bash tests/test_deepRetinotopy_container.sh

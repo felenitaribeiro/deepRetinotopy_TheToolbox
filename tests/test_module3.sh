@@ -41,7 +41,8 @@ do
     do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 3: Resampling data back to native space..."
-        clone_command=`cat ../deepRetinotopy | grep 3_fsaverage2native.sh`
+        # clone_command=`cat ../deepRetinotopy | grep 3_fsaverage2native.sh`
+        clone_command=`./3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model`
         echo $clone_command
         eval $clone_command
 

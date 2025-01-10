@@ -33,7 +33,7 @@ for hemisphere in lh rh; do
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
         # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
         pwd
-        clone_command=`./../main/1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast`
+        clone_command=`./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast`
         echo $clone_command
         eval $clone_command
 
@@ -48,6 +48,6 @@ for hemisphere in lh rh; do
         else
             echo "curvature data not generated"
         fi
-        
+
     done
 done

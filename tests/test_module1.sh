@@ -24,7 +24,8 @@ rm /data/*/surf/*graymid
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/midthickness_surf.py
+export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/
+export DEPLOY_BINS=$DEPLOY_BINS:midthickness_surf.py
 
 cd main
 for hemisphere in lh rh; do

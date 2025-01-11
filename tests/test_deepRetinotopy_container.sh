@@ -39,10 +39,6 @@ var=`cat ./README.md | grep date_tag=`
 echo $var
 export $var
 
-echo $DEPLOY_BINS
-export PATH=~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/:$PATH
-export DEPLOY_BINS=wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:midthickness_surf.py
-echo $DEPLOY_BINS
 which deepRetinotopy
 
 for map in "${maps[@]}";

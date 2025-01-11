@@ -48,7 +48,7 @@ do
             sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
             sudo chmod 777  $dirSubs/$i/deepRetinotopy/
         done
-        python 2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+        python ./2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
         rm -r $dirSubs/processed
     done
 done

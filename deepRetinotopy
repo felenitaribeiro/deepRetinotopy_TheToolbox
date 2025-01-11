@@ -2,48 +2,98 @@
 exec > >(tee -a ~/deepRetinotopy_output.log)
 exec 2> >(tee -a ~/deepRetinotopy_error.log >&2)
 
-while getopts s:t:d:m: flag
+# Default values
+fast='no'
+
+while getopts s:t:d:m:g: flag
 do
     case "${flag}" in
         s) dirSubs=${OPTARG};;
         t) dirHCP=${OPTARG};;
         d) datasetName=${OPTARG};;
         m) IFS=',' read -ra maps <<< "${OPTARG}";;
+        g) fast=${OPTARG};
+            case "$fast" in
+                'yes'|'no') ;;
+                *) echo "Invalid fast argument: $fast"; exit 1;;
+            esac;;
 	?)
-		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps]" >&2
+		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface]" >&2
 		exit 1
 	esac
 done
 
-echo "Path subs directory: $dirSubs";
-echo "Path to fs_LR-deformed_to-fsaverage surfaces: $dirHCP";
+# create a print box
+echo "--------------------------------------------------------------------------------"
+echo "DeepRetinotopy: retinotopic mapping using deep learning"
+echo "--------------------------------------------------------------------------------"
+echo "Directories and parameters:"
+echo 
+echo "Path to FreeSurfer directory: $dirSubs";
+echo "Path to fs_LR-deformed_to-fsaverage template surfaces: $dirHCP";
 echo "Dataset name: $datasetName";
 echo "Maps: ${maps[@]}";
+echo "--------------------------------------------------------------------------------"
 
-for hemisphere in 'lh' 'rh';
-do 
-    echo "Generating mid-thickness surface and curvature data..."
-    1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere 
-
-    if [ $? -eq 1 ]; then
-        echo "Error in 1_native2fsaverage.sh"
+if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
+    # check if template surfaces are available
+    if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] && [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
+        echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii 
+        and/or $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii do not exist!"
         exit 1
     else
-        for map in "${maps[@]}";
-        do
+        for hemisphere in 'lh' 'rh';
+        do 
+            if [ $hemisphere == 'lh' ]; then
+                echo "Generating retinotopic maps for the left hemisphere"
+            else
+                echo "Generating retinotopic maps for the right hemisphere"
+            fi
+            echo "--------------------------------------------------------------------------------"
+            echo "[Step 1] Generating mid-thickness surface and curvature data..."
+            
+            1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast
 
-            echo "Retinotopy prediction..."
-            2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+            if [ $? -eq 1 ]; then
+                echo "Error in Step 1: Please check surface files."
+                exit 1
+            else
+                for map in "${maps[@]}";
+                do
+                    echo "--------------------------------------------------------------------------------"
+                    echo "Map: $map"
+                    echo "--------------------------------------------------------------------------------"
+                    echo "[Step 2] Retinotopy prediction..."
+                    2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+                    
+                    if [ $? -eq 1 ]; then
+                        rm -r $dirSubs/processed
+                        echo "Error in Step 2: Please check if model path is correct."
+                        exit 1
+                    fi
 
-            rm -r $dirSubs/processed
+                    rm -r $dirSubs/processed
 
-            echo "Resampling predictions to native space..."
-            for model in model1 model2 model3 model4 model5 average;
-            do
-                3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
-            done
-            echo "$map predictions for $hemisphere are done!"
+                    echo "--------------------------------------------------------------------------------"
+                    echo "[Step 3] Resampling predictions to native space..."
+                    
+                    for model in model1 model2 model3 model4 model5 average;
+                    do
+                        3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
+                        if [ $? -eq 1 ]; then
+                        echo "Error in Step 3: Please check if prediction files were appropriately generated."
+                        exit 1
+                    fi
+                    done
+                    
+                    echo "$map predictions resampling for $hemisphere is done!"
+                    echo "--------------------------------------------------------------------------------"
+                done
+            fi
         done
+        echo "All done!"
     fi
-done
-echo "All done!"
+else
+    echo "Directories do not exist! Please check the paths to the directories."
+    exit 1
+fi

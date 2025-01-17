@@ -34,7 +34,7 @@ def transform(args):
 
     data.agg_data()[:] = polarAngle
     nib.save(data, args.path + subject + 
-                            '.predicted_polarAngle_' +  args.model + 'test.lh.native.func.gii')
+                            '.predicted_polarAngle_' +  args.model + '.lh.native.func.gii')
     return polarAngle
     
 

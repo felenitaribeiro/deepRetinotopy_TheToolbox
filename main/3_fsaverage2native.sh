@@ -44,8 +44,10 @@ do
         $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii \
         $dirSub/surf/"$hemisphere".sphere.reg.surf.gii ADAP_BARY_AREA $dirSub/deepRetinotopy/"$dirSub".predicted_"$map"_"$model"."$hemisphere".native.func.gii \
         -area-surfs $dirSub/surf/"$dirSub"."$hemisphere".midthickness.32k_fs_LR.surf.gii $dirSub/surf/"$hemisphere".midthickness.surf.gii
-        # to edit
-        transform_polarangle_lh.py --path $dirSub/deepRetinotopy/ --model $model     
+        if [ "$map" == "polarAngle" ]; then
+          echo "Transforming polar angle map of the left hemisphere..."
+          transform_polarangle_lh.py --path $dirSub/deepRetinotopy/ --model $model
+        fi     
       else
         wb_command -metric-resample $dirSub/deepRetinotopy/"$dirSub".fs_predicted_"$map"_"$hemisphere"_curvatureFeat_"$model".func.gii \
         $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii \

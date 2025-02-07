@@ -9,7 +9,9 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
 from utils.fieldSign import field_sign
 
 def generate_signMaps(args):
-    for sub in os.listdir(args.path):
+    list_subs = os.listdir(args.path)
+    list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.')]
+    for sub in list_subs:
         path = os.path.join(args.path, sub, 'deepRetinotopy/')
         if os.path.exists(os.path.join(path, sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_model.func.gii')) and \
             os.path.exists(os.path.join(path, sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_model.func.gii')):

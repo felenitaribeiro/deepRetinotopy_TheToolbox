@@ -13,7 +13,7 @@ sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.labels import labels
 
-def field_sign(path, hemisphere, polarAngle_file, eccentricity_file, map = 'fs_predicted', model = 'average'):
+def field_sign(path, hemisphere, polarAngle_file, eccentricity_file, map = 'fs_predicted', model = 'model'):
     """
     This function computes the visual field sign for each node in the cortical surface.
     
@@ -23,7 +23,7 @@ def field_sign(path, hemisphere, polarAngle_file, eccentricity_file, map = 'fs_p
         polarAngle (str): file name of the predicted polar angle map.
         eccentricity (numpy.ndarray): file name of the predicted eccentricity map.
         map (str): Type of the map. It can be 'fs_predicted' or 'fs_empirical'.
-        model (str): Type of the model. It can be 'model1', 'model2', 'model3', 'model4', 'model5', and 'average'.
+        model (str): Type of the model. It can be 'model1', 'model2', 'model3', 'model4', 'model5', 'average', or 'model'.
     Returns:
         print: The visual field sign map is saved in the same folder as the predicted polar angle and eccentricity maps.
     """

@@ -31,8 +31,7 @@ def test(model, data_loader, device):
 
 def inference(args):
     list_subs = os.listdir(args.path)
-    if 'fsaverage' in list_subs:
-        list_subs.remove('fsaverage')
+    list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.')]
     norm_value = 70 
     pre_transform = T.Compose([T.FaceToEdge()])
     # Load the dataset

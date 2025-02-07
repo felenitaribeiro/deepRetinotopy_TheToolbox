@@ -27,8 +27,8 @@ cd $dirSubs
 for dirSub in `ls .`; 
 do 
     # exclude fsaverage directory
-    if [ "$dirSub" == "fsaverage" ]; then 
-        echo "Skipping fsaverage directory..."
+    if [ "$dirSub" == "fsaverage" ] || [[ "$dirSub" == .* ]]; then 
+        echo "Skipping fsaverage or hidden files directory..."
         continue
     else
         if [ -d $dirSub/surf ]; then

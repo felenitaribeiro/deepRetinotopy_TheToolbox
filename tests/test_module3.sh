@@ -21,7 +21,7 @@ echo "Path to freesurfer data: "$dirSubs""
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-model=average
+model=model
 echo "Model: "$model""
 
 echo "[DEBUG]: data download for resampling:"

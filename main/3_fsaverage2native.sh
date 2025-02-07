@@ -17,7 +17,7 @@ do
        esac;;
     m) model=${OPTARG};
        case "$model" in
-         model1|model2|model3|model4|model5|average) ;;
+         model1|model2|model3|model4|model5|average|model) ;;
          *) echo "Invalid model argument: $model"; exit 1;;
        esac;;
     ?)
@@ -31,8 +31,8 @@ echo "Model: $model";
 cd $dirSubs
 for dirSub in `ls $dirSubs`; 
 do 
-  if [ "$dirSub" == "fsaverage" ]; then 
-        echo "Skipping fsaverage directory..."
+  if [ "$dirSub" == "fsaverage" ] || [[ "$dirSub" == .* ]]; then 
+        echo "Skipping fsaverage or hidden files directory..."
         continue
   else
     if [ ! -f $dirSub"/deepRetinotopy/"$dirSub".fs_predicted_"$map"_"$hemisphere"_curvatureFeat_"$model".func.gii" ]; then

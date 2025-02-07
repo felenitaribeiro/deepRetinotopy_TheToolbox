@@ -34,7 +34,7 @@ sudo chmod 777 -R /data/1/deepRetinotopy/
 cd ~/deepRetinotopy_TheToolbox/main
 signMaps -s $dirSubs -t $dirHCP -d $datasetName 
 
-file_path=$dirSubs/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_average.func.gii
+file_path=$dirSubs/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_model.func.gii
 if [ ! -f "$file_path" ]; then
     echo "Error: File does not exist."
     exit 1

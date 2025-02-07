@@ -3,10 +3,10 @@ import numpy as np
 import torch
 import os.path as osp
 import nibabel as nib
-from numpy.random import seed
 from torch_geometric.data import Data
 
-def read_HCP(path, hemisphere=None, sub_id=None, 
+
+def read_HCP(path, hemisphere=None, sub_id=None,
              visual_mask_L=None, visual_mask_R=None,
              faces_L=None, faces_R=None, myelination=None, prediction=None):
     """Read the data files and create a data object with attributes x, y, pos,
@@ -92,8 +92,8 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                 dtype=torch.float)
         # Anatomical
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
-                                                    '.curvature-midthickness.rh.32k_fs_LR.func.gii')
-                                            ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+                                                            '.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                                                   ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
         if myelination == True:
             myelin_values = torch.tensor(np.reshape(
                 myelin['x' + str(sub_id) + '_myelinmap'][0][0][
@@ -106,7 +106,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
         # Removing NaN values
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
- 
+
         noR2 = np.isnan(R2_values)
         R2_values[noR2 == 1] = 0
 
@@ -131,7 +131,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
             osp.join(path, 'mid_pos_L.mat'))['mid_pos_L'].reshape(
             (number_hemi_nodes, 3))[visual_mask_L == 1]),
             dtype=torch.float)
-        
+
         # Measures for the feft hemisphere
         # Functional
         R2_values = torch.tensor(np.reshape(
@@ -178,11 +178,11 @@ def read_HCP(path, hemisphere=None, sub_id=None,
         retinotopicMap_values[condition == 1] = -1
 
         if prediction == 'polarAngle':
-        # Rescaling polar angle values
-            sum = retinotopicMap_values < 180
-            minus = retinotopicMap_values > 180
-            retinotopicMap_values[sum] = retinotopicMap_values[sum] + 180
-            retinotopicMap_values[minus] = retinotopicMap_values[minus] - 180
+            # Rescaling polar angle values
+            sum_180 = retinotopicMap_values < 180
+            minus_180 = retinotopicMap_values > 180
+            retinotopicMap_values[sum_180] = retinotopicMap_values[sum_180] + 180
+            retinotopicMap_values[minus_180] = retinotopicMap_values[minus_180] - 180
 
         if myelination == False:
             data = Data(x=curvature, y=retinotopicMap_values, pos=pos)
@@ -197,7 +197,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
 
 def read_gifti(path, hemisphere=None, sub_id=None,
                visual_mask_L=None, visual_mask_R=None,
-               faces_L=None, faces_R=None, prediction=None):
+               faces_L=None, faces_R=None):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -214,8 +214,6 @@ def read_gifti(path, hemisphere=None, sub_id=None,
                 interest (number of faces, 3) in the left hemisphere
             faces_R (numpy array): triangular faces from the region of
                 interest (number of faces, 3) in the right hemisphere
-            prediction (string): output of the model ('polarAngle' or
-                'eccentricity')
 
         Returns:
             data (object): object of class Data (from torch_geometric.data)

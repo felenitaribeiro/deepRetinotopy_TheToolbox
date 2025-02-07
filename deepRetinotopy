@@ -77,14 +77,12 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     echo "--------------------------------------------------------------------------------"
                     echo "[Step 3] Resampling predictions to native space..."
                     
-                    for model in model1 model2 model3 model4 model5 average;
-                    do
-                        3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m $model
-                        if [ $? -eq 1 ]; then
+
+                    3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model
+                    if [ $? -eq 1 ]; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."
                         exit 1
                     fi
-                    done
                     
                     echo "$map predictions resampling for $hemisphere is done!"
                     echo "--------------------------------------------------------------------------------"

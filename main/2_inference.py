@@ -18,7 +18,6 @@ from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.model import deepRetinotopy
 from torch_geometric.data import DataLoader
 from utils.dataset import Retinotopy
-from utils.metrics import average_prediction
 
 def test(model, data_loader, device):
     model.eval()
@@ -34,7 +33,7 @@ def inference(args):
     list_subs = os.listdir(args.path)
     if 'fsaverage' in list_subs:
         list_subs.remove('fsaverage')
-    norm_value = 70.4237  # normalization parameter for distance between nodes
+    norm_value = 70 
     pre_transform = T.Compose([T.FaceToEdge()])
     # Load the dataset
     print('[Step 2.1] Loading the dataset')
@@ -48,7 +47,7 @@ def inference(args):
     end_time = time.time() / 60
     print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-    num_of_models = 5
+    num_of_models = 1
     num_of_cortical_nodes = 32492
     predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
     
@@ -59,13 +58,23 @@ def inference(args):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = deepRetinotopy(num_features=args.num_features).to(device)
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
-            model.load_state_dict(
-                torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + '.pt',
-                           map_location=device))
+            if num_of_models != 1:
+                model.load_state_dict(
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + '.pt',
+                            map_location=device))
+            elif num_of_models == 1:
+                model.load_state_dict(
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model.pt',
+                            map_location=device))
         else:
-            model.load_state_dict(
-                torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + '.pt',
-                           map_location=device))
+            if num_of_models != 1:
+                model.load_state_dict(
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + '.pt',
+                            map_location=device))
+            elif num_of_models == 1:
+                model.load_state_dict(
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model.pt',
+                            map_location=device)) 
 
         # Run the model on the test set
         evaluation = test(model=model, data_loader=test_loader, device=device)
@@ -87,58 +96,39 @@ def inference(args):
                                     'lh.32k_fs_LR.func.gii')
                 pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_L == 1] = np.reshape(
-                    np.array(evaluation['Predicted_values'][j]), (-1, 1))
+                    np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
                 predictions[j, i, :] = pred[:, 0]
                 pred[final_mask_L != 1] = -1
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
-
-                nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                        '_lh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+                if num_of_models != 1:
+                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_lh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+                elif num_of_models == 1:
+                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_lh_curvatureFeat_model.func.gii')
             else:
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                     'rh.32k_fs_LR.func.gii')
                 pred = np.zeros((num_of_cortical_nodes, 1))
                 pred[final_mask_R == 1] = np.reshape(
-                    np.array(evaluation['Predicted_values'][j]), (-1, 1))
+                    np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
                 predictions[j, i, :] = pred[:, 0]
 
                 pred[final_mask_R != 1] = -1
 
                 template.agg_data()[:] = np.reshape(pred, (-1))
 
-                nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                        '_rh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+                if num_of_models != 1:
+                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_rh_curvatureFeat_model' + str(i + 1) + '.func.gii')
+                elif num_of_models == 1:
+                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_rh_curvatureFeat_model.func.gii')
+                
         print('Predictions from model ' + str(i + 1) + ' were saved')
         end_time = time.time() / 60
         print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
-    
-    # Average the predictions
-    average_predictions = average_prediction(predictions)
-    print('Saving average prediction')
-    for j in range(len(list_subs)):
-        if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
-            template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
-                                'lh.32k_fs_LR.func.gii')
-            pred = average_predictions[j, :]
-            pred = np.reshape(pred, (num_of_cortical_nodes,1))
-            
-            pred[final_mask_L != 1] = -1
-            template.agg_data()[:] = np.reshape(pred, (-1))
-
-            nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                    '_lh_curvatureFeat_average.func.gii')
-        else:
-            template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
-                                'rh.32k_fs_LR.func.gii')
-            pred = average_predictions[j, :]
-            pred = np.reshape(pred, (num_of_cortical_nodes,1))
-            pred[final_mask_R != 1] = -1
-            template.agg_data()[:] = np.reshape(pred, (-1))
-
-            nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                    '_rh_curvatureFeat_average.func.gii')  
-    print('Average prediction has been saved')
     return          
     
 

@@ -5,7 +5,7 @@ import torch_geometric.transforms as T
 import sys
 import time
 import argparse
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 sys.path.append('..')
 
@@ -77,24 +77,20 @@ def train_loop(args):
     if subjects[-1] == '':
         subjects = subjects[0:len(subjects) - 1]    
 
-    path = osp.join(osp.dirname(osp.realpath(__file__)),
-                    '..', 'Retinotopy', 'data')
-    norm_value = 70.4237
+    norm_value = 70
     pre_transform = T.Compose([T.FaceToEdge()])
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere)  # Change to Right for the RH
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True)
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True)
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = deepRetinotopy(num_features=args.num_features).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     # Create an output folder if it doesn't already exist
     directory = './output'
@@ -103,6 +99,8 @@ def train_loop(args):
 
     # Model training
     for i in range(5):
+        model = deepRetinotopy(num_features=args.num_features).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         for epoch in range(1, 201):
             loss, MAE = train(epoch, model, optimizer, train_loader, device)
             test_output = test(model, dev_loader, device)

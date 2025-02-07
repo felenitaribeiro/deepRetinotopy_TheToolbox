@@ -3,18 +3,16 @@ import scipy.io
 import torch
 import numpy as np
 import sys
-import os
 sys.path.append(osp.dirname(osp.realpath(__file__)))
-from numpy.random import seed
-from torch_geometric.data import InMemoryDataset
-from utils.read_data import read_gifti, read_HCP
-from utils.labels import labels
 from utils.rois import ROI_WangParcelsPlusFovea as roi
-
+from utils.labels import labels
+from utils.read_data import read_gifti, read_HCP
+from torch_geometric.data import InMemoryDataset
+from numpy.random import seed
 
 # Generates the training, dev and test set separately
 class Retinotopy(InMemoryDataset):
-    url = 'https://balsa.wustl.edu/study/show/9Zkk'
+    ""'Retinotopy dataset from HCP and GIFTI files'""
 
     def __init__(self,
                  root,
@@ -44,7 +42,7 @@ class Retinotopy(InMemoryDataset):
             path = self.processed_paths[1]
         else:
             path = self.processed_paths[2]
-        self.data, self.slices = torch.load(path)
+        self.data, self.slices = torch.load(path, weights_only=False)
 
     @property
     def raw_file_names(self):
@@ -52,101 +50,31 @@ class Retinotopy(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        if (self.hemisphere == 'Left' or self.hemisphere == 'LH' or self.hemisphere == 'left' or self.hemisphere == 'lh'):
+        if (self.hemisphere == 'Left' or self.hemisphere == 'LH' or
+                self.hemisphere == 'left' or self.hemisphere == 'lh'):
             if self.myelination == True:
-                if self.prediction == 'eccentricity':
-                    return [
-                        'training_ecc_LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_ecc_LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_ecc_LH_myelincurv_ROI_' + str(self.dataset) + '.pt']
+                return ['training_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                        'development_' + self.prediction +
+                        '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                        'test_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt']
 
-                elif self.prediction == 'polarAngle':
-                    return [
-                        'training_PA_LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_PA_LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_PA_LH_myelincurv_ROI_' + str(self.dataset) + '.pt']
-
-                else:
-                    return [
-                        'training_pRFsize_LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_pRFsize__LH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_pRFsize_LH_myelincurv_ROI_' + str(self.dataset) + '.pt']
             else:
-                if self.prediction == 'eccentricity':
-                    return ['training_ecc_LH_ROI_' + str(self.dataset) + '.pt',
-                            'development_ecc_LH_ROI_' +
-                            str(self.dataset) + '.pt',
-                            'test_ecc_LH_ROI_' + str(self.dataset) + '.pt']
-
-                elif self.prediction == 'polarAngle':
-                    return ['training_PA_LH_ROI_' + str(self.dataset) + '.pt',
-                            'development_PA_LH_ROI_' +
-                            str(self.dataset) + '.pt',
-                            'test_PA_LH_ROI_' + str(self.dataset) + '.pt']
-                else:
-                    return [
-                        'training_pRFsize_LH_ROI_' + str(self.dataset) + '.pt',
-                        'development_pRFsize_LH_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_pRFsize_LH_ROI_' + str(self.dataset) + '.pt']
+                return ['training_' + self.prediction + '_LH_ROI_' + str(self.dataset) + '.pt',
+                        'development_' + self.prediction +
+                        '_LH_ROI_' + str(self.dataset) + '.pt',
+                        'test_' + self.prediction + '_LH_ROI_' + str(self.dataset) + '.pt']
 
         else:
             if self.myelination == True:
-                if self.prediction == 'eccentricity':
-                    return [
-                        'training_ecc_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_ecc_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_ecc_RH_myelincurv_ROI_' + str(self.dataset) + '.pt']
-
-                elif self.prediction == 'polarAngle':
-                    return [
-                        'training_PA_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_PA_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_PA_RH_myelincurv_ROI_' + str(self.dataset) + '.pt']
-
-                else:
-                    return [
-                        'training_pRFsize_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'development_pRFsize_RH_myelincurv_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_pRFsize_RH_myelincurv_ROI_' + str(self.dataset) + '.pt']
+                return ['training_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                        'development_' + self.prediction +
+                        '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                        'test_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt']
             else:
-                if self.prediction == 'eccentricity':
-                    return ['training_ecc_RH_ROI_' + str(self.dataset) + '.pt',
-                            'development_ecc_RH_ROI_' +
-                            str(self.dataset) + '.pt',
-                            'test_ecc_RH_ROI_' + str(self.dataset) + '.pt']
-
-                elif self.prediction == 'polarAngle':
-                    return ['training_PA_RH_ROI_' + str(self.dataset) + '.pt',
-                            'development_PA_RH_ROI_' +
-                            str(self.dataset) + '.pt',
-                            'test_PA_RH_ROI_' + str(self.dataset) + '.pt']
-
-                else:
-                    return [
-                        'training_pRFsize_RH_ROI_' + str(self.dataset) + '.pt',
-                        'development_pRFsize_RH_ROI_' +
-                        str(self.dataset) + '.pt',
-                        'test_pRFsize_RH_ROI_' + str(self.dataset) + '.pt']
-
-    # def download(self):
-    #     raise RuntimeError(
-    #         'Dataset not found. Please download S1200_7T_Retinotopy_9Zkk.zip '
-    #         'from {} and '
-    #         'move it to {} and execute SettingDataset.sh'.format(self.url,
-    #                                                              self.raw_dir))
+                return ['training_' + self.prediction + '_RH_ROI_' + str(self.dataset) + '.pt',
+                        'development_' + self.prediction +
+                        '_RH_ROI_' + str(self.dataset) + '.pt',
+                        'test_' + self.prediction + '_RH_ROI_' + str(self.dataset) + '.pt']
 
     def process(self):
         # Selecting all visual areas (Wang2015) plus V1-3 fovea
@@ -166,38 +94,54 @@ class Retinotopy(InMemoryDataset):
         if self.dataset == 'HCP':
             path = osp.join(self.raw_dir, 'converted')
             data_list = []
+            subs_id = []
+
+            # Subsets from original paper
+            dev_subs = ['186949', '169747', '826353', '825048', '671855',
+                        '751550', '318637', '131722', '137128', '706040']
+            test_subs = ['680957', '191841', '617748', '725751', '198653',
+                         '191336', '572045', '601127', '644246', '157336']
+            for sub in dev_subs:
+                self.list_subs.remove(sub)
+            for sub in test_subs:
+                self.list_subs.remove(sub)
+
+            self.list_subs = self.list_subs + dev_subs + test_subs
 
             for i in range(0, len(self.list_subs)):
-                data = read_HCP(path, hemisphere=self.hemisphere, 
+                data = read_HCP(path, hemisphere=self.hemisphere,
                                 sub_id=self.list_subs[i],
                                 visual_mask_L=final_mask_L,
-                                visual_mask_R=final_mask_R, 
+                                visual_mask_R=final_mask_R,
                                 faces_L=faces_L,
-                                faces_R=faces_R, 
+                                faces_R=faces_R,
                                 myelination=self.myelination,
                                 prediction=self.prediction)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
+                subs_id.append(self.list_subs[i])
                 data_list.append(data)
+
             train = data_list[0:int(161)]
             dev = data_list[int(161):int(171)]
             test = data_list[int(171):int(len(data_list))]
+
+            assert dev_subs == subs_id[int(161):int(171)]
+            assert test_subs == subs_id[int(171):int(len(data_list))]
 
             torch.save(self.collate(train), self.processed_paths[0])
             torch.save(self.collate(dev), self.processed_paths[1])
             torch.save(self.collate(test), self.processed_paths[2])
         else:
-            # path = osp.join(self.raw_dir)
             data_list = []
 
             for i in range(0, len(self.list_subs)):
                 data = read_gifti(self.root, hemisphere=self.hemisphere,
                                   sub_id=self.list_subs[i],
-                                  visual_mask_L=final_mask_L, 
+                                  visual_mask_L=final_mask_L,
                                   visual_mask_R=final_mask_R,
-                                  faces_L=faces_L, 
-                                  faces_R=faces_R,
-                                  prediction=self.prediction)
+                                  faces_L=faces_L,
+                                  faces_R=faces_R,)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 data_list.append(data)

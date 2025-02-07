@@ -17,7 +17,7 @@ do
        esac;;
     m) model=${OPTARG};
        case "$model" in
-         model1|model2|model3|model4|model5|average) ;;
+         model1|model2|model3|model4|model5|average|model) ;;
          *) echo "Invalid model argument: $model"; exit 1;;
        esac;;
     ?)

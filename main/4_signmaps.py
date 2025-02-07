@@ -11,11 +11,11 @@ from utils.fieldSign import field_sign
 def generate_signMaps(args):
     for sub in os.listdir(args.path):
         path = os.path.join(args.path, sub, 'deepRetinotopy/')
-        if os.path.exists(os.path.join(path, sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_average.func.gii')) and \
-            os.path.exists(os.path.join(path, sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_average.func.gii')):
+        if os.path.exists(os.path.join(path, sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_model.func.gii')) and \
+            os.path.exists(os.path.join(path, sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_model.func.gii')):
             field_sign(path, args.hemisphere, 
-                    sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_average.func.gii',
-                    sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_average.func.gii')
+                    sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_model.func.gii',
+                    sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_model.func.gii')
         else: 
             print(f'{sub} is missing either the polar angle and/or the eccentricity maps')
 

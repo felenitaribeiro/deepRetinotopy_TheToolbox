@@ -125,7 +125,7 @@ def inference(args):
                     nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                             '_rh_curvatureFeat_model.func.gii')
                 
-        print('Predictions from model ' + str(i + 1) + ' were saved')
+        print('Predictions were saved')
         end_time = time.time() / 60
         print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
     return          

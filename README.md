@@ -1,5 +1,5 @@
 # DeepRetinotopy -- The toolbox
-This repository contains (restructured) code for the general use of deepRetinotopy with a command line interface.
+This repository contains code for the general use of deepRetinotopy with a command line interface.
 
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
@@ -22,12 +22,12 @@ DeepRetinotopy, pre-trained models, and required software are packaged in softwa
 If you want to run deepRetinotopy locally, you can install Docker and pull our container from Dockerhub using the following command:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.5:latest
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.5:latest
+docker pull vnmd/deepretinotopy_1.0.8:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.8:latest
 # docker exec -it deepret bash
 ```
 
-If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.5:latest').
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.8:latest').
 
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
@@ -42,34 +42,33 @@ The following arguments are required:
 - **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ### Singularity
-Alternatevely, you can run your analysis on [Neurodesk]() through the following commands:
+Alternatevely, you can run your analysis on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.5
+ml deepretinotopy/1.0.8
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
 
 ```bash
-date_tag=20240609
-export container=deepretinotopy_1.0.5_$date_tag
+date_tag=20250207
+export container=deepretinotopy_1.0.8_$date_tag
 curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
 ```
 
 Then, you can execute the container (so long Singularity is already available on your computing environment) using the following command:
 
 ```bash
-singularity exec --nv ./deepretinotopy_1.0.5_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+singularity exec ./deepretinotopy_1.0.8_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
 ## Usage
 
-### Visual field sign maps
-
-You can also generate visual field sign maps from the predicted maps with the following command:
+The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from freesurfer-based data (specifically, data in the 'surf' directory).
+However, you can also generate visual field sign maps after running 'deepRetinotopy' to help with manual delineation of visual areas, using the following command:
 
 ```bash
 signMaps -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name 
@@ -77,10 +76,31 @@ signMaps -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name
 
 ## Output
 
-The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesurfer subject folder, containing the following files:
-- ***sub-id**.predicted_eccentricity(**polarAngle** or **pRFsize**)_average(**model1** to **model5**).lh(**rh**).native.func.gii*: GIFTI files containing the predicted maps in the native space of the subject.
-- ***sub-id**.fs_predicted_eccentricity(**polarAngle** or **pRFsize**)_lh(**rh**)_curvatureFeat_average(**model1** to **model5**).func.gii*: GIFTI files containing the predicted maps in the 32k fsaverage space.
+The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesurfer subject directory, containing the following files:
 
+```bash
+└── freesurfer
+				└── [sub_id]
+					└── deepRetinotopy
+						├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_model.func.gii
+						├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_model.func.gii
+						├── [sub_id].fs_predicted_fieldSignMap_lh_model.func.gii
+						├── [sub_id].fs_predicted_fieldSignMap_rh_model.func.gii
+						├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_model.func.gii
+						├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_model.func.gii
+						├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_model.func.gii
+						├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_model.func.gii
+						├── [sub_id].predicted_eccentricity_model.lh.native.func.gii
+						├── [sub_id].predicted_eccentricity_model.rh.native.func.gii
+						├── [sub_id].predicted_fieldSignMap_model.lh.native.func.gii
+						├── [sub_id].predicted_fieldSignMap_model.rh.native.func.gii
+						├── [sub_id].predicted_pRFsize_model.lh.native.func.gii
+						├── [sub_id].predicted_pRFsize_model.rh.native.func.gii
+						├── [sub_id].predicted_polarAngle_model.lh.native.func.gii
+						└── [sub_id].predicted_polarAngle_model.rh.native.func.gii
+```
+
+Files with 'fs_predicted' in their name are GIFTI files containing the predicted maps in the 32k fsaverage space, and files with 'native' in their name are GIFTI files containing the predicted maps in the native space of the subject.
 
 ## Contributors
 If you want to contribute to this repository, please follow the instructions below:

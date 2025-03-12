@@ -25,7 +25,8 @@ class Retinotopy(InMemoryDataset):
                  myelination=False,
                  prediction=None,
                  hemisphere=None,
-                 shuffle=False):
+                 shuffle=False,
+                 stimulus=None):
         self.root = root
         self.dataset = dataset
         self.list_subs = list_subs
@@ -33,6 +34,7 @@ class Retinotopy(InMemoryDataset):
         self.prediction = prediction
         self.hemisphere = hemisphere
         self.shuffle = shuffle
+        self.stimulus = stimulus
         super(Retinotopy, self).__init__(root, transform, pre_transform,
                                          pre_filter)
         self.set = set
@@ -50,31 +52,36 @@ class Retinotopy(InMemoryDataset):
 
     @property
     def processed_file_names(self):
+        if self.stimulus == 'original':
+            name_stimulus = ''
+        else:
+            name_stimulus = '_' + str(self.stimulus)
+
         if (self.hemisphere == 'Left' or self.hemisphere == 'LH' or
                 self.hemisphere == 'left' or self.hemisphere == 'lh'):
             if self.myelination == True:
-                return ['training_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                return ['training_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
                         'development_' + self.prediction +
-                        '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt',
-                        'test_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + '.pt']
+                        '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
+                        'test_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt']
 
             else:
-                return ['training_' + self.prediction + '_LH_ROI_' + str(self.dataset) + '.pt',
+                return ['training_' + self.prediction + '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
                         'development_' + self.prediction +
-                        '_LH_ROI_' + str(self.dataset) + '.pt',
-                        'test_' + self.prediction + '_LH_ROI_' + str(self.dataset) + '.pt']
+                        '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
+                        'test_' + self.prediction + '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt']
 
         else:
             if self.myelination == True:
-                return ['training_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt',
+                return ['training_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
                         'development_' + self.prediction +
-                        '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt',
-                        'test_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + '.pt']
+                        '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
+                        'test_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt']
             else:
-                return ['training_' + self.prediction + '_RH_ROI_' + str(self.dataset) + '.pt',
+                return ['training_' + self.prediction + '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
                         'development_' + self.prediction +
-                        '_RH_ROI_' + str(self.dataset) + '.pt',
-                        'test_' + self.prediction + '_RH_ROI_' + str(self.dataset) + '.pt']
+                        '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
+                        'test_' + self.prediction + '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt']
 
     def process(self):
         # Selecting all visual areas (Wang2015) plus V1-3 fovea
@@ -116,7 +123,8 @@ class Retinotopy(InMemoryDataset):
                                 faces_L=faces_L,
                                 faces_R=faces_R,
                                 myelination=self.myelination,
-                                prediction=self.prediction)
+                                prediction=self.prediction,
+                                stimulus=self.stimulus)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 subs_id.append(self.list_subs[i])

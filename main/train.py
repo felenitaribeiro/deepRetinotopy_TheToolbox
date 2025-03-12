@@ -82,10 +82,10 @@ def train_loop(args):
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
@@ -98,7 +98,7 @@ def train_loop(args):
         os.makedirs(directory)
 
     # Model training
-    for i in range(5):
+    for i in range(args.n_seeds):
         model = deepRetinotopy(num_features=args.num_features).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         for epoch in range(1, 201):
@@ -108,10 +108,14 @@ def train_loop(args):
                 'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
                 '{:.4f}, Test_MAE_thr: {:.4f}'.format(
                     epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
-
-        torch.save(model.state_dict(),
-                osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                            'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
+        if args.stimulus=='original':
+            torch.save(model.state_dict(),
+                    osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
+        else:
+            torch.save(model.state_dict(),
+                    osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_bars.pt'))
 
 def main():
     parser = argparse.ArgumentParser(description='Train deepRetinotopy model')
@@ -125,6 +129,8 @@ def main():
                         choices=['LH', 'RH'], help='Hemisphere to use')
     parser.add_argument('--num_features', type=int, default=1, 
                         help='Number of features')
+    parser.add_argument('--stimulus', type=str, default='original')
+    parser.add_argument('--n_seeds', type=int, default=5)
     args = parser.parse_args()
     train_loop(args)
 

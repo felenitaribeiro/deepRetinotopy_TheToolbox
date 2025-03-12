@@ -96,7 +96,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
             R2_values = torch.tensor(np.reshape(
                 nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_variance_explained_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-                dtype=torch.float)
+                dtype=torch.float) * 100
             if prediction == 'polarAngle':
                 retinotopicMap_values = torch.tensor(np.reshape(
                     nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_polarAngle_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
@@ -112,7 +112,6 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                     nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_pRFsize_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
                 dtype=torch.float)
-            print('Bars stimulus data loaded')
         # Anatomical
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
                                                             '.curvature-midthickness.rh.32k_fs_LR.func.gii')
@@ -182,7 +181,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
             R2_values = torch.tensor(np.reshape(
                 nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_variance_explained_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
-                dtype=torch.float)
+                dtype=torch.float) * 100
             if prediction == 'polarAngle':
                 retinotopicMap_values = torch.tensor(np.reshape(
                     nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_polarAngle_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
@@ -198,7 +197,6 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                     nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_pRFsize_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
                 dtype=torch.float)
-            print('Bars stimulus data loaded')
         # Anatomical
         curvature = torch.tensor(np.array(nib.load(osp.join(path, '../../freesurfer/' + sub_id + '/surf/' + sub_id +
                                                             '.curvature-midthickness.lh.32k_fs_LR.func.gii')

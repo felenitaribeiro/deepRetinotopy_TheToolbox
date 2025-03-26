@@ -24,14 +24,17 @@ def transform(args):
     data = nib.load(args.path + subject + 
                             '.predicted_polarAngle_' +  args.model + '.lh.native.func.gii')
     polarAngle = data.agg_data()
+    mask = polarAngle == -1
     
-    # Transform the polar angle map form the left hemisphere to cover the right visual field,
+    # Transform the polar angle map from the left hemisphere to cover the right visual field,
     # i.e., from 270 (LVM) to 360/0 (HM) to 90 (UVM) degrees.
     add_180 = polarAngle <= 180
     subtract_180 = polarAngle > 180
     polarAngle[add_180] += 180
     polarAngle[subtract_180] -= 180
 
+    # Mask out vertices without predictions
+    polarAngle[mask] = -1
     data.agg_data()[:] = polarAngle
     nib.save(data, args.path + subject + 
                             '.predicted_polarAngle_' +  args.model + '.lh.native.func.gii')

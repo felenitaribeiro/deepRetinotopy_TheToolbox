@@ -8,7 +8,8 @@ from torch_geometric.data import Data
 
 def read_HCP(path, hemisphere=None, sub_id=None,
              visual_mask_L=None, visual_mask_R=None,
-             faces_L=None, faces_R=None, myelination=None, prediction=None):
+             faces_L=None, faces_R=None, myelination=None, prediction=None, 
+             stimulus = 'original'):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -28,7 +29,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                 additional feature
             prediction (string): output of the model ('polarAngle' or
                 'eccentricity' or 'pRFsize')
-
+            stimulus (string): stimulus used for estimating pRF parameters from empirical data ('original' or 'bars1bars2')
         Returns:
             data (object): object of class Data (from torch_geometric.data)
                 with attributes x, y, pos, faces and R2.
@@ -64,30 +65,51 @@ def read_HCP(path, hemisphere=None, sub_id=None,
 
         # Measures for the right hemisphere
         # Functional
-        R2_values = torch.tensor(np.reshape(
-            R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
-                number_hemi_nodes:number_cortical_nodes].reshape(
-                (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
-            dtype=torch.float)
-        if prediction == 'polarAngle':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
-                    0][
+        if stimulus == 'original':
+            R2_values = torch.tensor(np.reshape(
+                R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
                     number_hemi_nodes:number_cortical_nodes].reshape(
                     (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
                 dtype=torch.float)
-        elif prediction == 'eccentricity':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
-                    0][0][
-                    number_hemi_nodes:number_cortical_nodes].reshape(
+            if prediction == 'polarAngle':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
+                        0][
+                        number_hemi_nodes:number_cortical_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                    dtype=torch.float)
+            elif prediction == 'eccentricity':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
+                        0][0][
+                        number_hemi_nodes:number_cortical_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                    dtype=torch.float)
+            elif prediction == 'pRFsize':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
+                        0][0][
+                        number_hemi_nodes:number_cortical_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                    dtype=torch.float)
+        else:
+            R2_values = torch.tensor(np.reshape(
+                nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_variance_explained_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float) * 100
+            if prediction == 'polarAngle':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_polarAngle_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
                 dtype=torch.float)
-        elif prediction == 'pRFsize':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
-                    0][0][
-                    number_hemi_nodes:number_cortical_nodes].reshape(
+            elif prediction == 'eccentricity':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_eccentricity_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+            elif prediction == 'pRFsize':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_pRFsize_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
                 dtype=torch.float)
         # Anatomical
@@ -134,24 +156,45 @@ def read_HCP(path, hemisphere=None, sub_id=None,
 
         # Measures for the feft hemisphere
         # Functional
-        R2_values = torch.tensor(np.reshape(
-            R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
-                0:number_hemi_nodes].reshape((number_hemi_nodes))[
-                visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        if prediction == 'polarAngle':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
-                    0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
+        if stimulus == 'original':
+            R2_values = torch.tensor(np.reshape(
+                R2['x' + str(sub_id) + '_fit1_r2_msmall'][0][0][
+                    0:number_hemi_nodes].reshape((number_hemi_nodes))[
                     visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        elif prediction == 'eccentricity':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
-                    0][0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
-                    visual_mask_L == 1], (-1, 1)), dtype=torch.float)
-        elif prediction == 'pRFsize':
-            retinotopicMap_values = torch.tensor(np.reshape(
-                pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
-                    0][0][0:number_hemi_nodes].reshape(
+            if prediction == 'polarAngle':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][
+                        0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
+                        visual_mask_L == 1], (-1, 1)), dtype=torch.float)
+            elif prediction == 'eccentricity':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][
+                        0][0][0:number_hemi_nodes].reshape((number_hemi_nodes))[
+                        visual_mask_L == 1], (-1, 1)), dtype=torch.float)
+            elif prediction == 'pRFsize':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
+                        0][0][0:number_hemi_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                    dtype=torch.float)
+        else:
+            R2_values = torch.tensor(np.reshape(
+                nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_variance_explained_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float) * 100
+            if prediction == 'polarAngle':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_polarAngle_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float)
+            elif prediction == 'eccentricity':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_eccentricity_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float)
+            elif prediction == 'pRFsize':
+                retinotopicMap_values = torch.tensor(np.reshape(
+                    nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_pRFsize_lh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
                     (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
                 dtype=torch.float)
         # Anatomical

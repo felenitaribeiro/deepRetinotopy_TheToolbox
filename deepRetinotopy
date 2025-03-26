@@ -3,7 +3,7 @@ exec > >(tee -a ~/deepRetinotopy_output.log)
 exec 2> >(tee -a ~/deepRetinotopy_error.log >&2)
 
 # Default values
-fast='no'
+fast='yes'
 
 while getopts s:t:d:m:g: flag
 do

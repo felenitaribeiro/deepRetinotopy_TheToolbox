@@ -33,6 +33,7 @@ for hemisphere in lh rh; do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
         # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
+        rm $dirSubs/*/surf/*graymid*
         clone_command="./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
         echo $clone_command
         eval $clone_command

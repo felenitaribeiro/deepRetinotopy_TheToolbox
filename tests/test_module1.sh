@@ -24,8 +24,8 @@ rm /data/*/surf/*graymid
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/
-export DEPLOY_BINS=$DEPLOY_BINS:midthickness_surf.py
+export PATH=~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/:$PATH
+export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
 
 cd main
 for hemisphere in lh rh; do
@@ -33,6 +33,7 @@ for hemisphere in lh rh; do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
         # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
+        rm $dirSubs/*/surf/*graymid*
         clone_command="./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
         echo $clone_command
         eval $clone_command

@@ -43,7 +43,7 @@ do
                     else
                         mris_convert $dirSub/surf/"$hemisphere".white $dirSub/surf/"$hemisphere".white.gii
                         mris_convert $dirSub/surf/"$hemisphere".pial $dirSub/surf/"$hemisphere".pial.gii
-                        midthickness_surf.py --path $dirSub/surf/ --hemisphere $hemisphere # add to PATH
+                        midthickness_surf.py --path $dirSub/surf/ --hemisphere $hemisphere 
                         mris_convert $dirSub/surf/"$hemisphere".graymid.gii $dirSub/surf/"$hemisphere".graymid
                         mris_curvature -w $dirSub/surf/"$hemisphere".graymid
                     fi

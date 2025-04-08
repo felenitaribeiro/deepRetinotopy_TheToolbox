@@ -5,8 +5,8 @@ exec 2> >(tee -a ~/signMap_error.log >&2)
 while getopts s:t:d:m: flag
 do
     case "${flag}" in
-        s) dirSubs=${OPTARG};;
-        t) dirHCP=${OPTARG};;
+        s) dirSubs=$(realpath "${OPTARG}");;
+        t) dirHCP=$(realpath "${OPTARG}");;
         d) datasetName=${OPTARG};;
 	?)
 		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset]" >&2

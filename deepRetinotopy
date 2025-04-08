@@ -8,8 +8,8 @@ fast='yes'
 while getopts s:t:d:m:g: flag
 do
     case "${flag}" in
-        s) dirSubs=${OPTARG};;
-        t) dirHCP=${OPTARG};;
+        s) dirSubs=$(realpath "${OPTARG}");;  # Convert to absolute path
+        t) dirHCP=$(realpath "${OPTARG}");;  # Convert to absolute path
         d) datasetName=${OPTARG};;
         m) IFS=',' read -ra maps <<< "${OPTARG}";;
         g) fast=${OPTARG};
@@ -22,6 +22,17 @@ do
 		exit 1
 	esac
 done
+
+# Check if realpath failed (e.g., invalid paths)
+if [ ! -d "$dirSubs" ]; then
+    echo "Error: Path to FreeSurfer directory ($dirSubs) does not exist."
+    exit 1
+fi
+
+if [ ! -d "$dirHCP" ]; then
+    echo "Error: Path to HCP surfaces directory ($dirHCP) does not exist."
+    exit 1
+fi
 
 # create a print box
 echo "--------------------------------------------------------------------------------"

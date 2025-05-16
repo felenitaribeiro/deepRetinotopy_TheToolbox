@@ -64,20 +64,21 @@ def inference(args):
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             if num_of_models != 1:
                 model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt',
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt',
                             map_location=device))
             elif num_of_models == 1:
                 model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt',
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt',
                             map_location=device))
+                print('/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt')
         else:
             if num_of_models != 1:
                 model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt',
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt',
                             map_location=device))
             elif num_of_models == 1:
                 model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt',
+                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt',
                             map_location=device)) 
 
         # Run the model on the test set

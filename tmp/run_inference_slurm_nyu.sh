@@ -5,9 +5,9 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=50G
 #SBATCH --account=a_barth
-#SBATCH --time=36:00:00
-#SBATCH -o output_models.txt
-#SBATCH -e error_models.txt
+#SBATCH --time=06:00:00
+#SBATCH -o output_models_inference_nyu.txt
+#SBATCH -e error_models_inference_nyu.txt
 #SBATCH --partition=gpu_cuda
 #SBATCH --qos=gpu
 #SBATCH --gres=gpu:a100:1
@@ -18,9 +18,10 @@ cd ../main
 
 for prediction_type in polarAngle eccentricity pRFsize;
 do
-    for hemisphere in LH RH; 
+    for hemisphere in lh rh; 
     do
         echo Training $prediction_type models for $hemisphere hemisphere
-        python -u ./train.py --path ./../HCP/ --path2list ./../HCP/subs.txt --prediction_type $prediction_type --hemisphere $hemisphere
+        python ./../main/2_inference.py --path ./../NYU/BULK/LABDATA/openneuro/ds003787/derivatives/freesurfer/ --dataset nyu --prediction_type $prediction_type --hemisphere $hemisphere --stimulus bars
+        rm -r ./../NYU/BULK/LABDATA/openneuro/ds003787/derivatives/freesurfer/processed/
     done
 done

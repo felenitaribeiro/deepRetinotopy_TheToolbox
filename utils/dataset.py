@@ -6,7 +6,7 @@ import sys
 sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import ROI_WangParcelsPlusFovea as roi
 from utils.labels import labels
-from utils.read_data import read_gifti, read_HCP
+from utils.read_data import read_gifti, read_HCP, read_nyu
 from torch_geometric.data import InMemoryDataset
 from numpy.random import seed
 
@@ -140,6 +140,32 @@ class Retinotopy(InMemoryDataset):
             torch.save(self.collate(train), self.processed_paths[0])
             torch.save(self.collate(dev), self.processed_paths[1])
             torch.save(self.collate(test), self.processed_paths[2])
+        elif self.dataset == 'NYU':
+            path = self.raw_dir[:-4]
+            data_list = []
+            subs_id = []
+            print(path)
+
+            for i in range(0, len(self.list_subs)):
+                data = read_nyu(path, hemisphere=self.hemisphere,
+                                sub_id=self.list_subs[i],
+                                visual_mask_L=final_mask_L,
+                                visual_mask_R=final_mask_R,
+                                faces_L=faces_L,
+                                faces_R=faces_R,
+                                myelination=self.myelination,
+                                prediction=self.prediction,
+                                stimulus=self.stimulus)
+                if self.pre_transform is not None:
+                    data = self.pre_transform(data)
+                subs_id.append(self.list_subs[i])
+                data_list.append(data)
+
+            train = data_list[0:int(len(self.list_subs))]
+            dev = data_list[0:int(len(self.list_subs))]
+
+            torch.save(self.collate(train), self.processed_paths[0])
+            torch.save(self.collate(dev), self.processed_paths[1])
         else:
             data_list = []
 

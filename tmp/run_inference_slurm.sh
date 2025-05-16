@@ -10,7 +10,7 @@
 #SBATCH -e error_models_inference.txt
 #SBATCH --partition=gpu_cuda
 #SBATCH --qos=gpu
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:a100:1
 
 eval "$(conda shell.bash hook)"
 conda activate deepretinotopy_2

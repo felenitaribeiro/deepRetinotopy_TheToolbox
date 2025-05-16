@@ -12,7 +12,7 @@ sys.path.append('..')
 from utils.model import deepRetinotopy
 from utils.dataset import Retinotopy
 
-def train(epoch, model, optimizer, train_loader, device):
+def train(epoch, model, optimizer, train_loader, device, loss_type='original'):
     model.train()
 
     if epoch == 100:
@@ -27,7 +27,15 @@ def train(epoch, model, optimizer, train_loader, device):
         threshold = R2.view(-1) > 2.2
 
         loss = torch.nn.SmoothL1Loss()
-        output_loss = loss(R2 * model(data), R2 * data.y.view(-1))
+        if loss_type == 'original':
+            output_loss = loss(R2 * model(data), R2 * data.y.view(-1))
+        elif loss_type == 'no_weight':
+            output_loss = loss(model(data), data.y.view(-1))
+        elif loss_type == 'logscale':
+            output_loss = loss(torch.log(torch.abs(model(data))), torch.log(torch.abs(data.y.view(-1))))
+        elif loss_type == 'probabilistic':
+            prob = data.prob.view(-1)
+            output_loss = loss(R2 * model(data) * prob, R2 * data.y.view(-1) * prob)
         output_loss.backward()
 
         MAE = torch.mean(abs(
@@ -79,6 +87,11 @@ def train_loop(args):
 
     norm_value = 70
     pre_transform = T.Compose([T.FaceToEdge()])
+    print(torch.cuda.is_available())
+    print(torch.cuda.get_device_name(0))
+    print('Using ' + args.dataset + ' dataset')
+    print('Using ' + args.prediction_type + ' prediction')
+    print('Using ' + args.hemisphere + ' hemisphere')
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
@@ -86,6 +99,8 @@ def train_loop(args):
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
                             prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+    print(len(train_dataset), len(dev_dataset))
+    print('Stimulus: ' + args.stimulus)
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
@@ -102,13 +117,21 @@ def train_loop(args):
         model = deepRetinotopy(num_features=args.num_features).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         for epoch in range(1, 201):
-            loss, MAE = train(epoch, model, optimizer, train_loader, device)
+            loss, MAE = train(epoch, model, optimizer, train_loader, device, loss_type = args.loss)
             test_output = test(model, dev_loader, device)
             print(
                 'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
                 '{:.4f}, Test_MAE_thr: {:.4f}'.format(
                     epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
         if args.stimulus=='original':
+            if args.dataset != 'HCP':
+                torch.save(model.state_dict(),
+                    osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_' + args.dataset +'.pt'))
+                if args.loss != 'original':
+                    torch.save(model.state_dict(),
+                        osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                    'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_' + args.dataset + '_' + args.loss + '.pt'))
             torch.save(model.state_dict(),
                     osp.join(osp.dirname(osp.realpath(__file__)), 'output',
                                 'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
@@ -131,6 +154,7 @@ def main():
                         help='Number of features')
     parser.add_argument('--stimulus', type=str, default='original')
     parser.add_argument('--n_seeds', type=int, default=5)
+    parser.add_argument('--loss', type=str, default='original', choices = ['original', 'no_weight', 'logscale', 'probabilistic'])
     args = parser.parse_args()
     train_loop(args)
 

@@ -407,7 +407,7 @@ def read_nyu(path, hemisphere=None, sub_id=None,
 
 def read_gifti(path, hemisphere=None, sub_id=None,
                visual_mask_L=None, visual_mask_R=None,
-               faces_L=None, faces_R=None):
+               faces_L=None, faces_R=None, myelination=None):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -433,6 +433,10 @@ def read_gifti(path, hemisphere=None, sub_id=None,
     # Defining number of nodes
     number_cortical_nodes = int(64984)
     number_hemi_nodes = int(number_cortical_nodes / 2)
+    if myelination == True:
+        myelin = scipy.io.loadmat(osp.join(path, '../raw/converted/cifti_myelin_all.mat'))[
+            'cifti_myelin']
+        
     if (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
         # Loading connectivity of triangles
         faces = torch.tensor(faces_L.T, dtype=torch.long)
@@ -449,7 +453,19 @@ def read_gifti(path, hemisphere=None, sub_id=None,
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        data = Data(x=curvature, pos=pos)
+        if myelination == True:
+            myelin_values = torch.tensor(np.reshape(
+                myelin['x' + str(sub_id) + '_myelinmap'][0][0][
+                    0:number_hemi_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
+
+            data = Data(x=torch.cat((curvature, myelin_values), 1), pos=pos)
+            print('Myelin loaded')
+        else:
+            data = Data(x=curvature, pos=pos)
         data.face = faces
 
     elif (hemisphere == 'Right' or hemisphere == 'RH' or hemisphere == 'right' or hemisphere == 'rh'):
@@ -468,7 +484,18 @@ def read_gifti(path, hemisphere=None, sub_id=None,
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        data = Data(x=curvature, pos=pos)
+        if myelination == True:
+            myelin_values = torch.tensor(np.reshape(
+                myelin['x' + str(sub_id) + '_myelinmap'][0][0][
+                    number_hemi_nodes:number_cortical_nodes].reshape(
+                    (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
+            data = Data(x=torch.cat((curvature, myelin_values), 1), pos=pos)
+            print('Myelin loaded')
+        else:
+            data = Data(x=curvature, pos=pos)
         data.face = faces
 
     return data

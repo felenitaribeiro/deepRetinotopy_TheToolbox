@@ -37,11 +37,20 @@ def inference(args):
     # Load the dataset
     print('[Step 2.1] Loading the dataset')
     init_time = time.time() / 60
-    test_dataset = Retinotopy(args.path, 'Test',
-                              transform=T.Cartesian(max_value=norm_value),
-                              pre_transform=pre_transform, dataset=args.dataset,
-                              list_subs=list_subs,
-                              prediction=args.prediction_type, hemisphere=args.hemisphere)
+    if args.num_features == 2:
+        print('Using myelination and curvature features')
+        test_dataset = Retinotopy(args.path, 'Test',
+                                transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset=args.dataset,
+                                list_subs=list_subs, myelination=True,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere)
+    elif args.num_features == 1:
+        print('Using curvature features')
+        test_dataset = Retinotopy(args.path, 'Test',
+                                transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset=args.dataset,
+                                list_subs=list_subs,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere)
     print('Dataset loaded')
     end_time = time.time() / 60
     print('Time elapsed: ' + str(end_time - init_time) + ' minutes')
@@ -67,19 +76,33 @@ def inference(args):
                     torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt',
                             map_location=device))
             elif num_of_models == 1:
-                model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt',
-                            map_location=device))
-                print('/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt')
+                if args.num_features == 2:
+                    model.load_state_dict(
+                        torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '_myelincurv.pt',
+                                map_location=device))
+                    print('/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '_myelincurv.pt')
+                else:
+                    model.load_state_dict(
+                        torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt',
+                                map_location=device))
+                    print('/output/deepRetinotopy_' + args.prediction_type + '_LH_model1' + stimulus_name + '.pt')
         else:
             if num_of_models != 1:
                 model.load_state_dict(
                     torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt',
                             map_location=device))
             elif num_of_models == 1:
-                model.load_state_dict(
-                    torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt',
-                            map_location=device)) 
+                # Load the model
+                print('Loading model ' + str(i + 1))
+                if args.num_features == 2:
+                    model.load_state_dict(
+                        torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model'  + str(i + 1) + stimulus_name + '_myelincurv.pt',
+                                map_location=device))
+                    print('/output/deepRetinotopy_' + args.prediction_type + '_RH_model1' + stimulus_name + '_myelincurv.pt')
+                else:
+                    model.load_state_dict(
+                        torch.load(osp.dirname(osp.realpath(__file__)) + '/output/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt',
+                                map_location=device)) 
 
         # Run the model on the test set
         evaluation = test(model=model, data_loader=test_loader, device=device)
@@ -110,8 +133,12 @@ def inference(args):
                     nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                             '_lh_curvatureFeat_model' + str(i + 1) + stimulus_name + '.func.gii')
                 elif num_of_models == 1:
-                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                            '_lh_curvatureFeat_model' + stimulus_name + '.func.gii')
+                    if args.num_features == 2:
+                        nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_lh_curvatureMyelinFeat_model' + stimulus_name + '.func.gii')
+                    else:
+                        nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                                '_lh_curvatureFeat_model' + stimulus_name + '.func.gii')
             else:
                 template = nib.load(args.path + '/' + list_subs[j] + '/surf/' + list_subs[j] + '.curvature-midthickness.' +
                                     'rh.32k_fs_LR.func.gii')
@@ -128,8 +155,12 @@ def inference(args):
                     nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
                                             '_rh_curvatureFeat_model' + str(i + 1) + stimulus_name + '.func.gii')
                 elif num_of_models == 1:
-                    nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
-                                            '_rh_curvatureFeat_model' + stimulus_name + '.func.gii')
+                    if args.num_features == 2:
+                        nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                            '_rh_curvatureMyelinFeat_model' + stimulus_name + '.func.gii')
+                    else:
+                        nib.save(template, args.path + '/' + list_subs[j] + '/deepRetinotopy/' + list_subs[j] + '.fs_predicted_' + args.prediction_type +
+                                                '_rh_curvatureFeat_model' + stimulus_name + '.func.gii')
                 
         print('Predictions were saved')
         end_time = time.time() / 60

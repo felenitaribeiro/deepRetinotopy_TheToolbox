@@ -175,7 +175,8 @@ class Retinotopy(InMemoryDataset):
                                   visual_mask_L=final_mask_L,
                                   visual_mask_R=final_mask_R,
                                   faces_L=faces_L,
-                                  faces_R=faces_R,)
+                                  faces_R=faces_R,
+                                  myelination=self.myelination,)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 data_list.append(data)

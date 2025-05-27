@@ -92,13 +92,22 @@ def train_loop(args):
     print('Using ' + args.dataset + ' dataset')
     print('Using ' + args.prediction_type + ' prediction')
     print('Using ' + args.hemisphere + ' hemisphere')
+    
+    if args.num_features == 2:
+        train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects, myelination=True,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+        dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects, myelination=True,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
 
-    train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
-                            pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
-    dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
-                            pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+    else:
+        train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+        dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
+                                pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
+                                prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
     print(len(train_dataset), len(dev_dataset))
     print('Stimulus: ' + args.stimulus)
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
@@ -125,16 +134,24 @@ def train_loop(args):
                     epoch, loss, MAE, test_output['MAE'], test_output['MAE_thr']))
         if args.stimulus=='original':
             if args.dataset != 'HCP':
-                torch.save(model.state_dict(),
-                    osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                                'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_' + args.dataset +'.pt'))
                 if args.loss != 'original':
                     torch.save(model.state_dict(),
                         osp.join(osp.dirname(osp.realpath(__file__)), 'output',
                                     'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_' + args.dataset + '_' + args.loss + '.pt'))
-            torch.save(model.state_dict(),
-                    osp.join(osp.dirname(osp.realpath(__file__)), 'output',
-                                'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
+                else:
+                    torch.save(model.state_dict(),
+                        osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                    'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_' + args.dataset +'.pt'))       
+            else:
+                if args.num_features == 2:
+                    torch.save(model.state_dict(),
+                        osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                    'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '_myelincurv.pt'))
+                    print('Saved model training with myelin maps')
+                else:
+                    torch.save(model.state_dict(),
+                            osp.join(osp.dirname(osp.realpath(__file__)), 'output',
+                                        'deepRetinotopy_' + args.prediction_type + '_' + args.hemisphere + '_model' + str(i+1) + '.pt'))
         else:
             torch.save(model.state_dict(),
                     osp.join(osp.dirname(osp.realpath(__file__)), 'output',

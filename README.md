@@ -1,5 +1,7 @@
-# DeepRetinotopy -- The toolbox
-This repository contains code for the general use of deepRetinotopy with a command line interface.
+# DeepRetinotopy - A deep learning-based toolkit for retinotopic mapping
+![Logo](/figures/logo_v1.png)
+
+DeepRetinotopy is a toolkit that leverage a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
 
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
@@ -45,7 +47,7 @@ The following arguments are required:
 Alternatevely, you can run your analysis on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.8
+ml deepretinotopy/1.0.10
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 

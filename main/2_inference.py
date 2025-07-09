@@ -89,8 +89,7 @@ def inference(args):
             label_primary_visual_areas)
 
         for j in range(len(list_subs)):
-            print('Saving .gii files in: ' + args.path +
-                  list_subs[j] + '/deepRetinotopy/')
+            print('Saving .gii files in: ' + args.path + '/' + list_subs[j] + '/deepRetinotopy/')
             if not osp.exists(args.path + '/' + list_subs[j] + '/deepRetinotopy/'):
                 os.makedirs(args.path + '/' +
                             list_subs[j] + '/deepRetinotopy/')

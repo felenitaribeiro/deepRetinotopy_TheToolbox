@@ -1,7 +1,7 @@
 # DeepRetinotopy - A deep learning-based toolkit for retinotopic mapping
 ![Logo](/figures/logo_v1.png)
 
-DeepRetinotopy is a toolkit that leverage a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
+DeepRetinotopy is a toolkit that leverage a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) an [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
 
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
@@ -18,10 +18,24 @@ DeepRetinotopy is a toolkit that leverage a geometric deep learning model to pre
 - HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 
 ## Software containers
-DeepRetinotopy, pre-trained models, and required software are packaged in software containers available through Dockerhub and Neurodesk.
+DeepRetinotopy (pre-trained models) and required software are packaged in software containers available through Neurodesk and Dockerhub.
+
+### Neurodesk
+You can run deepRetinotopy on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
+
+```bash
+ml deepretinotopy/1.0.10
+deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+```
+
+The following arguments are required:
+- **-s** path to the freesurfer directory
+- **-t** path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
+- **-d** dataset name (e.g. "hcpP")
+- **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ### Docker
-If you want to run deepRetinotopy locally, you can install Docker and pull our container from Dockerhub using the following command:
+If you prefer running deepRetinotopy locally via Docker, you can pull our container from Dockerhub and run it using the following commands:
 
 ```bash
 docker pull vnmd/deepretinotopy_1.0.10:latest
@@ -37,21 +51,8 @@ Once in the container (the working directory is deepRetinotopy_TheToolbox), you 
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
-The following arguments are required:
-- **-s** path to the freesurfer directory
-- **-t** path to the HCP "fs_LR-deformed_to-fsaverage" surfaces
-- **-d** dataset name (e.g. "HCP")
-- **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
-
 ### Singularity
-Alternatevely, you can run your analysis on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
-
-```bash
-ml deepretinotopy/1.0.10
-deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
-```
-
-You can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
+Alternatevely, you can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
 
 ```bash
 date_tag=20250409
@@ -69,8 +70,7 @@ For different locations see the [Neurodesk documentation](https://www.neurodesk.
 
 ## Usage
 
-The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from freesurfer-based data (specifically, data in the 'surf' directory).
-However, you can also generate visual field sign maps after running 'deepRetinotopy' to help with manual delineation of visual areas, using the following command:
+The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from freesurfer-based data (specifically, data in the 'surf' directory). However, you can also generate visual field sign maps after running 'deepRetinotopy' to help with manual delineation of visual areas by using the following command:
 
 ```bash
 signMaps -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name 
@@ -102,20 +102,21 @@ The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesur
 			└── [sub_id].predicted_polarAngle_model.rh.native.func.gii
 ```
 
-Files with 'fs_predicted' in their name are GIFTI files containing the predicted maps in the 32k fsaverage space, and files with 'native' in their name are GIFTI files containing the predicted maps in the native space of the subject.
+Files with 'fs_predicted' in their name are GIFTI files containing the predicted maps in the 32k fsaverage space, and files with 'native' are GIFTI files containing the predicted maps in the native space of the subject.
 
 ## Contributors
 If you want to contribute to this repository, please follow the instructions below:
 
 1. Fork the repository
 2. Create a new branch (e.g. `git checkout -b my-new-branch`)
-3. Commit your changes (e.g. `git commit -am 'Add some feature'`)
-4. Push the branch (e.g. `git push origin my-new-branch`)
-5. Create a new Pull Request
+3. Add your changes (e.g.,`git add new_script.py`)
+4. Commit your changes (e.g. `git commit -m 'Add some feature'`)
+5. Push the branch (e.g. `git push origin my-new-branch`)
+6. Create a new Pull Request
 
 ## Citation
 
-Please cite our work if you used our model:
+Please cite our earlier work if you find it helpful:
 
 	@article{Ribeiro2021,
 		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Puckett, Alexander M},

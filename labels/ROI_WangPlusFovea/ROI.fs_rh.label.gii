@@ -1,58 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE GIFTI SYSTEM "http://www.nitrc.org/frs/download.php/115/gifti.dtd">
-<GIFTI Version="1" NumberOfDataArrays="1"><MetaData><MD><Name>AnatomicalStructurePrimary</Name><Value>Invalid</Value></MD><MD><Name>ParentProvenance</Name><Value>/tmp/PycharmProjects/deepRetinotopy_with_DWIdata/Retinotopy/data/standard_mesh_atlases/resample_fsaverage//fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii:
-wb_command -surface-sphere-project-unproject ../L.sphere.32k_fs_LR.surf.gii ../fs_L/fs_L-to-fs_LR_fsaverage.L_LR.spherical_std.164k_fs_L.surf.gii ../fs_L/fsaverage.L.sphere.164k_fs_L.surf.gii fs_LR-deformed-to-fsaverage.L.sphere.32k_fs_LR.surf.gii
-
-100610/surf/rh.midthickness.surf.gii:
-/opt/workbench/workbench/bin_rh_linux64/../exe_rh_linux64/wb_command -surface-average 100610/surf/rh.midthickness.surf.gii -surf 100610/surf/rh.midthickness.surf.gii.temp10.white.surf.gii -surf 100610/surf/rh.midthickness.surf.gii.temp10.pial.surf.gii
-
-100610/surf/100610.rh.midthickness.32k_fs_LR.surf.gii:
-/opt/workbench/workbench/bin_rh_linux64/../exe_rh_linux64/wb_command -surface-resample 100610/surf/rh.midthickness.surf.gii 100610/surf/rh.sphere.reg.surf.gii /tmp/PycharmProjects/deepRetinotopy_with_DWIdata/Retinotopy/data/standard_mesh_atlases/resample_fsaverage//fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii BARYCENTRIC 100610/surf/100610.rh.midthickness.32k_fs_LR.surf.gii</Value></MD><MD><Name>ProgramProvenance</Name><Value>Connectome Workbench
-Type: Command Line Application
-Version: 1.5.0
-Qt Compiled Version: 5.7.0
-Qt Runtime Version: 5.7.0
-Commit: 76441605d20536d81034a64c9d34ec393aa528b9
-Commit Date: 2021-02-16 13:46:47 -0600
-Compiled with OpenMP: YES
-Compiler: g++ (/export/gcc-4.8.5/bin)
-Compiler Version: 4.8.5
-Compiled Debug: NO
-Operating System: Linux</Value></MD><MD><Name>Provenance</Name><Value>/opt/workbench/workbench/bin_rh_linux64/../exe_rh_linux64/wb_command -metric-resample 100610/surf/rh.graymid.H.gii 100610/surf/rh.sphere.reg.surf.gii /tmp/PycharmProjects/deepRetinotopy_with_DWIdata/Retinotopy/data/standard_mesh_atlases/resample_fsaverage//fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii ADAP_BARY_AREA 100610/surf/100610.curvature-midthickness.rh.32k_fs_LR.func.gii -area-surfs 100610/surf/rh.midthickness.surf.gii 100610/surf/100610.rh.midthickness.32k_fs_LR.surf.gii</Value></MD><MD><Name>WorkingDirectory</Name><Value>/tmp/PycharmProjects/deepRetinotopy_TheToolbox/HCP</Value></MD></MetaData><LabelTable><Label Key="0" Red="1.0" Green="1.0" Blue="1.0" Alpha="0.0">???</Label></LabelTable><DataArray Intent="NIFTI_INTENT_NORMAL" DataType="NIFTI_TYPE_FLOAT32" ArrayIndexingOrder="RowMajorOrder" Dimensionality="1" Encoding="GZipBase64Binary" Endian="LittleEndian" ExternalFileName="" ExternalFileOffset="0" Dim0="32492"><MetaData><MD><Name>Name</Name><Value>100610/surf/rh.graymid.H</Value></MD><MD><Name>PaletteColorMapping</Name><Value>&lt;PaletteColorMapping Version="1"&gt;
-   &lt;ScaleMode&gt;MODE_AUTO_SCALE_ABSOLUTE_PERCENTAGE&lt;/ScaleMode&gt;
-   &lt;AutoScalePercentageValues&gt;98.000000 2.000000 2.000000 98.000000&lt;/AutoScalePercentageValues&gt;
-   &lt;AutoScaleAbsolutePercentageValues&gt;2.000000 98.000000&lt;/AutoScaleAbsolutePercentageValues&gt;
-   &lt;UserScaleValues&gt;-100.000000 0.000000 0.000000 100.000000&lt;/UserScaleValues&gt;
-   &lt;PaletteName&gt;ROY-BIG-BL&lt;/PaletteName&gt;
-   &lt;InterpolatePalette&gt;true&lt;/InterpolatePalette&gt;
-   &lt;InvertPalette&gt;OFF&lt;/InvertPalette&gt;
-   &lt;DisplayPositiveData&gt;true&lt;/DisplayPositiveData&gt;
-   &lt;DisplayZeroData&gt;false&lt;/DisplayZeroData&gt;
-   &lt;DisplayNegativeData&gt;true&lt;/DisplayNegativeData&gt;
-   &lt;ThresholdTest&gt;THRESHOLD_TEST_SHOW_OUTSIDE&lt;/ThresholdTest&gt;
-   &lt;ThresholdType&gt;THRESHOLD_TYPE_OFF&lt;/ThresholdType&gt;
-   &lt;ThresholdFailureInGreen&gt;false&lt;/ThresholdFailureInGreen&gt;
-   &lt;ThresholdNormalValues&gt;-1.000000 1.000000&lt;/ThresholdNormalValues&gt;
-   &lt;ThresholdMappedValues&gt;-1.000000 1.000000&lt;/ThresholdMappedValues&gt;
-   &lt;ThresholdMappedAvgAreaValues&gt;-1.000000 1.000000&lt;/ThresholdMappedAvgAreaValues&gt;
-   &lt;ThresholdDataName&gt;&lt;/ThresholdDataName&gt;
-   &lt;ThresholdRangeMode&gt;PALETTE_THRESHOLD_RANGE_MODE_FILE&lt;/ThresholdRangeMode&gt;
-   &lt;ThresholdLowHighLinked&gt;false&lt;/ThresholdLowHighLinked&gt;
-   &lt;ThresholdOutlineDrawingMode&gt;OFF&lt;/ThresholdOutlineDrawingMode&gt;
-   &lt;ThresholdOutlineDrawingColor&gt;WHITE&lt;/ThresholdOutlineDrawingColor&gt;
-   &lt;HistogramRangeMode&gt;PALETTE_HISTOGRAM_RANGE_ALL&lt;/HistogramRangeMode&gt;
-   &lt;HistogramBarsVisible&gt;true&lt;/HistogramBarsVisible&gt;
-   &lt;HistogramEnvelopeVisible&gt;false&lt;/HistogramEnvelopeVisible&gt;
-   &lt;HistogramBarsColor&gt;CUSTOM&lt;/HistogramBarsColor&gt;
-   &lt;HistogramEnvelopeColor&gt;RED&lt;/HistogramEnvelopeColor&gt;
-   &lt;HistogramEnvelopeLineWidthPercentage&gt;0.5&lt;/HistogramEnvelopeLineWidthPercentage&gt;
-   &lt;HistogramNumberOfBuckets&gt;100&lt;/HistogramNumberOfBuckets&gt;
-   &lt;NumericFormatMode&gt;AUTO&lt;/NumericFormatMode&gt;
-   &lt;PrecisionDigits&gt;2&lt;/PrecisionDigits&gt;
-   &lt;NumericSubivisions&gt;0&lt;/NumericSubivisions&gt;
-   &lt;ColorBarValuesMode&gt;DATA&lt;/ColorBarValuesMode&gt;
-   &lt;ShowTickMarksSelected&gt;false&lt;/ShowTickMarksSelected&gt;
-&lt;/PaletteColorMapping&gt;</Value></MD></MetaData><CoordinateSystemTransformMatrix><DataSpace>NIFTI_XFORM_UNKNOWN</DataSpace><TransformedSpace>NIFTI_XFORM_UNKNOWN</TransformedSpace><MatrixData>  1.000000   0.000000   0.000000   0.000000
+<GIFTI Version="1.0" NumberOfDataArrays="1"><MetaData /><LabelTable /><DataArray Intent="NIFTI_INTENT_LABEL" DataType="NIFTI_TYPE_FLOAT32" ArrayIndexingOrder="RowMajorOrder" Dimensionality="1" Encoding="GZipBase64Binary" Endian="LittleEndian" ExternalFileName="" ExternalFileOffset="0" Dim0="32492"><MetaData /><CoordinateSystemTransformMatrix><DataSpace>NIFTI_XFORM_UNKNOWN</DataSpace><TransformedSpace>NIFTI_XFORM_UNKNOWN</TransformedSpace><MatrixData>  1.000000   0.000000   0.000000   0.000000
   0.000000   1.000000   0.000000   0.000000
   0.000000   0.000000   1.000000   0.000000
-  0.000000   0.000000   0.000000   1.000000</MatrixData></CoordinateSystemTransformMatrix><Data>eJzt3Utu6kAQBdDsLFvL0p8YvAkKxLirXR+fI/Ugkt11r0MIeABfX89+vt//TB+P393zmuK3bpP6AQAAAADAHby63//XAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+vj5rr2qy74+la99dv5d3bKz36WTPjW7TOjRvUPn/F2zd8u9olPWT/Nme5elQr7/KmUBAACYJuv981Um95vaTaf6nSb1mdJlQo/uHWS/Xsfc3TLLes+c1R+nlfNV/V92JtfufNUyVcpTJUuFHCsZInKszl/JEDH7zPyouZ/Mjpx5ZO6V87rNiZrx6tyI/c/I2PesyL1+2y9qr4h9YJfo5/ldz6sT+kV3zO6yq1t2jx29sjtEd8rOH9knO/u0Ht07dM6flX1lz1U7r01kzr8yV9Yl50OHjAAAAAAAAAAAAAAAAAAAAAAAAAAAAADssfNz0Suo8tn2AAAAAADUEvmdpmfP+3SPlXvYZ8+N/m7WleOP3sc/clzEMVbc2iW7185u2f2uMLHTlb2y6VKrR+cOXR9LXf+mO+bulrlT3spZo7PtyFk5485sq/mqZquY626ZquQ4mmV3hiM5sjNMn3+nuZPnXTVrwowr9t6xb4c9LcuyOq0rXgtk9One65XsXHfuMqHHO9nZVvNX79A1+xHZGc9krpQ/SqesuztU0CHjs+r5AAAAInR7r/aJO/Xqblqfh2ldAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBM/wCucGI1</Data></DataArray></GIFTI>
+  0.000000   0.000000   0.000000   1.000000</MatrixData></CoordinateSystemTransformMatrix><Data>eJzt3UtOw0AQBUBuxtU4OsqCDSLB8fS4P66SZoFkT79nQki8SD4+fvv6fP0zfTx+d7/XFH91m9QPAAAAAADu4Nn9/v8WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQx9dn7VVd9vWpfO2z8+/qlp39Lp30qdllQo/uHTrn75q9W+4VnbK+mzfbqywV8v2olAUAAGCarPfPV5ncb2o3nep3mtRnSpcJPbp3kP16HXN3yyzrPXNWf5xWzlf1f9mZXLvzVctUKU+VLBVyrGSIyLE6fyVDxOwz86PmvjM7cuaRuVfO6zYnasazcyP2PyNj37Mi9/prv6i9IvaBXaKf53c9r07oF90xu8uubtk9dvTK7hDdKTt/ZJ/s7NN6dO/QOX9W9pU9V+28NpE5/8tcWZecDx0yAgAAAAAAAAAAAAAAAAAAAAAAAAAAALDHzs9Fr6DKZ9sDAAAAAFBL5Heanj3v3T1W7mGfPTf6u1lXjj96H//IcRHHWHFrl+xeO7tl97vCxE5X9sqmS60enTt0fSx1/ZvumLtb5k55K2eNzrYjZ+WMO7Ot5quarWKuu2WqkuNolt0ZjuTIzjB9/p3mTp531awJM67Ye8e+Hfa0LMvqtK54LZDRp3uvZ7Jz3bnLhB6vZGdbzV+9Q9fsR2RnPJO5Uv4oUfOvyPpuh6jjs3TI+FA9HwAAQITM97273alXd9P6PEzrAgAAAAAAAAAAAAAAAAAAAAAAAAAAAABk+gYgI1iC</Data></DataArray></GIFTI>

@@ -9,6 +9,8 @@ on:
       - main/3_fsaverage2native.sh
       - tests/test_cvmfs.sh
       - tests/test_module3.sh
+      - labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii
+      - labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii
       - .github/workflows/test_module3.yml
 
 
@@ -19,6 +21,8 @@ on:
       - main/3_fsaverage2native.sh
       - tests/test_cvmfs.sh
       - tests/test_module3.sh
+      - labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii
+      - labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii
       - .github/workflows/test_module3.yml
       
 jobs:

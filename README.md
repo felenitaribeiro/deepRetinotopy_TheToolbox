@@ -1,7 +1,7 @@
 # DeepRetinotopy - A deep learning-based toolkit for retinotopic mapping
 ![Logo](/figures/logo_v1.png)
 
-DeepRetinotopy is a toolkit that leverage a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) an [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
+DeepRetinotopy is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
 
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
@@ -52,7 +52,7 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 ```
 
 ### Singularity
-Alternatevely, you can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
+Alternatively, you can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
 
 ```bash
 date_tag=20250409
@@ -60,13 +60,13 @@ export container=deepretinotopy_1.0.10_$date_tag
 curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
 ```
 
-Then, you can execute the container (so long Singularity is already available on your computing environment) using the following command:
+Then, you can execute the container (so long as Singularity is already available on your computing environment) using the following command:
 
 ```bash
 singularity exec ./deepretinotopy_1.0.10_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
-For different locations see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
+For different locations, see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
 ## Usage
 

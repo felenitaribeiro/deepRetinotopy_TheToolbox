@@ -13,7 +13,7 @@ DeepRetinotopy is a toolkit that leverages a geometric deep learning model to pr
 
 ## Requirements 
 
-- Docker / Singularity container
+- Docker / Singularity container / Neurodesk
 - freesurfer directory
 - HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
 
@@ -24,26 +24,26 @@ DeepRetinotopy (pre-trained models) and required software are packaged in softwa
 You can run deepRetinotopy on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.10
+ml deepretinotopy/1.0.11
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 The following arguments are required:
 - **-s** path to the freesurfer directory
 - **-t** path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
-- **-d** dataset name (e.g. "hcpP")
+- **-d** dataset name (e.g. "hcp")
 - **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ### Docker
 If you prefer running deepRetinotopy locally via Docker, you can pull our container from Dockerhub and run it using the following commands:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.10:latest
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.10:latest
+docker pull vnmd/deepretinotopy_1.0.11:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.11:latest
 # docker exec -it deepret bash
 ```
 
-If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.10:latest').
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.11:latest').
 
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
@@ -52,21 +52,36 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 ```
 
 ### Singularity
-Alternatively, you can also download the Singularity container using the following command (for Asian/Australian locations) to run it locally or on your HPC:
+Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:
 
 ```bash
-date_tag=20250409
-export container=deepretinotopy_1.0.10_$date_tag
-curl -X GET https://objectstorage.ap-sydney-1.oraclecloud.com/n/sd63xuke79z3/b/neurodesk/o/${container}.simg -O
+date_tag=20250714
+export container=deepretinotopy_1.0.11_$date_tag
+curl -X GET https://neurocontainers.neurodesk.org//${container}.simg -O
 ```
 
-Then, you can execute the container (so long as Singularity is already available on your computing environment) using the following command:
+Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:
 
 ```bash
-singularity exec ./deepretinotopy_1.0.10_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec ./deepretinotopy_1.0.11_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 For different locations, see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
+
+### Containers for GPU inference
+Our "deepretinotopy_1.0.11" containers are meant for a broader CPU-based inference pipeline. However, we also have containers for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. 
+
+#### Singularity: 
+```bash
+date_tag=20250804
+export container=deepretinotopy_1.0.12_$date_tag
+curl -X GET https://neurocontainers.neurodesk.org//${container}.simg -O
+```
+And to run our tool using a GPU, you need to pass the --nv flag.
+
+```bash
+apptainer exec --nv  ./deepretinotopy_1.0.12_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+```
 
 ## Usage
 

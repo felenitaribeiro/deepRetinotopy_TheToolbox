@@ -5,7 +5,7 @@ echo "[DEBUG]: test deepRetinotopy on the Singularity container"
 export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.10
+ml deepretinotopy/1.0.11
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
@@ -20,7 +20,7 @@ var=`cat ./README.md | grep date_tag=`
 echo $var
 export $var
 
-cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.10_"$date_tag"/deepretinotopy_1.0.10_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
+cd /cvmfs/neurodesk.ardc.edu.au/containers/deepretinotopy_1.0.11_"$date_tag"/deepretinotopy_1.0.11_"$date_tag".simg/opt/deepRetinotopy_TheToolbox
 sudo mkdir ~/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 ~/deepRetinotopy_TheToolbox/
 sudo cp -r models/deepRetinotopy_polarAngle_LH_* ~/deepRetinotopy_TheToolbox/models/

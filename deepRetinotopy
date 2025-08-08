@@ -2,14 +2,19 @@
 exec > >(tee -a ~/deepRetinotopy_output.log)
 exec 2> >(tee -a ~/deepRetinotopy_error.log >&2)
 
+# Auto-detect number of cores (leave 1 core free)
+auto_cores=$(($(nproc) - 1))
+[ $auto_cores -lt 1 ] && auto_cores=1  # Ensure at least 1 core
+
 # Default values
 fast='yes'
+n_jobs=$auto_cores  # Use auto-detected cores as default
 
-while getopts s:t:d:m:g: flag
+while getopts s:t:d:m:g:j: flag
 do
     case "${flag}" in
-        s) dirSubs=$(realpath "${OPTARG}");;  # Convert to absolute path
-        t) dirHCP=$(realpath "${OPTARG}");;  # Convert to absolute path
+        s) dirSubs=$(realpath "${OPTARG}");;
+        t) dirHCP=$(realpath "${OPTARG}");;
         d) datasetName=${OPTARG};;
         m) IFS=',' read -ra maps <<< "${OPTARG}";;
         g) fast=${OPTARG};
@@ -17,13 +22,14 @@ do
                 'yes'|'no') ;;
                 *) echo "Invalid fast argument: $fast"; exit 1;;
             esac;;
-	?)
-		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface]" >&2
-		exit 1
-	esac
+        j) n_jobs=${OPTARG};;
+        ?)
+            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface] [-j number of cores for parallelization]" >&2
+            exit 1
+        esac
 done
 
-# Check if realpath failed (e.g., invalid paths)
+# Check if realpath failed
 if [ ! -d "$dirSubs" ]; then
     echo "Error: Path to FreeSurfer directory ($dirSubs) does not exist."
     exit 1
@@ -34,6 +40,11 @@ if [ ! -d "$dirHCP" ]; then
     exit 1
 fi
 
+# Validate n_jobs
+if ! [[ "$n_jobs" =~ ^[0-9]+$ ]] || [ "$n_jobs" -lt 1 ]; then
+    echo "Error: Invalid number of jobs ($n_jobs). Must be a positive integer."
+    exit 1
+fi
 # create a print box
 echo "--------------------------------------------------------------------------------"
 echo "DeepRetinotopy: retinotopic mapping using deep learning"
@@ -63,7 +74,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
             echo "--------------------------------------------------------------------------------"
             echo "[Step 1] Generating mid-thickness surface and curvature data..."
             
-            1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast
+            1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast -j $n_jobs
 
             if [ $? -eq 1 ]; then
                 echo "Error in Step 1: Please check surface files."
@@ -89,7 +100,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     echo "[Step 3] Resampling predictions to native space..."
                     
 
-                    3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model
+                    3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model -j $n_jobs
                     if [ $? -eq 1 ]; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."
                         exit 1

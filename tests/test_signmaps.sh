@@ -5,7 +5,7 @@ echo "[DEBUG]: test deepRetinotopy on the Singularity container"
 export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
 source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.10
+ml deepretinotopy/1.0.11
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
-source /usr/share/module.sh
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
+# source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.11
+ml deepretinotopy
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
@@ -12,9 +12,9 @@ if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
 else
     echo "deepRetinotopy repo is not cloned"
 fi
-cp -r . ~/deepRetinotopy_TheToolbox/
+cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
-cd ~/deepRetinotopy_TheToolbox
+cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
 
 dirSubs="/data/"
 echo "Path to freesurfer data: "$dirSubs""
@@ -24,7 +24,7 @@ rm /data/*/surf/*graymid
 dirHCP="/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-export PATH=~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/:$PATH
+export PATH=/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/:$PATH
 export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
 
 cd main

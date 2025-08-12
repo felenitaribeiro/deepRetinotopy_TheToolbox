@@ -2,7 +2,7 @@
 set -e
 
 echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage/'
 # source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy

@@ -15,10 +15,10 @@ else
 fi
 cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 datasetName="TEST"

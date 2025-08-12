@@ -16,12 +16,12 @@ cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
 
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""
-rm /data/*/surf/*curvature-midthickness*
-rm /data/*/surf/*graymid
+rm /storage/deep_retinotopy/data/*/surf/*curvature-midthickness*
+rm /storage/deep_retinotopy/data/*/surf/*graymid
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 export PATH=/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/:$PATH

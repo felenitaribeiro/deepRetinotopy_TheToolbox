@@ -15,10 +15,10 @@ fi
 cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 model=model
@@ -47,11 +47,11 @@ do
         echo $clone_command
         eval $clone_command
 
-        if find /data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii" -size +0 | grep -q '.'; then
+        if find /storage/deep_retinotopy/data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii" -size +0 | grep -q '.'; then
             echo "retinotopic map in native surface space generated"
         else
             echo "retinotopic map in native surface space was not generated"
-            ls -R /data
+            ls -R /storage/deep_retinotopy/data
         fi
 
     done

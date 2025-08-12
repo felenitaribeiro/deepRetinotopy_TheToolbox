@@ -2,7 +2,7 @@
 set -e
 
 echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates/,/storage'
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
 # source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
@@ -16,10 +16,10 @@ fi
 cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 datasetName="TEST"

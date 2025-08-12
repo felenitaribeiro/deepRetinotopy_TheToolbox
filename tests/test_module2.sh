@@ -37,10 +37,10 @@ sudo mkdir /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
 sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 sudo cp -r models/deepRetinotopy_polarAngle_LH_* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
 
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 datasetName="TEST"

@@ -23,6 +23,7 @@ if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
 else
     echo "deepRetinotopy repo is not cloned"
 fi
+sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox

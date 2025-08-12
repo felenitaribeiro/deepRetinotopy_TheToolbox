@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-
+source ./test_cvmfs.sh
 ml deepretinotopy
 cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
 

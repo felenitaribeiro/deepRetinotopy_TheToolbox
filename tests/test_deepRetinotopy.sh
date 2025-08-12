@@ -17,7 +17,6 @@ export -f ml
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 
-
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
     echo "deepRetinotopy repo is cloned"
@@ -52,15 +51,14 @@ var=`cat ./README.md | grep date_tag=`
 echo $var
 export $var
 
+#find path of deepRetinotopy executable
+deepRetinotopy_executable=$(which deepRetinotopy)
+echo $deepRetinotopy_executable
+
 echo $DEPLOY_BINS
 export PATH=/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/:$PATH
 export DEPLOY_BINS=wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:midthickness_surf.py
 echo $DEPLOY_BINS
-which deepRetinotopy
-
-#find path of deepRetinotopy executable
-deepRetinotopy_executable=$(which deepRetinotopy)
-echo $deepRetinotopy_executable
 
 #remove executable name from $deepRetinotopy_path
 deepRetinotopy_path=${deepRetinotopy_executable%/*}

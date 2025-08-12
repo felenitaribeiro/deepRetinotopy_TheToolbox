@@ -24,7 +24,8 @@ else
     echo "deepRetinotopy repo is not cloned"
 fi
 sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
 var=`cat ./README.md | grep date_tag=`

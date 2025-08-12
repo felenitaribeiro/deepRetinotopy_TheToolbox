@@ -24,7 +24,8 @@ else
     echo "deepRetinotopy repo is not cloned"
 fi
 sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 dirSubs="/storage/deep_retinotopy/data/"
 echo "Path to freesurfer data: "$dirSubs""

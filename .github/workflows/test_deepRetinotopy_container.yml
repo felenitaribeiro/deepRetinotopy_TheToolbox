@@ -36,9 +36,8 @@ jobs:
       shell: bash
       run: |
         export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
-        export MODULEPATH=$(find /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ -maxdepth 1 -mindepth 1 -type d -exec realpath {} \; | tr '\n' ':')
-        bin/bash tests/test_cvmfs.sh
+        /bin/bash tests/test_cvmfs.sh
     - name: test deepRetinotopy
       shell: bash
       run: |
-        bin/bash tests/test_deepRetinotopy_container.sh
+        /bin/bash tests/test_deepRetinotopy_container.sh

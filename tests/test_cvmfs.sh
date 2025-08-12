@@ -67,10 +67,13 @@ export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/storage/deep_retinotopy/data,/stor
 # trap - 1 2 3
 # " | sudo tee /usr/share/module.sh
 
-# source /usr/share/module.sh
-if [ -f ~/.bashrc ]; then
-    source ~/.bashrc
-fi
+# Remove all the if/then module sourcing attempts and replace with:
+export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+export MODULEPATH=$(find /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ -maxdepth 1 -mindepth 1 -type d -exec realpath {} \; | tr '\n' ':')
+
+# Define the module function directly
+module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
+export -f module
 
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy

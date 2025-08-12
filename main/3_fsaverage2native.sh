@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# Auto-detect number of cores (leave 1 core free)
+auto_cores=$(($(nproc) - 1))
+[ $auto_cores -lt 1 ] && auto_cores=1  # Ensure at least 1 core
+
+# Default values
+n_jobs=$auto_cores 
+
 # Get the directory of the current script
 script_dir=$(dirname "$(realpath "$0")")
 

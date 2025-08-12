@@ -68,9 +68,10 @@ export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/storage/deep_retinotopy/data,/stor
 # " | sudo tee /usr/share/module.sh
 
 # source /usr/share/module.sh
-if [ -f /etc/profile.d/modules.sh ]; then
-    source /etc/profile.d/lmod.sh
+if [ -f ~/.bashrc ]; then
+    source ~/.bashrc
 fi
+
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 ml 

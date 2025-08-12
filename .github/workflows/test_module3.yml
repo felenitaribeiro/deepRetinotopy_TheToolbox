@@ -27,7 +27,7 @@ on:
       
 jobs:
   test_module3:
-    runs-on: "cirun-nectar-large--${{ github.run_id }}"
+    runs-on: "self-hosted"
 
     steps:
     - uses: actions/checkout@v3

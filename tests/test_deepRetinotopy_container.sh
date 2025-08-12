@@ -2,7 +2,7 @@
 set -e
 
 echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage,/storage/deep_retinotopy/data'
 # Remove all the if/then module sourcing attempts and replace with:
 export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
 

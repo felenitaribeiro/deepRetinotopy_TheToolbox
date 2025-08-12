@@ -28,6 +28,17 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: 3.8
+    - name: Initialize module system
+      shell: bash
+      run: |
+        export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+        export MODULEPATH=$(find /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ -maxdepth 1 -mindepth 1 -type d -exec realpath {} \; | tr '\n' ':')
+        module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
+        ml() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
+        export -f module ml
+        echo "MODULEPATH=$MODULEPATH" >> $GITHUB_ENV
+        # Test that it works
+        module --version || echo "Module system not working"
     - name: Set up neurocommand
       env:
         OSF_TOKEN: ${{ secrets.OSF_TOKEN }}

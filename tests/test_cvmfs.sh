@@ -67,17 +67,20 @@ export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/storage/deep_retinotopy/data,/stor
 # trap - 1 2 3
 # " | sudo tee /usr/share/module.sh
 
-# Remove all the if/then module sourcing attempts and replace with:
-export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
-export MODULEPATH=$(find /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ -maxdepth 1 -mindepth 1 -type d -exec realpath {} \; | tr '\n' ':')
+# # Remove all the if/then module sourcing attempts and replace with:
+# export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+# export MODULEPATH=$(find /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/ -maxdepth 1 -mindepth 1 -type d -exec realpath {} \; | tr '\n' ':')
 
-# Define the module function directly
-module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
-export -f module
+# # Define the module function directly
+# module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
+# export -f module
+
+# ml() { module load "$@"; }
+# export -f ml
 
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-module load deepretinotopy
-module list 
+ml deepretinotopy
+ml
 mris_expand
 
 echo "[DEBUG]: data download from osf"

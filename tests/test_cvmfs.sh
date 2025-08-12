@@ -38,18 +38,21 @@ ml deepretinotopy
 # rm surf.zip
 # sudo chmod 777 -R /storage/deep_retinotopy/data/
 
-
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-pwd
-# if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-#     echo "deepRetinotopy repo is cloned"
-# else
-#     echo "deepRetinotopy repo is not cloned"
-# fi
-# sudo rm -rf /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-# sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-# sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-# cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+# use the runner name form current path to create a unique directory
+current_dir=$(pwd)
+tmp_dir=${current_dir:9:32}
+echo "Current directory: $tmp_dir"
 
+if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
+    echo "deepRetinotopy repo is cloned"
+else
+    echo "deepRetinotopy repo is not cloned"
+fi
+sudo mkdir -p /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
+sudo chmod 777 /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
+cp -r ./* /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
+
+export tmp_dir
 
 echo "Testing general settings done!"

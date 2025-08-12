@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+echo "[DEBUG]: General configuration for testing deepRetinotopy "
 # Get the directory where the current script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Source the file from that directory
 source "$SCRIPT_DIR/test_cvmfs.sh"
 ml deepretinotopy
-cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
+cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
 
+
+echo "[DEBUG]: data paths:"
 dirSubs="/storage/deep_retinotopy/data"
 echo "Path to freesurfer data: "$dirSubs""
 # remove files to perform tests
@@ -18,7 +20,7 @@ rm $dirSubs/*/surf/*graymid
 dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-export PATH=/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/:$PATH
+export PATH=/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/utils/:$PATH
 export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
 
 cd main
@@ -43,3 +45,4 @@ for hemisphere in lh rh; do
         fi
     done
 done
+rm -rf /storage/deep_retinotopy/$tmp_dir

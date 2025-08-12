@@ -11,8 +11,11 @@ cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
 
 
 echo "[DEBUG]: data paths:"
-dirSubs="/storage/deep_retinotopy/data"
+dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
 echo "Path to freesurfer data: "$dirSubs""
+sudo mkdir -p $dirSubs
+sudo chmod 777 $dirSubs
+cp -r /storage/deep_retinotopy/data $dirSubs
 # remove files to perform tests
 rm $dirSubs/*/surf/*curvature-midthickness*
 rm $dirSubs/*/surf/*graymid
@@ -45,4 +48,4 @@ for hemisphere in lh rh; do
         fi
     done
 done
-rm -rf /storage/deep_retinotopy/$tmp_dir
+sudo rm -rf /storage/deep_retinotopy/$tmp_dir

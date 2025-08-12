@@ -40,15 +40,16 @@ ml deepretinotopy
 
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-    echo "deepRetinotopy repo is cloned"
-else
-    echo "deepRetinotopy repo is not cloned"
-fi
-sudo rm -rf /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+pwd
+# if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
+#     echo "deepRetinotopy repo is cloned"
+# else
+#     echo "deepRetinotopy repo is not cloned"
+# fi
+# sudo rm -rf /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+# sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+# sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
+# cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 
 echo "Testing general settings done!"

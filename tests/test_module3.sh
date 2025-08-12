@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates'
-source /usr/share/module.sh
+export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
+# source /usr/share/module.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy/1.0.11
+ml deepretinotopy
 
 echo "[DEBUG]: test if deepRetinotopy repo is cloned"
 if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
@@ -12,7 +12,7 @@ if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
 else
     echo "deepRetinotopy repo is not cloned"
 fi
-cp -r . ~/deepRetinotopy_TheToolbox/
+cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
 dirSubs="/data/"
@@ -25,15 +25,15 @@ model=model
 echo "Model: "$model""
 
 echo "[DEBUG]: data download for resampling:"
-mkdir /data/1/deepRetinotopy/
-cd /resampling/
+mkdir /storage/deep_retinotopy/data/1/deepRetinotopy/
+cd /storage/deep_retinotopy/resampling/
 unzip resampling.zip
-sudo chmod 777 -R /resampling/
-sudo chmod 777 -R /data
-mv /resampling/resampling/* /data/1/deepRetinotopy/
+sudo chmod 777 -R /storage/deep_retinotopy/resampling/
+sudo chmod 777 -R /storage/deep_retinotopy/data
+mv /storage/deep_retinotopy/resampling/resampling/* /storage/deep_retinotopy/data/1/deepRetinotopy/
 
-cd ~/deepRetinotopy_TheToolbox/main
-export PATH=$PATH:~/deepRetinotopy_TheToolbox/:~/deepRetinotopy_TheToolbox/main/:~/deepRetinotopy_TheToolbox/utils/
+cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox/main
+export PATH=$PATH:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/
 export DEPLOY_BINS=$DEPLOY_BINS:transform_polarangle_lh.py
 
 for hemisphere in lh; # rh; 

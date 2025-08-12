@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-source ./test_cvmfs.sh
+# Get the directory where the current script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source the file from that directory
+source "$SCRIPT_DIR/test_cvmfs.sh"
 ml deepretinotopy
 cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
 

@@ -68,6 +68,8 @@ export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/storage/deep_retinotopy/data,/stor
 # " | sudo tee /usr/share/module.sh
 
 # source /usr/share/module.sh
+if [ -f /etc/profile.d/modules.sh ]; then
+    source /etc/profile.d/lmod.sh
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 ml 
@@ -79,9 +81,9 @@ osf -p 4p6yk list > /tmp/osf_list.txt
 for i in $(cat /tmp/osf_list.txt);
 do
    path=${i:10} 
-   sudo mkdir -p /storage/deep_retinotopy/data/${path%/*}
-   sudo chmod 777 /storage/deep_retinotopy/data/${path%/*}
-   osf -p 4p6yk fetch $i /storage/deep_retinotopy/data/${i:10} 
+   sudo mkdir -p /storage/deep_retinotopy${path%/*}
+   sudo chmod 777 /storage/deep_retinotopy${path%/*}
+   osf -p 4p6yk fetch $i /storage/deep_retinotopy${i:10} 
    echo $i
 done
 

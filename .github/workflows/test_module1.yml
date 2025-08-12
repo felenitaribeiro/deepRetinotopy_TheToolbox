@@ -36,5 +36,4 @@ jobs:
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
       run: |
-        /usr/bin/bash tests/test_cvmfs.sh
         /usr/bin/bash tests/test_module1.sh

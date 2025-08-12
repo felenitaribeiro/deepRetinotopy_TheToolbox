@@ -1,31 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
-# Remove all the if/then module sourcing attempts and replace with:
-export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+echo "[DEBUG]: General configuration for testing deepRetinotopy "
+# Get the directory where the current script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Source the file from that directory
+source "$SCRIPT_DIR/test_cvmfs.sh"
 
-# Create the module/ml function directly
-module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
-export -f module
-
-ml() { module load "$@"; }
-export -f ml
-
-# add neurodesk modules
-module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 
-echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-    echo "deepRetinotopy repo is cloned"
-else
-    echo "deepRetinotopy repo is not cloned"
-fi
-sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
 dirSubs="/storage/deep_retinotopy/data/"

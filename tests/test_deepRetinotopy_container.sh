@@ -1,31 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage,/storage/deep_retinotopy/data'
-# Remove all the if/then module sourcing attempts and replace with:
-export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+echo "[DEBUG]: General configuration for testing deepRetinotopy "
+# Get the directory where the current script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Source the file from that directory
+source "$SCRIPT_DIR/test_cvmfs.sh"
 
-# Create the module/ml function directly
-module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
-export -f module
-
-ml() { module load "$@"; }
-export -f ml
-
-# add neurodesk modules
-module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
-
-echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-    echo "deepRetinotopy repo is cloned"
-else
-    echo "deepRetinotopy repo is not cloned"
-fi
-sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: general settings:"
 dirSubs="/storage/deep_retinotopy/data/"
@@ -42,7 +24,12 @@ IFS=',' read -ra maps <<< "$list_of_maps"
 echo "Maps: "${maps[@]}""
 
 echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-sudo mkdir /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+if [ ! -d /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/ ]; then
+    sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+    echo "Created models directory"
+else
+    echo "Models directory already exists, skipping creation"
+fi
 sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 echo "[DEBUG]: testing deepRetinotopy:"
@@ -72,7 +59,7 @@ do
     else
         echo "deepRetinotopy_${map} model files already exist in destination, skipping copy"
     fi
-    
+
     for i in $(ls "$dirSubs"); do
         sudo chmod 777 $dirSubs/$i
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/

@@ -15,7 +15,7 @@ dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
 echo "Path to freesurfer data: "$dirSubs""
 sudo mkdir -p $dirSubs
 sudo chmod 777 $dirSubs
-cp -r /storage/deep_retinotopy/data $dirSubs
+cp -r /storage/deep_retinotopy/data/* $dirSubs
 # remove files to perform tests
 rm $dirSubs/*/surf/*curvature-midthickness*
 rm $dirSubs/*/surf/*graymid

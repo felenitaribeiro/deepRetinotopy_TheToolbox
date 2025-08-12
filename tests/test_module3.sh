@@ -6,12 +6,24 @@ echo "[DEBUG]: General configuration for testing deepRetinotopy "
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source the file from that directory
 source "$SCRIPT_DIR/test_cvmfs.sh"
-
 ml deepretinotopy
 
-echo "[DEBUG]: general settings:"
-dirSubs="/storage/deep_retinotopy/data/"
+
+echo "[DEBUG]: data paths:"
+dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
 echo "Path to freesurfer data: "$dirSubs""
+sudo mkdir -p $dirSubs
+sudo chmod 777 $dirSubs
+cp -r /storage/deep_retinotopy/data/* $dirSubs
+
+cd /storage/deep_retinotopy/resampling/
+if [ ! -d /storage/deep_retinotopy/resampling/resampling/ ]; then
+    unzip resampling.zip
+else
+    echo "Resampling directory already exists, skipping unzipping"
+fi
+sudo chmod 777 -R /storage/deep_retinotopy/resampling/
+mv /storage/deep_retinotopy/resampling/resampling/* /storage/deep_retinotopy/$tmp_dir/data/1/deepRetinotopy/
 
 dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
@@ -19,15 +31,10 @@ echo "Path to template surfaces: "$dirHCP""
 model=model
 echo "Model: "$model""
 
-echo "[DEBUG]: data download for resampling:"
-cd /storage/deep_retinotopy/resampling/
-unzip resampling.zip
-sudo chmod 777 -R /storage/deep_retinotopy/resampling/
-sudo chmod 777 -R /storage/deep_retinotopy/data
-mv /storage/deep_retinotopy/resampling/resampling/* /storage/deep_retinotopy/data/1/deepRetinotopy/
 
-cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox/main
-export PATH=$PATH:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/
+echo "[DEBUG]: export excutables:"
+cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/main
+export PATH=$PATH:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/utils/
 export DEPLOY_BINS=$DEPLOY_BINS:transform_polarangle_lh.py
 
 for hemisphere in lh; # rh; 
@@ -41,12 +48,12 @@ do
         echo $clone_command
         eval $clone_command
 
-        if find /storage/deep_retinotopy/data -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii" -size +0 | grep -q '.'; then
+        if find $dirSubs -name "*.predicted_"$map"_"$model"."$hemisphere".native.func.gii" -size +0 | grep -q '.'; then
             echo "retinotopic map in native surface space generated"
         else
             echo "retinotopic map in native surface space was not generated"
-            ls -R /storage/deep_retinotopy/data
+            ls -R $dirSubs
         fi
-
     done
 done
+sudo rm -rf /storage/deep_retinotopy/$tmp_dir

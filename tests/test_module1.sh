@@ -23,6 +23,8 @@ rm $dirSubs/*/surf/*graymid
 dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
+
+echo "[DEBUG]: export excutables:"
 export PATH=/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/utils/:$PATH
 export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
 

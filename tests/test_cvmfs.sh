@@ -70,13 +70,14 @@ export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/storage/deep_retinotopy/data,/stor
 # Remove all the if/then module sourcing attempts and replace with:
 export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
 
-# Define the module function directly
+# Create the module/ml function directly
 module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
 export -f module
 
 ml() { module load "$@"; }
 export -f ml
 
+# add neurodesk modules
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 ml

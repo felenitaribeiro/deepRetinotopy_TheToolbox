@@ -29,10 +29,10 @@ cp -r ./* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
 cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
 
-dirSubs="/storage/deep_retinotopy/data/"
+dirSubs="/storage/deep_retinotopy/data"
 echo "Path to freesurfer data: "$dirSubs""
-rm /storage/deep_retinotopy/data/*/surf/*curvature-midthickness*
-rm /storage/deep_retinotopy/data/*/surf/*graymid
+rm $dirSubs/*/surf/*curvature-midthickness*
+rm $dirSubs/*/surf/*graymid
 
 dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
@@ -45,8 +45,6 @@ for hemisphere in lh rh; do
     for fast in 'yes'; do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
-        # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
-        rm $dirSubs/*/surf/*graymid*
         clone_command="./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
         echo $clone_command
         eval $clone_command
@@ -62,6 +60,5 @@ for hemisphere in lh rh; do
         else
             echo "curvature data not generated"
         fi
-
     done
 done

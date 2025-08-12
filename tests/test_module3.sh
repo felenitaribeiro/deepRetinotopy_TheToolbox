@@ -38,7 +38,6 @@ model=model
 echo "Model: "$model""
 
 echo "[DEBUG]: data download for resampling:"
-mkdir /storage/deep_retinotopy/data/1/deepRetinotopy/
 cd /storage/deep_retinotopy/resampling/
 unzip resampling.zip
 sudo chmod 777 -R /storage/deep_retinotopy/resampling/

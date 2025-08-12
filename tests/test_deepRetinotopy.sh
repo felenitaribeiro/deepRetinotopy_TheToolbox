@@ -70,7 +70,15 @@ echo $deepRetinotopy_last_dir
 
 for map in "${maps[@]}";
 do
-    sudo cp -r $deepRetinotopy_path/$deepRetinotopy_last_dir.simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+    # Only copy if the model files don't already exist in the destination
+    if ! ls /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* 1> /dev/null 2>&1; then
+        echo "No deepRetinotopy_${map} model files found in destination, copying..."
+        sudo mkdir -p /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+        sudo cp -r $deepRetinotopy_path/$deepRetinotopy_last_dir.simg/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_"$map"_* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+    else
+        echo "deepRetinotopy_${map} model files already exist in destination, skipping copy"
+    fi
+
     for i in $(ls "$dirSubs"); do
         sudo chmod 777 $dirSubs/$i
         sudo mkdir -p  $dirSubs/$i/deepRetinotopy/

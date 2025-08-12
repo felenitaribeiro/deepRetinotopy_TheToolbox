@@ -76,8 +76,8 @@ module() { eval $($LMOD_CMD bash "$@") 2>/dev/null; }
 export -f module
 
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
-ml deepretinotopy
-ml 
+module load deepretinotopy
+module list 
 mris_expand
 
 echo "[DEBUG]: data download from osf"

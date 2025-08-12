@@ -23,7 +23,7 @@ else
     echo "Resampling directory already exists, skipping unzipping"
 fi
 sudo chmod 777 -R /storage/deep_retinotopy/resampling/
-mv /storage/deep_retinotopy/resampling/resampling/* /storage/deep_retinotopy/$tmp_dir/data/1/deepRetinotopy/
+cp /storage/deep_retinotopy/resampling/resampling/* /storage/deep_retinotopy/$tmp_dir/data/1/deepRetinotopy/
 
 dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""

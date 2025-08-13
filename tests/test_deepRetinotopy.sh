@@ -24,6 +24,7 @@ test_deepretinotopy_full() {
     declare -A test_scenarios=(
         ["single_subject"]="-i 1"
         ["all_subjects"]=""
+        ["single_subject_output"]="-i 1 -o $OUTPUT_DIR"
     )
 
     for scenario_name in "${!test_scenarios[@]}"; do
@@ -37,6 +38,20 @@ test_deepretinotopy_full() {
             
             clean_models
         done
+
+        if [ scenario_name == "single_subject_output" ]; then
+            if [ -d "$OUTPUT_DIR" ]; then
+                test_output "Output directory created successfully for scenario '$scenario_name'" "SUCCESS"
+                # check if output files are present
+                if find "$OUTPUT_DIR" -name "*${map}*.gii" | grep -q .; then
+                    test_output "Output files found in $OUTPUT_DIR for scenario '$scenario_name'" "SUCCESS"
+                else
+                    test_output "No output files found in $OUTPUT_DIR for scenario '$scenario_name'" "ERROR"
+                fi
+            else
+                test_output "Failed to create output directory for scenario '$scenario_name'" "ERROR"
+            fi
+        fi
     done
     cleanup_tmp_directory
     test_output "Full deepRetinotopy test complete!" "SUCCESS"

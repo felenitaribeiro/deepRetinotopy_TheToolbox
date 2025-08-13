@@ -7,8 +7,9 @@ auto_cores=$(($(nproc) - 1))
 # Default values
 n_jobs=$auto_cores
 subject_id=""
+output_dir=""
 
-while getopts s:t:h:g:j:i: flag
+while getopts s:t:h:g:j:i:o: flag
 do
     case "${flag}" in
         s) dirSubs=${OPTARG};;
@@ -25,8 +26,9 @@ do
             esac;;
         j) n_jobs=${OPTARG};;
         i) subject_id=${OPTARG};;
+        o) output_dir=${OPTARG};;
         ?)
-            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-h hemisphere] [-g fast generation of midthickness surface] [-j number of cores for parallelization] [-i subject ID for single subject processing]" >&2
+            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-h hemisphere] [-g fast generation of midthickness surface] [-j number of cores for parallelization] [-i subject ID for single subject processing] [-o output directory]" >&2
             exit 1;;
     esac
 done
@@ -40,6 +42,15 @@ else
     echo "Using $n_jobs parallel jobs for multiple subjects"
 fi
 
+# Check output directory setup
+if [ -n "$output_dir" ]; then
+    echo "Output directory: $output_dir"
+    # Create output directory if it doesn't exist
+    mkdir -p "$output_dir"
+else
+    echo "Output mode: In-place (within FreeSurfer directory structure)"
+fi
+
 # Start total timing
 total_start_time=$(date +%s)
 
@@ -50,8 +61,20 @@ process_subject() {
     local fast=$3
     local dirSubs=$4
     local dirHCP=$5
+    local output_dir=$6
     
     echo "=== Processing Step 1 for subject: $dirSub ==="
+    
+    # Determine output paths
+    if [ -n "$output_dir" ]; then
+        local subject_output_dir="$output_dir/$dirSub"
+        local surf_output_dir="$subject_output_dir/surf"
+        mkdir -p "$surf_output_dir"
+        echo "[$dirSub] Using custom output directory: $subject_output_dir"
+    else
+        local surf_output_dir="$dirSubs/$dirSub/surf"
+        echo "[$dirSub] Using FreeSurfer directory: $surf_output_dir"
+    fi
     
     if [ -d "$dirSubs/$dirSub/surf" ]; then
         start_time=$(date +%s)
@@ -59,19 +82,19 @@ process_subject() {
         if [ "$fast" == "yes" ]; then
             echo "[$dirSub] Fast mode enabled."
             echo "[$dirSub] [Step 1.1] Generating mid-thickness surface and curvature data if not available..."
-            if [ ! -f "$dirSubs/$dirSub/surf/$hemisphere.graymid" ]; then
+            if [ ! -f "$surf_output_dir/$hemisphere.graymid" ]; then
                 if [ ! -f "$dirSubs/$dirSub/surf/$hemisphere.white" ]; then
                     echo "[$dirSub] ERROR: No white surface found"
                     exit 1
                 else
                     echo "[$dirSub] Converting surfaces..."
-                    mris_convert "$dirSubs/$dirSub/surf/$hemisphere.white" "$dirSubs/$dirSub/surf/$hemisphere.white.gii"
-                    mris_convert "$dirSubs/$dirSub/surf/$hemisphere.pial" "$dirSubs/$dirSub/surf/$hemisphere.pial.gii"
+                    mris_convert "$dirSubs/$dirSub/surf/$hemisphere.white" "$surf_output_dir/$hemisphere.white.gii"
+                    mris_convert "$dirSubs/$dirSub/surf/$hemisphere.pial" "$surf_output_dir/$hemisphere.pial.gii"
                     echo "[$dirSub] Generating midthickness surface..."
-                    midthickness_surf.py --path "$dirSubs/$dirSub/surf/" --hemisphere $hemisphere 
-                    mris_convert "$dirSubs/$dirSub/surf/$hemisphere.graymid.gii" "$dirSubs/$dirSub/surf/$hemisphere.graymid"
+                    midthickness_surf.py --path "$surf_output_dir/" --hemisphere $hemisphere 
+                    mris_convert "$surf_output_dir/$hemisphere.graymid.gii" "$surf_output_dir/$hemisphere.graymid"
                     echo "[$dirSub] Computing curvature..."
-                    mris_curvature -w "$dirSubs/$dirSub/surf/$hemisphere.graymid"
+                    mris_curvature -w "$surf_output_dir/$hemisphere.graymid"
                 fi
                 echo "[$dirSub] Mid-thickness surface has been generated"
             else 
@@ -79,15 +102,15 @@ process_subject() {
             fi
         else
             echo "[$dirSub] [Step 1.1] Generating mid-thickness surface and curvature data if not available..."
-            if [ ! -f "$dirSubs/$dirSub/surf/$hemisphere.graymid" ]; then
+            if [ ! -f "$surf_output_dir/$hemisphere.graymid" ]; then
                 if [ ! -f "$dirSubs/$dirSub/surf/$hemisphere.white" ]; then
                     echo "[$dirSub] ERROR: No white surface found"
                     exit 1
                 else
                     echo "[$dirSub] Expanding white surface to midthickness..."
-                    mris_expand -thickness "$dirSubs/$dirSub/surf/$hemisphere.white" 0.5 "$dirSubs/$dirSub/surf/$hemisphere.graymid"
+                    mris_expand -thickness "$dirSubs/$dirSub/surf/$hemisphere.white" 0.5 "$surf_output_dir/$hemisphere.graymid"
                     echo "[$dirSub] Computing curvature..."
-                    mris_curvature -w "$dirSubs/$dirSub/surf/$hemisphere.graymid"
+                    mris_curvature -w "$surf_output_dir/$hemisphere.graymid"
                 fi
                 echo "[$dirSub] Mid-thickness surface has been generated"
             else 
@@ -96,36 +119,36 @@ process_subject() {
         fi    
         
         echo "[$dirSub] [Step 1.2] Preparing native surfaces for resampling..."
-        if [ ! -f "$dirSubs/$dirSub/surf/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" ]; then
+        if [ ! -f "$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" ]; then
             echo "[$dirSub] Running freesurfer-resample-prep..."
             if [ "$hemisphere" == "lh" ]; then
                 wb_shortcuts -freesurfer-resample-prep "$dirSubs/$dirSub/surf/$hemisphere.white" "$dirSubs/$dirSub/surf/$hemisphere.pial" \
                 "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg" "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii" "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii"
+                "$surf_output_dir/$hemisphere.midthickness.surf.gii" "$surf_output_dir/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" \
+                "$surf_output_dir/$hemisphere.sphere.reg.surf.gii"
                 
                 echo "[$dirSub] Converting curvature data..."
-                mris_convert -c "$dirSubs/$dirSub/surf/$hemisphere.graymid.H" "$dirSubs/$dirSub/surf/$hemisphere.graymid" "$dirSubs/$dirSub/surf/$hemisphere.graymid.H.gii"
+                mris_convert -c "$surf_output_dir/$hemisphere.graymid.H" "$surf_output_dir/$hemisphere.graymid" "$surf_output_dir/$hemisphere.graymid.H.gii"
                 
                 echo "[$dirSub] Resampling native data to fsaverage space..."
-                wb_command -metric-resample "$dirSubs/$dirSub/surf/$hemisphere.graymid.H.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii" "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
-                ADAP_BARY_AREA "$dirSubs/$dirSub/surf/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" \
-                -area-surfs "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii" "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii"
+                wb_command -metric-resample "$surf_output_dir/$hemisphere.graymid.H.gii" \
+                "$surf_output_dir/$hemisphere.sphere.reg.surf.gii" "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
+                ADAP_BARY_AREA "$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" \
+                -area-surfs "$surf_output_dir/$hemisphere.midthickness.surf.gii" "$surf_output_dir/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii"
             else
                 wb_shortcuts -freesurfer-resample-prep "$dirSubs/$dirSub/surf/$hemisphere.white" "$dirSubs/$dirSub/surf/$hemisphere.pial" \
                 "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg" "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii" "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii"
+                "$surf_output_dir/$hemisphere.midthickness.surf.gii" "$surf_output_dir/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" \
+                "$surf_output_dir/$hemisphere.sphere.reg.surf.gii"
                 
                 echo "[$dirSub] Converting curvature data..."
-                mris_convert -c "$dirSubs/$dirSub/surf/$hemisphere.graymid.H" "$dirSubs/$dirSub/surf/$hemisphere.graymid" "$dirSubs/$dirSub/surf/$hemisphere.graymid.H.gii"
+                mris_convert -c "$surf_output_dir/$hemisphere.graymid.H" "$surf_output_dir/$hemisphere.graymid" "$surf_output_dir/$hemisphere.graymid.H.gii"
                 
                 echo "[$dirSub] Resampling native data to fsaverage space..."
-                wb_command -metric-resample "$dirSubs/$dirSub/surf/$hemisphere.graymid.H.gii" \
-                "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii" "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
-                ADAP_BARY_AREA "$dirSubs/$dirSub/surf/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" \
-                -area-surfs "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii" "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii"
+                wb_command -metric-resample "$surf_output_dir/$hemisphere.graymid.H.gii" \
+                "$surf_output_dir/$hemisphere.sphere.reg.surf.gii" "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
+                ADAP_BARY_AREA "$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" \
+                -area-surfs "$surf_output_dir/$hemisphere.midthickness.surf.gii" "$surf_output_dir/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii"
             fi
             echo "[$dirSub] Data resampling complete"
         else
@@ -142,24 +165,25 @@ process_subject() {
     fi
 }
 
-cd $dirSubs
-
 # Process single subject or multiple subjects
 if [ -n "$subject_id" ]; then
     # Single subject processing
-    if [ ! -d "$subject_id" ]; then
+    if [ ! -d "$dirSubs/$subject_id" ]; then
         echo "ERROR: Subject directory '$subject_id' not found in $dirSubs"
         exit 1
     fi
     
     echo "Processing subject: $subject_id"
-    process_subject "$subject_id" "$hemisphere" "$fast" "$dirSubs" "$dirHCP"
+    process_subject "$subject_id" "$hemisphere" "$fast" "$dirSubs" "$dirHCP" "$output_dir"
     
 else
     # Multiple subjects processing (original behavior)
     # Export the function and variables for parallel processing
     export -f process_subject
-    export hemisphere fast dirSubs dirHCP
+    export hemisphere fast dirSubs dirHCP output_dir
+    
+    # Change to subjects directory for listing
+    cd $dirSubs
     
     # Collect subjects
     subjects=()
@@ -172,7 +196,7 @@ else
     echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
 
     # Process in parallel
-    printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject '{}' '$hemisphere' '$fast' '$dirSubs' '$dirHCP'"
+    printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject '{}' '$hemisphere' '$fast' '$dirSubs' '$dirHCP' '$output_dir'"
 fi
 
 # Calculate and display total time
@@ -192,5 +216,11 @@ else
     echo "Subjects processed: ${#subjects[@]}"
     echo "Average time per subject: $((total_minutes * 60 + total_seconds))s ÷ ${#subjects[@]} = $(( (total_minutes * 60 + total_seconds) / ${#subjects[@]} ))s"
     echo "Parallel jobs used: $n_jobs"
+fi
+
+if [ -n "$output_dir" ]; then
+    echo "Output location: $output_dir"
+else
+    echo "Output location: In-place within FreeSurfer directory"
 fi
 echo "==============================================="

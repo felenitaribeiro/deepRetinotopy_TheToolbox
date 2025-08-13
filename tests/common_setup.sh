@@ -59,6 +59,7 @@ setup_data_directories() {
     export DIR_SUBS="/storage/deep_retinotopy/$TMP_DIR/data"
     export DIR_HCP="/storage/deep_retinotopy/templates/"
     export DATASET_NAME="TEST"
+    export OUTPUT_DIR="/storage/deep_retinotopy/output/"
     
     echo "Path to freesurfer data: $DIR_SUBS"
     echo "Path to template surfaces: $DIR_HCP"
@@ -66,6 +67,8 @@ setup_data_directories() {
     
     sudo mkdir -p "$DIR_SUBS"
     sudo chmod 777 "$DIR_SUBS"
+    sudo mkdir -p "$OUTPUT_DIR"
+    sudo chmod 777 "$OUTPUT_DIR"
     
     # Copy data if it exists
     if [ -d "/storage/deep_retinotopy/data" ]; then

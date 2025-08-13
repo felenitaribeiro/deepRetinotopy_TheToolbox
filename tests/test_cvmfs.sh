@@ -20,7 +20,7 @@ export -f ml
 module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
 ml deepretinotopy
 
-
+# REMINDER: Uncomment the following lines if you want to download data from OSF - RUNNER HAVE PERSISTENT STORAGE
 # echo "[DEBUG]: data download from osf"
 # echo -e "[osf]\nproject = $OSF_PROJECT_ID\nusername = $OSF_USERNAME" > ~/.osfcli.config
 # osf -p 4p6yk list > /tmp/osf_list.txt

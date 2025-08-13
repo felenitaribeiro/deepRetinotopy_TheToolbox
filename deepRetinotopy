@@ -7,10 +7,11 @@ auto_cores=$(($(nproc) - 1))
 [ $auto_cores -lt 1 ] && auto_cores=1  # Ensure at least 1 core
 
 # Default values
+n_jobs=$auto_cores
+subject_id=""
 fast='yes'
-n_jobs=$auto_cores  # Use auto-detected cores as default
 
-while getopts s:t:d:m:g:j: flag
+while getopts s:t:d:m:g:j:i: flag
 do
     case "${flag}" in
         s) dirSubs=$(realpath "${OPTARG}");;
@@ -23,8 +24,9 @@ do
                 *) echo "Invalid fast argument: $fast"; exit 1;;
             esac;;
         j) n_jobs=${OPTARG};;
+        i) subject_id=${OPTARG};;
         ?)
-            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface] [-j number of cores for parallelization]" >&2
+            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface] [-j number of cores for parallelization] [-i subject ID for single subject processing]" >&2
             exit 1
         esac
 done
@@ -45,6 +47,19 @@ if ! [[ "$n_jobs" =~ ^[0-9]+$ ]] || [ "$n_jobs" -lt 1 ]; then
     echo "Error: Invalid number of jobs ($n_jobs). Must be a positive integer."
     exit 1
 fi
+
+# Check if processing single subject or multiple subjects
+if [ -n "$subject_id" ]; then
+    echo "Processing single subject: $subject_id"
+    # Validate subject directory exists
+    if [ ! -d "$dirSubs/$subject_id" ]; then
+        echo "Error: Subject directory '$subject_id' not found in $dirSubs"
+        exit 1
+    fi
+else
+    echo "Using $n_jobs parallel jobs for multiple subjects"
+fi
+
 # create a print box
 echo "--------------------------------------------------------------------------------"
 echo "DeepRetinotopy: retinotopic mapping using deep learning"
@@ -55,6 +70,12 @@ echo "Path to FreeSurfer directory: $dirSubs";
 echo "Path to fs_LR-deformed_to-fsaverage template surfaces: $dirHCP";
 echo "Dataset name: $datasetName";
 echo "Maps: ${maps[@]}";
+if [ -n "$subject_id" ]; then
+    echo "Processing mode: Single subject ($subject_id)";
+else
+    echo "Processing mode: All subjects (parallel jobs: $n_jobs)";
+fi
+echo "Fast midthickness generation: $fast";
 echo "--------------------------------------------------------------------------------"
 
 if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
@@ -74,7 +95,12 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
             echo "--------------------------------------------------------------------------------"
             echo "[Step 1] Generating mid-thickness surface and curvature data..."
             
-            1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast -j $n_jobs
+            # Pass subject_id flag to step 1 if provided
+            if [ -n "$subject_id" ]; then
+                1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast -j 1 -i $subject_id
+            else
+                1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast -j $n_jobs
+            fi
 
             if [ $? -eq 1 ]; then
                 echo "Error in Step 1: Please check surface files."
@@ -86,7 +112,13 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     echo "Map: $map"
                     echo "--------------------------------------------------------------------------------"
                     echo "[Step 2] Retinotopy prediction..."
-                    2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+                    
+                    # Pass subject_id flag to step 2 if provided
+                    if [ -n "$subject_id" ]; then
+                        2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere --subject_id $subject_id
+                    else
+                        2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
+                    fi
                     
                     if [ $? -eq 1 ]; then
                         rm -r $dirSubs/processed
@@ -99,8 +131,13 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     echo "--------------------------------------------------------------------------------"
                     echo "[Step 3] Resampling predictions to native space..."
                     
-
-                    3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model -j $n_jobs
+                    # Pass subject_id flag to step 3 if provided
+                    if [ -n "$subject_id" ]; then
+                        3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model -j 1 -i $subject_id
+                    else
+                        3_fsaverage2native.sh -s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model -j $n_jobs
+                    fi
+                    
                     if [ $? -eq 1 ]; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."
                         exit 1

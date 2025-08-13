@@ -5,9 +5,10 @@ auto_cores=$(($(nproc) - 1))
 [ $auto_cores -lt 1 ] && auto_cores=1  # Ensure at least 1 core
 
 # Default values
-n_jobs=$auto_cores 
+n_jobs=$auto_cores
+subject_id=""
 
-while getopts s:t:h:g:j: flag
+while getopts s:t:h:g:j:i: flag
 do
     case "${flag}" in
         s) dirSubs=${OPTARG};;
@@ -23,14 +24,21 @@ do
             *) echo "Invalid fast argument: $fast"; exit 1;;
             esac;;
         j) n_jobs=${OPTARG};;
+        i) subject_id=${OPTARG};;
         ?)
-            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-h hemisphere]  [-g fast generation of midthickness surface] [-j number of cores for parallelization]" >&2
+            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-h hemisphere] [-g fast generation of midthickness surface] [-j number of cores for parallelization] [-i subject ID for single subject processing]" >&2
             exit 1;;
     esac
 done
 
 echo "Hemisphere: $hemisphere"
-echo "Using $n_jobs parallel jobs"
+
+# Check if processing single subject or multiple subjects
+if [ -n "$subject_id" ]; then
+    echo "Processing single subject: $subject_id"
+else
+    echo "Using $n_jobs parallel jobs for multiple subjects"
+fi
 
 # Start total timing
 total_start_time=$(date +%s)
@@ -134,24 +142,38 @@ process_subject() {
     fi
 }
 
-# Export the function and variables
-export -f process_subject
-export hemisphere fast dirSubs dirHCP
-
 cd $dirSubs
 
-# Collect subjects
-subjects=()
-for dirSub in `ls .`; do
-    if [ "$dirSub" != "fsaverage" ] && [[ "$dirSub" != .* ]]; then
-        subjects+=("$dirSub")
+# Process single subject or multiple subjects
+if [ -n "$subject_id" ]; then
+    # Single subject processing
+    if [ ! -d "$subject_id" ]; then
+        echo "ERROR: Subject directory '$subject_id' not found in $dirSubs"
+        exit 1
     fi
-done
+    
+    echo "Processing subject: $subject_id"
+    process_subject "$subject_id" "$hemisphere" "$fast" "$dirSubs" "$dirHCP"
+    
+else
+    # Multiple subjects processing (original behavior)
+    # Export the function and variables for parallel processing
+    export -f process_subject
+    export hemisphere fast dirSubs dirHCP
+    
+    # Collect subjects
+    subjects=()
+    for dirSub in `ls .`; do
+        if [ "$dirSub" != "fsaverage" ] && [[ "$dirSub" != .* ]] && [ "$dirSub" != "processed" ]; then
+            subjects+=("$dirSub")
+        fi
+    done
 
-echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
+    echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
 
-# Process in parallel
-printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject {} $hemisphere $fast $dirSubs $dirHCP"
+    # Process in parallel
+    printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject '{}' '$hemisphere' '$fast' '$dirSubs' '$dirHCP'"
+fi
 
 # Calculate and display total time
 total_end_time=$(date +%s)
@@ -163,7 +185,12 @@ echo ""
 echo "==============================================="
 echo "[Step 1] COMPLETED!"
 echo "Total execution time: ${total_minutes}m ${total_seconds}s"
-echo "Subjects processed: ${#subjects[@]}"
-echo "Average time per subject: $((total_minutes * 60 + total_seconds))s ÷ ${#subjects[@]} = $(( (total_minutes * 60 + total_seconds) / ${#subjects[@]} ))s"
-echo "Parallel jobs used: $n_jobs"
+
+if [ -n "$subject_id" ]; then
+    echo "Subject processed: $subject_id"
+else
+    echo "Subjects processed: ${#subjects[@]}"
+    echo "Average time per subject: $((total_minutes * 60 + total_seconds))s ÷ ${#subjects[@]} = $(( (total_minutes * 60 + total_seconds) / ${#subjects[@]} ))s"
+    echo "Parallel jobs used: $n_jobs"
+fi
 echo "==============================================="

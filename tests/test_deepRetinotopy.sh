@@ -8,8 +8,11 @@ source "$SCRIPT_DIR/common_setup.sh"
 
 
 test_deepretinotopy_full() {
-    common_init
+    setup_environment
+    setup_unique_directory
+    setup_data_directories
     get_deepretinotopy_paths
+    setup_path_and_bins
     
     cd "$TOOLBOX_PATH"
     

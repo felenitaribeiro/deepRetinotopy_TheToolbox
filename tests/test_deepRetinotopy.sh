@@ -21,15 +21,24 @@ test_deepretinotopy_full() {
 
     echo "[DEBUG]: Testing deepRetinotopy with model management..."
     
-    for map in "${maps[@]}"; do
-        copy_models "$map"
-        setup_subject_directories
-        
-        deepRetinotopy -s "$DIR_SUBS" -t "$DIR_HCP" -d "$DATASET_NAME" -m "$map"
-        
-        clean_models
+    declare -A test_scenarios=(
+        ["single_subject"]="-i 1"
+        ["all_subjects"]=""
+    )
+
+    for scenario_name in "${!test_scenarios[@]}"; do
+        local flags="${test_scenarios[$scenario_name]}"
+        echo "[DEBUG]: Running scenario '$scenario_name' with flags: $flags"
+        for map in "${maps[@]}"; do
+            copy_models "$map"
+            setup_subject_directories
+            
+            eval "deepRetinotopy -s $DIR_SUBS -t $DIR_HCP -d $DATASET_NAME -m $map $flags"
+            
+            clean_models
+        done
+        validate_scenario "$scenario_name" "$flags"
     done
-    
     cleanup_tmp_directory
     test_output "Full deepRetinotopy test complete!" "SUCCESS"
 }

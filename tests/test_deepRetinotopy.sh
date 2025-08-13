@@ -6,8 +6,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source the common setup file
 source "$SCRIPT_DIR/common_setup.sh"
 
-# Now we can use all the functions
-common_init()
 
 test_deepretinotopy_full() {
     common_init

@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
+set -e
 
 # Get the directory where the current script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source the common setup file
 source "$SCRIPT_DIR/common_setup.sh"
 
-# Now we can use all the functions
-common_init()
 
 test_container_simple() {
     setup_environment
+    setup_unique_directory
     setup_data_directories
     
     local list_of_maps="polarAngle,eccentricity,pRFsize"

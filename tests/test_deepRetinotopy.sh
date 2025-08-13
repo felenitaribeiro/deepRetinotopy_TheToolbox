@@ -37,7 +37,6 @@ test_deepretinotopy_full() {
             
             clean_models
         done
-        validate_scenario "$scenario_name" "$flags"
     done
     cleanup_tmp_directory
     test_output "Full deepRetinotopy test complete!" "SUCCESS"

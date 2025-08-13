@@ -36,6 +36,10 @@ def inference(args):
     print(f"Hemisphere: {args.hemisphere}")
     print(f"Dataset: {args.dataset}")
     print(f"Stimulus: {args.stimulus}")
+    if args.output_dir:
+        print(f"Output directory: {args.output_dir}")
+    else:
+        print("Output mode: In-place (within FreeSurfer directory structure)")
     print("===============================================")
     
     # Start total timing
@@ -56,6 +60,11 @@ def inference(args):
             list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed']
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")
+    
+    # Create output directory if specified
+    if args.output_dir:
+        os.makedirs(args.output_dir, exist_ok=True)
+        print(f"Created output directory: {args.output_dir}")
     
     norm_value = 70 
     pre_transform = T.Compose([T.FaceToEdge()])
@@ -94,15 +103,14 @@ def inference(args):
         # Load model weights
         if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
             if num_of_models != 1:
-                model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt'
+                model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt'
             else:
-                model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt'
+                model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt'
         else:
             if num_of_models != 1:
-                model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt'
+                model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt'
             else:
-                model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
-       
+                model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
         
         print(f'Loading model from: {osp.basename(model_path)}')
         model.load_state_dict(torch.load(model_path, map_location=device))
@@ -121,7 +129,15 @@ def inference(args):
         print(f'Saving predictions for {len(list_subs)} subjects...')
         for j, subject in enumerate(list_subs):
             subject_start_time = time.time()
-            output_dir = osp.join(args.path, subject, 'deepRetinotopy')
+            
+            # Determine output directory for this subject
+            if args.output_dir:
+                output_dir = osp.join(args.output_dir, subject, 'deepRetinotopy')
+                surf_dir = osp.join(args.output_dir, subject, 'surf')
+            else:
+                output_dir = osp.join(args.path, subject, 'deepRetinotopy')
+                surf_dir = osp.join(args.path, subject, 'surf')
+            
             print(f'[{subject}] Saving predictions to: {output_dir}')
             
             if not osp.exists(output_dir):
@@ -129,7 +145,12 @@ def inference(args):
                 print(f'[{subject}] Created output directory')
             
             if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
-                template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
+                # Try custom output directory first, then original location
+                template_path = osp.join(surf_dir, f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
+                if not osp.exists(template_path):
+                    # Fallback to original location if not in custom output
+                    template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
+                
                 if not osp.exists(template_path):
                     print(f'[{subject}] ERROR: Template file not found: {template_path}')
                     continue
@@ -144,14 +165,19 @@ def inference(args):
                 template.agg_data()[:] = np.reshape(pred, (-1))
                 if num_of_models != 1:
                     output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
-                elif num_of_models == 1:
+                else:
                     output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{stimulus_name}.func.gii'
                 
                 output_path = osp.join(output_dir, output_filename)
                 nib.save(template, output_path)
                 
             else:
-                template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                # Try custom output directory first, then original location
+                template_path = osp.join(surf_dir, f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                if not osp.exists(template_path):
+                    # Fallback to original location if not in custom output
+                    template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                
                 if not osp.exists(template_path):
                     print(f'[{subject}] ERROR: Template file not found: {template_path}')
                     continue
@@ -168,7 +194,7 @@ def inference(args):
 
                 if num_of_models != 1:
                     output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
-                elif num_of_models == 1:
+                else:
                     output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{stimulus_name}.func.gii'
                 
                 output_path = osp.join(output_dir, output_filename)
@@ -201,6 +227,11 @@ def inference(args):
             print(f"Average time per subject: {avg_time_per_subject:.1f}s")
     
     print(f"Prediction type: {args.prediction_type} | Hemisphere: {args.hemisphere} | Dataset: {args.dataset}")
+    
+    if args.output_dir:
+        print(f"Output location: {args.output_dir}")
+    else:
+        print("Output location: In-place within FreeSurfer directory")
     print("===============================================")
     
     return          
@@ -219,6 +250,8 @@ def main():
     parser.add_argument('--stimulus', type=str, default='original')
     parser.add_argument('--subject_id', type=str, default=None,
                         help='Subject ID to process. If None, all subjects will be processed.')
+    parser.add_argument('--output_dir', type=str, default=None,
+                        help='Output directory for generated files. If None, files will be saved within the FreeSurfer directory structure.')
     args = parser.parse_args()
     inference(args)
 

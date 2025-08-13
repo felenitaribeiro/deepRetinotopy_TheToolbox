@@ -1,42 +1,42 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: General configuration for testing deepRetinotopy "
 # Get the directory where the current script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Source the file from that directory
-source "$SCRIPT_DIR/test_cvmfs.sh"
-ml deepretinotopy
+# Source the common setup file
+source "$SCRIPT_DIR/common_setup.sh"
 
-echo "[DEBUG]: data paths:"
-dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
-echo "Path to freesurfer data: "$dirSubs""
-sudo mkdir -p $dirSubs
-sudo chmod 777 $dirSubs
-cp -r /storage/deep_retinotopy/data/* $dirSubs
+test_signmaps() {
+    common_init
+    
+    echo "[DEBUG]: Visual field sign maps generation"
+    
+    # Setup deepRetinotopy data
+    cd "$DIR_SUBS/1/"
+    if [ ! -d "$DIR_SUBS/1/deepRetinotopy/" ]; then
+        unzip deepRetinotopy.zip
+    else
+        echo "deepRetinotopy directory already exists, skipping unzipping"
+    fi
+    sudo chmod 777 -R "$DIR_SUBS/1/deepRetinotopy/"
 
-dirHCP="/storage/deep_retinotopy/templates/"
-echo "Path to template surfaces: "$dirHCP""
+    cd "$TOOLBOX_PATH/main"
+    signMaps -s "$DIR_SUBS" -t "$DIR_HCP" -d "$DATASET_NAME"
 
-datasetName="TEST"
-echo "Dataset name: "$datasetName""
+    # Validate output
+    local file_path="$DIR_SUBS/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_model.func.gii"
+    if [ -f "$file_path" ]; then
+        test_output "Visual field sign map generated successfully" "SUCCESS"
+    else
+        test_output "Visual field sign map NOT generated" "ERROR"
+        exit 1
+    fi
+    
+    cleanup_tmp_directory
+    test_output "Sign maps test complete!" "SUCCESS"
+}
 
-echo "[DEBUG]: Visual field sign maps generation"
-export PATH=$PATH:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/
-cd $dirSubs/1/
-if [ ! -d $dirSubs/1/deepRetinotopy/ ]; then
-    unzip deepRetinotopy.zip
-else
-    echo "deepRetinotopy directory already exists, skipping unzipping"
+# Run if called directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    test_signmaps
 fi
-sudo chmod 777 -R $dirSubs/1/deepRetinotopy/
-
-cd /storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main
-signMaps -s $dirSubs -t $dirHCP -d $datasetName 
-
-file_path=$dirSubs/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_model.func.gii
-if [ ! -f "$file_path" ]; then
-    echo "Error: File does not exist."
-    exit 1
-fi
-

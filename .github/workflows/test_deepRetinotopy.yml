@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - deepRetinotopy
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_deepRetinotopy.sh
       - .github/workflows/test_deepRetinotopy.yml
 
@@ -15,7 +15,7 @@ on:
     branches: [ main ]
     paths:
       - deepRetinotopy
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_deepRetinotopy.sh
       - .github/workflows/test_deepRetinotopy.yml
       

@@ -39,7 +39,7 @@ test_deepretinotopy_full() {
             clean_models
         done
 
-        if [ scenario_name == "single_subject_output" ]; then
+        if [ $scenario_name == "single_subject_output" ]; then
             if [ -d "$OUTPUT_DIR" ]; then
                 test_output "Output directory created successfully for scenario '$scenario_name'" "SUCCESS"
                 # check if output files are present

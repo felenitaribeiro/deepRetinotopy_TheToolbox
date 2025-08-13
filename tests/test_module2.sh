@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: test deepRetinotopy on the Singularity container"
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
-# source /usr/share/module.sh
-module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+echo "[DEBUG]: General configuration for testing deepRetinotopy "
+# Get the directory where the current script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Source the file from that directory
+source "$SCRIPT_DIR/test_cvmfs.sh"
 ml deepretinotopy
 
-echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-    echo "deepRetinotopy repo is cloned"
-else
-    echo "deepRetinotopy repo is not cloned"
-fi
-cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-
-echo "[DEBUG]: copying models' weights from cvmfs to repo directory:"
-var=`cat ./README.md | grep date_tag=`
-echo $var
-export $var
-
+echo "[DEBUG]: data paths:"
 #find path of deepRetinotopy executable
 deepRetinotopy_executable=$(which deepRetinotopy)
 echo $deepRetinotopy_executable
@@ -33,23 +22,26 @@ deepRetinotopy_last_dir=${deepRetinotopy_path##*/}
 echo $deepRetinotopy_last_dir
 
 cd $deepRetinotopy_path/$deepRetinotopy_last_dir.simg/opt/deepRetinotopy_TheToolbox
-sudo mkdir /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
-sudo chmod 777 /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
-sudo cp -r models/deepRetinotopy_polarAngle_LH_* /storage/deep_retinotopy/deepRetinotopy_TheToolbox/models/
+sudo mkdir /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/models/
+sudo chmod 777 /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
+sudo cp -r models/deepRetinotopy_polarAngle_LH_* /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/models/
 
-dirSubs="/data/"
+dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
 echo "Path to freesurfer data: "$dirSubs""
+sudo mkdir -p $dirSubs
+sudo chmod 777 $dirSubs
+cp -r /storage/deep_retinotopy/data/* $dirSubs
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
 datasetName="TEST"
 echo "Dataset name: "$datasetName""
 
-echo "[DEBUG]: deepRetinotopy inference:"
-export PATH=$PATH:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/
 
-cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox/main
+echo "[DEBUG]: deepRetinotopy inference:"
+export PATH=$PATH:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/
+cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/main
 for hemisphere in 'lh'; # 'rh';
 do 
     for map in 'polarAngle'; #'eccentricity' 'pRFsize';
@@ -62,6 +54,7 @@ do
             ls $dirSubs/$i/surf/
         done
         python ./2_inference.py --path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere
-        rm -r $dirSubs/processed
+        sudo rm -r $dirSubs/processed
     done
 done
+sudo rm -rf /storage/deep_retinotopy/$tmp_dir

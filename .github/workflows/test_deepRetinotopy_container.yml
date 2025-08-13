@@ -33,7 +33,5 @@ jobs:
         OSF_TOKEN: ${{ secrets.OSF_TOKEN }}
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
-      run: /bin/bash tests/test_cvmfs.sh
-    - name: test deepRetinotopy
       run: |
         /bin/bash tests/test_deepRetinotopy_container.sh

@@ -39,7 +39,5 @@ jobs:
         OSF_TOKEN: ${{ secrets.OSF_TOKEN }}
         OSF_USERNAME: ${{ secrets.OSF_USERNAME }}
         OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
-      run: /bin/bash tests/test_cvmfs.sh
-    - name: test visual field sign maps generation
       run: |
-        /bin/bash tests/test_signmaps.sh
+        /usr/bin/bash tests/test_signmaps.sh

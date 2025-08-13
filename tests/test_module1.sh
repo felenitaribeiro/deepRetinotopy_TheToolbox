@@ -1,30 +1,31 @@
 #!/usr/bin/env bash
 set -e
 
-export APPTAINER_BINDPATH='/cvmfs,/mnt,/home,/data,/templates,/storage'
-# source /usr/share/module.sh
-module use /cvmfs/neurodesk.ardc.edu.au/neurodesk-modules/*
+echo "[DEBUG]: General configuration for testing deepRetinotopy "
+# Get the directory where the current script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Source the file from that directory
+source "$SCRIPT_DIR/test_cvmfs.sh"
 ml deepretinotopy
+cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
 
-echo "[DEBUG]: test if deepRetinotopy repo is cloned"
-if find .-name "deepRetinotopy" -size +0 | grep -q '.'; then
-    echo "deepRetinotopy repo is cloned"
-else
-    echo "deepRetinotopy repo is not cloned"
-fi
-cp -r . /storage/deep_retinotopy/deepRetinotopy_TheToolbox/
 
-cd /storage/deep_retinotopy/deepRetinotopy_TheToolbox
-
-dirSubs="/data/"
+echo "[DEBUG]: data paths:"
+dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
 echo "Path to freesurfer data: "$dirSubs""
-rm /data/*/surf/*curvature-midthickness*
-rm /data/*/surf/*graymid
+sudo mkdir -p $dirSubs
+sudo chmod 777 $dirSubs
+cp -r /storage/deep_retinotopy/data/* $dirSubs
+# remove files to perform tests
+rm $dirSubs/*/surf/*curvature-midthickness*
+rm $dirSubs/*/surf/*graymid
 
-dirHCP="/templates/"
+dirHCP="/storage/deep_retinotopy/templates/"
 echo "Path to template surfaces: "$dirHCP""
 
-export PATH=/storage/deep_retinotopy/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/deepRetinotopy_TheToolbox/utils/:$PATH
+
+echo "[DEBUG]: export excutables:"
+export PATH=/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/utils/:$PATH
 export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
 
 cd main
@@ -32,8 +33,6 @@ for hemisphere in lh rh; do
     for fast in 'yes'; do
         echo "Hemisphere: "$hemisphere""
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
-        # clone_comand=`cat ../deepRetinotopy | grep 1_native2fsaverage.sh`
-        rm $dirSubs/*/surf/*graymid*
         clone_command="./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
         echo $clone_command
         eval $clone_command
@@ -49,6 +48,6 @@ for hemisphere in lh rh; do
         else
             echo "curvature data not generated"
         fi
-
     done
 done
+sudo rm -rf /storage/deep_retinotopy/$tmp_dir

@@ -9,7 +9,7 @@ on:
       - signMaps
       - main/2_inference.py
       - main/4_signmaps.py
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_signmaps.sh
       - .github/workflows/test_signmaps.yml
 
@@ -21,7 +21,7 @@ on:
       - signMaps
       - main/2_inference.py
       - main/4_signmaps.py
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_signmaps.sh
       - .github/workflows/test_signmaps.yml
       

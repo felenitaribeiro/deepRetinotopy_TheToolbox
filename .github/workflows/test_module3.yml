@@ -7,7 +7,7 @@ on:
     paths:
       - deepRetinotopy
       - main/3_fsaverage2native.sh
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module3.sh
       - labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii
       - labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii
@@ -19,7 +19,7 @@ on:
     paths:
       - deepRetinotopy
       - main/3_fsaverage2native.sh
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module3.sh
       - labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii
       - labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii

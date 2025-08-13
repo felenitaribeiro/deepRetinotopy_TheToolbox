@@ -6,7 +6,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source the common setup file
 source "$SCRIPT_DIR/common_setup.sh"
 
-
 test_deepretinotopy_full() {
     setup_environment
     setup_unique_directory
@@ -16,7 +15,6 @@ test_deepretinotopy_full() {
     
     cd "$TOOLBOX_PATH"
     
-
     local list_of_maps="polarAngle,eccentricity,pRFsize"
     IFS=',' read -ra maps <<< "$list_of_maps"
     echo "Maps: ${maps[*]}"

@@ -1,53 +1,51 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: General configuration for testing deepRetinotopy "
 # Get the directory where the current script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Source the file from that directory
-source "$SCRIPT_DIR/test_cvmfs.sh"
-ml deepretinotopy
-cd /storage/deep_retinotopy/$tmp_dir/deepRetinotopy_TheToolbox/
+# Source the common setup file
+source "$SCRIPT_DIR/common_setup.sh"
 
-
-echo "[DEBUG]: data paths:"
-dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
-echo "Path to freesurfer data: "$dirSubs""
-sudo mkdir -p $dirSubs
-sudo chmod 777 $dirSubs
-cp -r /storage/deep_retinotopy/data/* $dirSubs
-# remove files to perform tests
-rm $dirSubs/*/surf/*curvature-midthickness*
-rm $dirSubs/*/surf/*graymid
-
-dirHCP="/storage/deep_retinotopy/templates/"
-echo "Path to template surfaces: "$dirHCP""
-
-
-echo "[DEBUG]: export excutables:"
-export PATH=/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/main/:/storage/deep_retinotopy/"$tmp_dir"/deepRetinotopy_TheToolbox/utils/:$PATH
-export DEPLOY_BINS=midthickness_surf.py:$DEPLOY_BINS
-
-cd main
-for hemisphere in lh rh; do
-    for fast in 'yes'; do
-        echo "Hemisphere: "$hemisphere""
+test_module1() {
+    common_init
+    
+    cd "$TOOLBOX_PATH"
+    
+    # Clean existing surfaces for testing
+    rm -f "$DIR_SUBS"/*/surf/*curvature-midthickness* 2>/dev/null || true
+    rm -f "$DIR_SUBS"/*/surf/*graymid* 2>/dev/null || true
+    
+    export DEPLOY_BINS="midthickness_surf.py:$DEPLOY_BINS"
+    
+    cd main
+    
+    for hemisphere in lh rh; do
+        echo "Hemisphere: $hemisphere"
         echo "[DEBUG]: Module 1: Generating mid-thickness surface and curvature data..."
-        clone_command="./1_native2fsaverage.sh -s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
-        echo $clone_command
-        eval $clone_command
+        
+        local command="./1_native2fsaverage.sh -s $DIR_SUBS -t $DIR_HCP -h $hemisphere -g yes"
+        echo "$command"
+        eval "$command"
 
-        if find $dirSubs -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
-            echo "midthickness surface generated"
+        # Validate outputs
+        if find "$DIR_SUBS" -name "*${hemisphere}.midthickness.32k_fs_LR.surf.gii" -size +0 | grep -q '.'; then
+            test_output "Mid-thickness surface generated for $hemisphere" "SUCCESS"
         else
-            echo "midthickness surface not generated"
+            test_output "Mid-thickness surface NOT generated for $hemisphere" "ERROR"
         fi
 
-        if find $dirSubs -name "*curvature-midthickness.${hemisphere}.32k_fs_LR.func.gii" -size +0 | grep -q '.'; then
-            echo "curvature data generated"
+        if find "$DIR_SUBS" -name "*curvature-midthickness.${hemisphere}.32k_fs_LR.func.gii" -size +0 | grep -q '.'; then
+            test_output "Curvature data generated for $hemisphere" "SUCCESS"
         else
-            echo "curvature data not generated"
+            test_output "Curvature data NOT generated for $hemisphere" "ERROR"
         fi
     done
-done
-sudo rm -rf /storage/deep_retinotopy/$tmp_dir
+    
+    cleanup_tmp_directory
+    test_output "Module 1 test complete!" "SUCCESS"
+}
+
+# Run if called directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    test_module1
+fi

@@ -7,7 +7,7 @@ on:
     paths:
       - deepRetinotopy
       - main/2_inference.py
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module2.sh
       - .github/workflows/test_module2.yml
 
@@ -17,7 +17,7 @@ on:
     paths:
       - deepRetinotopy
       - main/2_inference.py
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module2.sh
       - .github/workflows/test_module2.yml
       

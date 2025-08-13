@@ -7,7 +7,7 @@ on:
     paths:
       - deepRetinotopy
       - main/1_native2fsaverage.sh
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module1.sh
       - .github/workflows/test_module1.yml
 
@@ -17,7 +17,7 @@ on:
     paths:
       - deepRetinotopy
       - main/1_native2fsaverage.sh
-      - tests/test_cvmfs.sh
+      - tests/common_setup.sh
       - tests/test_module1.sh
       - .github/workflows/test_module1.yml
       

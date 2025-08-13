@@ -1,38 +1,32 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[DEBUG]: General configuration for testing deepRetinotopy "
 # Get the directory where the current script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Source the file from that directory
-source "$SCRIPT_DIR/test_cvmfs.sh"
-ml deepretinotopy
+# Source the common setup file
+source "$SCRIPT_DIR/common_setup.sh"
 
-echo "[DEBUG]: data paths:"
-dirSubs="/storage/deep_retinotopy/$tmp_dir/data"
-echo "Path to freesurfer data: "$dirSubs""
-sudo mkdir -p $dirSubs
-sudo chmod 777 $dirSubs
-cp -r /storage/deep_retinotopy/data/* $dirSubs
 
-dirHCP="/storage/deep_retinotopy/templates/"
-echo "Path to template surfaces: "$dirHCP""
+test_container_simple() {
+    setup_environment
+    setup_unique_directory
+    setup_data_directories
+    
+    local list_of_maps="polarAngle,eccentricity,pRFsize"
+    IFS=',' read -ra maps <<< "$list_of_maps"
+    echo "Maps: ${maps[*]}"
 
-datasetName="TEST"
-echo "Dataset name: "$datasetName""
-
-list_of_maps="polarAngle,eccentricity,pRFsize"
-IFS=',' read -ra maps <<< "$list_of_maps"
-echo "Maps: "${maps[@]}""
-
-echo "[DEBUG]: testing deepRetinotopy:"
-for map in "${maps[@]}";
-do
-    for i in $(ls "$dirSubs"); do
-        sudo chmod 777 $dirSubs/$i
-        sudo mkdir -p  $dirSubs/$i/deepRetinotopy/
-        sudo chmod 777  $dirSubs/$i/deepRetinotopy/
+    echo "[DEBUG]: Testing deepRetinotopy container..."
+    
+    for map in "${maps[@]}"; do
+        setup_subject_directories
+        deepRetinotopy -s "$DIR_SUBS" -t "$DIR_HCP" -d "$DATASET_NAME" -m "$map"
     done
     
-    deepRetinotopy -s $dirSubs -t $dirHCP -d $datasetName -m $map
-done
+    test_output "Container test complete!" "SUCCESS"
+}
+
+# Run if called directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    test_container_simple
+fi

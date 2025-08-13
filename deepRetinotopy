@@ -122,7 +122,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 step1_args="$step1_args -o $output_dir"
             fi
             
-            ./main/1_native2fsaverage.sh $step1_args
+            1_native2fsaverage.sh $step1_args
 
             if [ $? -eq 1 ]; then
                 echo "Error in Step 1: Please check surface files."
@@ -144,7 +144,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                         step2_args="$step2_args --output_dir $output_dir"
                     fi
                     
-                    ./main/2_inference.py $step2_args
+                    2_inference.py $step2_args
                     
                     if [ $? -eq 1 ]; then
                         rm -r $dirSubs/processed
@@ -168,7 +168,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                         step3_args="$step3_args -o $output_dir"
                     fi
                     
-                    ./main/3_fsaverage2native.sh $step3_args
+                    3_fsaverage2native.sh $step3_args
                     
                     if [ $? -eq 1 ]; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."

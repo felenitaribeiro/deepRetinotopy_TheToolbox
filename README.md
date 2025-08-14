@@ -6,6 +6,13 @@ DeepRetinotopy is a toolkit that leverages a geometric deep learning model to pr
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
 * [Software containers](#software-containers)
+* [Usage](#usage)
+  * [Basic Usage](#basic-usage)
+  * [Advanced Options](#advanced-options)
+  * [Single Subject Processing](#single-subject-processing)
+  * [Custom Output Directory](#custom-output-directory)
+  * [Field Sign Maps](#field-sign-maps)
+* [Output](#output)
 * [Contributors](#contributors)
 * [Citation](#citation)
 * [Acknowledgements](#acknowledgements)
@@ -24,27 +31,20 @@ DeepRetinotopy (pre-trained models) and required software are packaged in softwa
 You can run deepRetinotopy on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.11
+ml deepretinotopy/1.0.14
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
-
-The following arguments are required:
-- **-s** path to the freesurfer directory
-- **-t** path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
-- **-d** dataset name (e.g. "hcp")
-- **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ### Docker
 If you prefer running deepRetinotopy locally via Docker, you can pull our container from Dockerhub and run it using the following commands:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.11:latest
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.11:latest
+docker pull vnmd/deepretinotopy_1.0.14:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.14:latest
 # docker exec -it deepret bash
 ```
 
-If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.11:latest').
-
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.14:latest').
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
 ```bash
@@ -55,69 +55,139 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:
 
 ```bash
-date_tag=20250714
-export container=deepretinotopy_1.0.11_$date_tag
-curl -X GET https://neurocontainers.neurodesk.org//${container}.simg -O
+date_tag=20250813
+export container=deepretinotopy_1.0.14_$date_tag
+curl -X GET https://neurocontainers.neurodesk.org/${container}.simg -O
 ```
 
 Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:
 
 ```bash
-apptainer exec ./deepretinotopy_1.0.11_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec ./deepretinotopy_1.0.14_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
-For different locations, see the [Neurodesk documentation](https://www.neurodesk.org/docs/getting-started/neurocontainers/singularity/).
 
 ### Containers for GPU inference
-Our "deepretinotopy_1.0.11" containers are meant for a broader CPU-based inference pipeline. However, we also have containers for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. 
+Our "deepretinotopy_1.0.14" containers are meant for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. You may see warnings like 'An issue occurred while importing pyg-lib' due to GLIBC version differences between PyTorch Geometric and FreeSurfer base image, but these can be safely ignored as they don't affect inference behaviour. You can also use the same container for a broader CPU-based inference pipeline. 
 
-#### Singularity: 
-```bash
-date_tag=20250804
-export container=deepretinotopy_1.0.12_$date_tag
-curl -X GET https://neurocontainers.neurodesk.org//${container}.simg -O
-```
-And to run our tool using a GPU, you need to pass the --nv flag.
+To run our tool using a GPU, you need to pass the --nv flag.
 
 ```bash
-apptainer exec --nv  ./deepretinotopy_1.0.12_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec --nv  ./deepretinotopy_1.0.14_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 ## Usage
 
-The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from freesurfer-based data (specifically, data in the 'surf' directory). However, you can also generate visual field sign maps after running 'deepRetinotopy' to help with manual delineation of visual areas by using the following command:
+### Basic Usage
+
+The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from FreeSurfer-based data (specifically, data in the 'surf' directory).
+
+**Required arguments:**
+- **-s** path to the FreeSurfer directory
+- **-t** path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
+- **-d** dataset name (e.g. "hcp")
+- **-m** maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
 
 ```bash
-signMaps -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name 
+deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity,pRFsize"
 ```
+
+### Advanced Options
+
+**Optional arguments:**
+- **-g** fast generation of midthickness surface (`yes` or `no`, default: `yes`)
+- **-j** number of cores for parallelization (default: auto-detected or 1 for single subject processing)
+- **-i** subject ID for single subject processing
+- **-o** output directory for generated files
+
+### Single Subject Processing
+
+Process a specific subject instead of all subjects in the directory:
+
+```bash
+## Process single subject
+deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -i sub-001
+```
+
+### Custom Output Directory
+
+Store generated files in a separate directory (useful for DataLad and version control workflows):
+
+```bash
+# All outputs to custom directory
+deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -o /path/to/output
+
+# Single subject with custom output
+deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle" -i sub-001 -o /path/to/output
+```
+
+When using a custom output directory, files will be organized as:
+```
+output_directory/
+├── sub-001/
+│   ├── surf/
+│   │   └── ... (surface processing files)
+│   └── deepRetinotopy/
+│       └── ... (prediction files)
+└── sub-002/
+    └── ...
+```
+
+### Field Sign Maps
+
+Generate visual field sign maps after running `deepRetinotopy` to help with manual delineation of visual areas:
+
+```bash
+# Process all subjects
+signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted
+
+# Process single subject
+signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted --subject_id sub-001
+
+# Process from custom output directory
+signMaps --path /path/to/output --hemisphere lh --map fs_predicted --subject_id sub-001
+```
+
+**signMaps arguments:**
+- **--path** path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)
+- **--hemisphere** hemisphere to process (`lh` or `rh`)
+- **--map** map type to use (default: `fs_predicted`)
+- **--subject_id** subject ID for single subject processing (optional)
 
 ## Output
 
-The output of deepRetinotopy is a folder named "deepRetinotopy", in each freesurfer subject directory, containing the following files:
+### Default Output (In-place)
+When no custom output directory is specified, files are saved within the FreeSurfer directory structure:
 
 ```bash
 └── freesurfer
 	└── [sub_id]
+		├── surf
+		│   ├── [sub_id].curvature-midthickness.lh.32k_fs_LR.func.gii
+		│   ├── [sub_id].curvature-midthickness.rh.32k_fs_LR.func.gii
+		│   └── ... (other surface processing files)
 		└── deepRetinotopy
 			├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_model.func.gii
 			├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_model.func.gii
-			├── [sub_id].fs_predicted_fieldSignMap_lh_model.func.gii
-			├── [sub_id].fs_predicted_fieldSignMap_rh_model.func.gii
 			├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_model.func.gii
 			├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_model.func.gii
 			├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_model.func.gii
 			├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_model.func.gii
 			├── [sub_id].predicted_eccentricity_model.lh.native.func.gii
 			├── [sub_id].predicted_eccentricity_model.rh.native.func.gii
-			├── [sub_id].predicted_fieldSignMap_model.lh.native.func.gii
-			├── [sub_id].predicted_fieldSignMap_model.rh.native.func.gii
 			├── [sub_id].predicted_pRFsize_model.lh.native.func.gii
 			├── [sub_id].predicted_pRFsize_model.rh.native.func.gii
 			├── [sub_id].predicted_polarAngle_model.lh.native.func.gii
 			└── [sub_id].predicted_polarAngle_model.rh.native.func.gii
 ```
 
-Files with 'fs_predicted' in their name are GIFTI files containing the predicted maps in the 32k fsaverage space, and files with 'native' are GIFTI files containing the predicted maps in the native space of the subject.
+### Custom Output Directory
+When using `-o /path/to/output`, the same file structure is replicated in the specified output directory, keeping the original FreeSurfer data unchanged.
+
+**File descriptions:**
+- Files with `fs_predicted` in their name are GIFTI files containing the predicted maps in the 32k fsaverage space
+- Files with `native` are GIFTI files containing the predicted maps in the native space of the subject
+- Files with `fieldSignMap` are generated by the `signMaps` command (only generated if signMaps command has been run)
 
 ## Contributors
 If you want to contribute to this repository, please follow the instructions below:

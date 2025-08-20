@@ -2,14 +2,18 @@
 exec > >(tee -a ~/signMap_output.log)
 exec 2> >(tee -a ~/signMap_error.log >&2)
 
-while getopts s:t:d:m: flag
+# Default values
+subject_id=""
+
+while getopts s:t:d:m:i: flag
 do
     case "${flag}" in
         s) dirSubs=$(realpath "${OPTARG}");;
         t) dirHCP=$(realpath "${OPTARG}");;
         d) datasetName=${OPTARG};;
+        i) subject_id=${OPTARG};;
 	?)
-		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset]" >&2
+		echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-i subject ID for single subject processing]" >&2
 		exit 1
 	esac
 done
@@ -22,7 +26,7 @@ echo "Dataset name: $datasetName";
 for hemisphere in 'lh' 'rh';
 do 
     echo "Generating visual field sign maps from fsaverage predicted maps..."
-    4_signmaps.py --path $dirSubs --hemisphere $hemisphere
+    4_signmaps.py --path $dirSubs --hemisphere $hemisphere --subject_id $subject_id
     
     echo "Resampling fsaverage sign maps to native space..."
     cd $dirSubs

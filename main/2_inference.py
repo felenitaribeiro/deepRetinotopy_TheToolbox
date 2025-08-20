@@ -66,10 +66,55 @@ def inference(args):
             raise FileNotFoundError(f"Path {data_path} does not exist.")    
         else:
             list_subs = os.listdir(data_path)
-            list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed']
+            list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed' and not sub.endswith('.txt')]
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")
     
+    # Check if the curvature files exist
+    removed_subjects = []
+    valid_subjects = []
+    
+    for subject in list_subs:
+        subject_path = osp.join(data_path, subject, 'surf')
+        if not osp.exists(subject_path):
+            removed_subjects.append(subject)
+            print(f"Removed subject '{subject}' due to missing surf directory.")
+            continue
+
+        lh_curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
+        rh_curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
+        
+        if not osp.exists(lh_curvature_file) or not osp.exists(rh_curvature_file):
+            removed_subjects.append(subject)
+            print(f"Removed subject '{subject}' due to missing curvature files.")
+        else:
+            valid_subjects.append(subject)
+    
+    # Save removed subjects to timestamped file (only if there are any)
+    if removed_subjects:
+        # Create unique filename with timestamp and process info
+        timestamp = int(time.time() * 1000)  # milliseconds for uniqueness
+        process_id = os.getpid()
+        removed_file = osp.join(data_path, f'removed_subjects_{timestamp}_{process_id}.txt')
+        
+        try:
+            with open(removed_file, 'w') as f:
+                for subject in removed_subjects:
+                    print(subject)
+                    f.write(f"{subject}\n")
+            print(f"Saved {len(removed_subjects)} removed subjects to: {removed_file}")
+            print(f"Removed subjects: {removed_subjects}")
+        except Exception as e:
+            print(f"Warning: Could not write removed subjects file: {e}")
+    
+    # Update the subjects list to only include valid subjects
+    list_subs = valid_subjects
+    print(f"Final subject list after validation: {len(list_subs)} subjects: {list_subs}")
+    
+    if len(list_subs) == 0:
+        print("ERROR: No valid subjects found with required curvature files!")
+        return
+
     # Create output directory if specified
     if args.output_dir:
         os.makedirs(args.output_dir, exist_ok=True)
@@ -227,6 +272,9 @@ def inference(args):
         print(f"Subject processed: {args.subject_id}")
     else:
         print(f"Subjects processed: {len(list_subs)}")
+        if removed_subjects:
+            print(f"Subjects removed due to missing files: {len(removed_subjects)}")
+            print(f"Removed subjects logged in: {removed_file}")
         if len(list_subs) > 0:
             avg_time_per_subject = total_execution_time / len(list_subs)
             print(f"Average time per subject: {avg_time_per_subject:.1f}s")

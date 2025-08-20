@@ -26,7 +26,12 @@ echo "Dataset name: $datasetName";
 for hemisphere in 'lh' 'rh';
 do 
     echo "Generating visual field sign maps from fsaverage predicted maps..."
-    4_signmaps.py --path $dirSubs --hemisphere $hemisphere --subject_id $subject_id
+    if [ -n "$subject_id" ]; then
+        echo "Processing single subject: $subject_id"
+        4_signmaps.py --path $dirSubs --hemisphere $hemisphere --subject_id $subject_id
+    else
+        echo "Processing all subjects in directory: $dirSubs"
+        4_signmaps.py --path $dirSubs --hemisphere $hemisphere
     
     echo "Resampling fsaverage sign maps to native space..."
     cd $dirSubs

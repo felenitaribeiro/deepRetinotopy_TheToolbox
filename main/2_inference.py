@@ -45,18 +45,27 @@ def inference(args):
     # Start total timing
     total_start_time = time.time()
     
+    # Set the data path
+    if args.output_dir is not None:
+        data_path = osp.abspath(args.output_dir)
+        print(f"Output directory set to: {args.output_dir}")
+    else:
+        data_path = osp.abspath(args.path)
+        print(f"Output directory not specified, using input path: {args.path}")
+    
+    print(f"Data path: {data_path}")
     if args.subject_id is not None:
         print(f'Processing single subject: {args.subject_id}')
-        if not osp.exists(osp.join(args.path, args.subject_id)):
-            raise FileNotFoundError(f"Subject directory '{args.subject_id}' not found in {args.path}")
+        if not osp.exists(osp.join(data_path, args.subject_id)):
+            raise FileNotFoundError(f"Subject directory '{args.subject_id}' not found in {data_path}")
         else:
             list_subs = [args.subject_id]
     else:
         print('Processing all subjects in the directory')
-        if not osp.exists(args.path):
-            raise FileNotFoundError(f"Path {args.path} does not exist.")    
+        if not osp.exists(data_path):
+            raise FileNotFoundError(f"Path {data_path} does not exist.")    
         else:
-            list_subs = os.listdir(args.path)
+            list_subs = os.listdir(data_path)
             list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed']
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")
@@ -72,7 +81,7 @@ def inference(args):
     # Load the dataset
     print('[Step 2.1] Loading the dataset...')
     init_time = time.time()
-    test_dataset = Retinotopy(args.path, 'Test',
+    test_dataset = Retinotopy(data_path, 'Test',
                               transform=T.Cartesian(max_value=norm_value),
                               pre_transform=pre_transform, dataset=args.dataset,
                               list_subs=list_subs,
@@ -131,12 +140,8 @@ def inference(args):
             subject_start_time = time.time()
             
             # Determine output directory for this subject
-            if args.output_dir:
-                output_dir = osp.join(args.output_dir, subject, 'deepRetinotopy')
-                surf_dir = osp.join(args.output_dir, subject, 'surf')
-            else:
-                output_dir = osp.join(args.path, subject, 'deepRetinotopy')
-                surf_dir = osp.join(args.path, subject, 'surf')
+            output_dir = osp.join(data_path, subject, 'deepRetinotopy')
+            surf_dir = osp.join(data_path, subject, 'surf')
             
             print(f'[{subject}] Saving predictions to: {output_dir}')
             
@@ -149,7 +154,7 @@ def inference(args):
                 template_path = osp.join(surf_dir, f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
                 if not osp.exists(template_path):
                     # Fallback to original location if not in custom output
-                    template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
+                    template_path = osp.join(data_path, subject, 'surf', f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
                 
                 if not osp.exists(template_path):
                     print(f'[{subject}] ERROR: Template file not found: {template_path}')
@@ -176,7 +181,7 @@ def inference(args):
                 template_path = osp.join(surf_dir, f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
                 if not osp.exists(template_path):
                     # Fallback to original location if not in custom output
-                    template_path = osp.join(args.path, subject, 'surf', f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
+                    template_path = osp.join(data_path, subject, 'surf', f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
                 
                 if not osp.exists(template_path):
                     print(f'[{subject}] ERROR: Template file not found: {template_path}')

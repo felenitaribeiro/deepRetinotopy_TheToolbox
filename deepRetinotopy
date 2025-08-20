@@ -147,12 +147,21 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     2_inference.py $step2_args
                     
                     if [ $? -eq 1 ]; then
-                        rm -r $dirSubs/processed
+                        # if output_dir is specified, processed folder will be in output_dir
+                        if [ -n "$output_dir" ]; then
+                            rm -r "$output_dir/processed"
+                        else
+                            rm -r "$dirSubs/processed"
+                        fi
                         echo "Error in Step 2: Please check if model path is correct."
                         exit 1
                     fi
 
-                    rm -r $dirSubs/processed
+                    if [ -n "$output_dir" ]; then
+                        rm -r "$output_dir/processed"
+                    else
+                        rm -r "$dirSubs/processed"
+                    fi
 
                     echo "--------------------------------------------------------------------------------"
                     echo "[Step 3] Resampling predictions to native space..."

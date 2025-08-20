@@ -32,6 +32,7 @@ do
     else
         echo "Processing all subjects in directory: $dirSubs"
         4_signmaps.py --path $dirSubs --hemisphere $hemisphere
+
     
     echo "Resampling fsaverage sign maps to native space..."
     cd $dirSubs

@@ -67,6 +67,7 @@ def inference(args):
         else:
             list_subs = os.listdir(data_path)
             list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed' and not sub.endswith('.txt')]
+
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")
     

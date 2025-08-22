@@ -31,7 +31,7 @@ DeepRetinotopy (pre-trained models) and required software are packaged in softwa
 You can run deepRetinotopy on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.14
+ml deepretinotopy/1.0.15
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
@@ -39,12 +39,12 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 If you prefer running deepRetinotopy locally via Docker, you can pull our container from Dockerhub and run it using the following commands:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.14:latest
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.14:latest
+docker pull vnmd/deepretinotopy_1.0.15:latest
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.15:latest
 # docker exec -it deepret bash
 ```
 
-If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.14:latest').
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.15:latest').
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
 ```bash
@@ -55,25 +55,25 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:
 
 ```bash
-date_tag=20250813
-export container=deepretinotopy_1.0.14_$date_tag
+date_tag=20250820
+export container=deepretinotopy_1.0.15_$date_tag
 curl -X GET https://neurocontainers.neurodesk.org/${container}.simg -O
 ```
 
 Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:
 
 ```bash
-apptainer exec ./deepretinotopy_1.0.14_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec ./deepretinotopy_1.0.15_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 
 ### Containers for GPU inference
-Our "deepretinotopy_1.0.14" containers are meant for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. You may see warnings like 'An issue occurred while importing pyg-lib' due to GLIBC version differences between PyTorch Geometric and FreeSurfer base image, but these can be safely ignored as they don't affect inference behaviour. You can also use the same container for a broader CPU-based inference pipeline. 
+Our "deepretinotopy_1.0.15" containers are meant for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. You may see warnings like 'An issue occurred while importing pyg-lib' due to GLIBC version differences between PyTorch Geometric and FreeSurfer base image, but these can be safely ignored as they don't affect inference behaviour. You can also use the same container for a broader CPU-based inference pipeline. 
 
 To run our tool using a GPU, you need to pass the --nv flag.
 
 ```bash
-apptainer exec --nv  ./deepretinotopy_1.0.14_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec --nv  ./deepretinotopy_1.0.15_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 ## Usage
@@ -132,6 +132,10 @@ output_directory/
 └── sub-002/
     └── ...
 ```
+
+### Error handling
+
+Pipeline execution logs are automatically saved to the home directory (`deepRetinotopy_output.log` and `deepRetinotopy_error.log`) for troubleshooting purposes. If subjects are missing required curvature files from Step 1, they will be automatically excluded from processing and logged in `removed_subjects_*.txt` files, which is saved in the output directory (if previously provided) or the FreeSurfer directory.
 
 ### Field Sign Maps
 

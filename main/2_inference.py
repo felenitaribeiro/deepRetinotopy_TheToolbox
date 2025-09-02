@@ -81,11 +81,10 @@ def inference(args):
             removed_subjects.append(subject)
             print(f"Removed subject '{subject}' due to missing surf directory.")
             continue
-
-        lh_curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.lh.32k_fs_LR.func.gii')
-        rh_curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
         
-        if not osp.exists(lh_curvature_file) or not osp.exists(rh_curvature_file):
+        curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.{args.hemisphere}.32k_fs_LR.func.gii')
+        
+        if not osp.exists(curvature_file):
             removed_subjects.append(subject)
             print(f"Removed subject '{subject}' due to missing curvature files.")
         else:

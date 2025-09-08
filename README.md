@@ -78,6 +78,23 @@ apptainer exec --nv  ./deepretinotopy_1.0.16_$date_tag.simg deepRetinotopy -s $p
 
 ## Usage
 
+### Required FreeSurfer Data
+
+For optimal storage efficiency when working with large datasets, the toolbox only requires a minimal subset of FreeSurfer outputs. You can significantly reduce storage requirements by downloading only the following files per subject:
+
+```
+# Essential Files
+<subject_id>/surf/
+├── lh.white          # White matter surface
+├── lh.pial           # Pial surface  
+├── lh.sphere.reg     # Spherical surface for resampling
+├── rh.white          # White matter surface
+├── rh.pial           # Pial surface
+└── rh.sphere.reg     # Spherical surface for resampling
+```
+
+**_Note_**: The toolbox automatically generates the midthickness surfaces and curvature data from these base files during processing. All other FreeSurfer outputs (thickness maps, parcellations, etc.) are not required for retinotopic mapping prediction.
+
 ### Basic Usage
 
 The main functionality of this toolbox is to generate retinotopic maps (polar angle, eccentricity, and pRF size) from FreeSurfer-based data (specifically, data in the 'surf' directory).

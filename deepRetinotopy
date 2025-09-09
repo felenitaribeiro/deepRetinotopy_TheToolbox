@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-exec > >(tee -a /tmp/deepRetinotopy_output.log)
-exec 2> >(tee -a /tmp/deepRetinotopy_error.log >&2)
 
 # Auto-detect number of cores (leave 1 core free)
 auto_cores=$(($(nproc) - 1))
@@ -176,9 +174,30 @@ case "$run_mode" in
         ;;
 esac
 
-# create a print box
+# Set up logging after we have all the information
+if [ -n "$output_dir" ]; then
+    LOG_DIR=$output_dir
+else
+    LOG_DIR="$dirSubs/logs"
+fi
+
+timestamp=$(date +"%Y%m%d_%H%M%S")
+log_prefix="deepRetinotopy_${timestamp}"
+
+# Create log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+# Set up logging with timestamp and location info
+exec > >(tee -a "$LOG_DIR/${log_prefix}_output.log")
+exec 2> >(tee -a "$LOG_DIR/${log_prefix}_error.log" >&2)
+
+echo "Log files location: $LOG_DIR"
+echo "Output log: ${log_prefix}_output.log"
+echo "Error log: ${log_prefix}_error.log"
 echo "--------------------------------------------------------------------------------"
 echo "DeepRetinotopy: retinotopic mapping using deep learning"
+echo "--------------------------------------------------------------------------------"
+echo "Log files: $LOG_DIR/${log_prefix}_output.log and ${log_prefix}_error.log"
 echo "--------------------------------------------------------------------------------"
 echo "Directories and parameters:"
 echo 

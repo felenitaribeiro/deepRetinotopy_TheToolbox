@@ -98,6 +98,7 @@ def inference(args):
                             and not sub.startswith('.') 
                             and not sub.startswith('processed_')  # Exclude all processed directories
                             and not sub.endswith('.txt') 
+                            and not sub.endswith('.log') 
                             and sub != 'logs']
 
         

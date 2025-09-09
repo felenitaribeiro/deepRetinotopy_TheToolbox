@@ -109,6 +109,24 @@ The main functionality of this toolbox is to generate retinotopic maps (polar an
 deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity,pRFsize"
 ```
 
+### Processing Step Control
+
+By default, DeepRetinotopy runs the complete pipeline (Steps 1-3). For greater flexibility and efficiency, you can run individual steps using the following flags:
+
+#### Available Step Flags
+
+| Flag | Description | Requirements |
+|------|-------------|--------------|
+| `--step1` | Generate midthickness surfaces and curvature maps | None |
+| `--step2` | Retinotopic map prediction | Requires Step 1 outputs |
+| `--step3` | Resample predictions to native space | Requires Steps 1+2 outputs |
+
+**_Examples:_**
+```bash
+# Generate input data only
+deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity,pRFsize" --step1
+```
+
 ### Advanced Options
 
 **Optional arguments:**
@@ -150,9 +168,18 @@ output_directory/
     └── ...
 ```
 
-### Error handling
+### Error Handling and Logging
 
-Pipeline execution logs are automatically saved to the home directory (`deepRetinotopy_output.log` and `deepRetinotopy_error.log`) for troubleshooting purposes. If subjects are missing required curvature files from Step 1, they will be automatically excluded from processing and logged in `removed_subjects_*.txt` files, which is saved in the output directory (if previously provided) or the FreeSurfer directory.
+Pipeline execution logs are automatically saved with timestamps for easy identification:
+- **Output log**: `deepRetinotopy_YYYYMMDD_HHMMSS_output.log`
+- **Error log**: `deepRetinotopy_YYYYMMDD_HHMMSS_error.log`
+
+**Log Location Priority:**
+1. Output directory (if specified with `-o` flag)
+2. FreeSurfer subjects directory (fallback)
+
+**Automatic Subject Exclusion:**
+If subjects are missing required curvature files from Step 1, they will be automatically excluded from processing and logged in `removed_subjects_*.txt` files. These exclusion logs are saved in the output directory (if previously provided) or the FreeSurfer directory.
 
 ### Field Sign Maps
 

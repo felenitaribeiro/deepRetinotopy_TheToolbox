@@ -188,7 +188,7 @@ else
     # Collect subjects
     subjects=()
     for dirSub in `ls .`; do
-        if [ "$dirSub" != "fsaverage" ] && [[ "$dirSub" != .* ]] && [ "$dirSub" != "processed" ] && [[ "$dirSub" != *.txt ]] && [[ "$dirSub" != "logs" ]]; then
+        if [ "$dirSub" != "fsaverage" ] && [[ "$dirSub" != .* ]] && [ "$dirSub" != processed_* ] && [[ "$dirSub" != *.txt ]] && [[ "$dirSub" != "logs" ]]; then
             subjects+=("$dirSub")
         fi
     done

@@ -288,22 +288,6 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     
                     2_inference.py $step2_args
                     
-                    if [ $? -eq 1 ]; then
-                        if [ -n "$output_dir" ]; then
-                            rm -r "$output_dir/processed"
-                        else
-                            rm -r "$dirSubs/processed"
-                        fi
-                        echo "Error in Step 2: Please check if model path is correct."
-                        exit 1
-                    fi
-
-                    if [ -n "$output_dir" ]; then
-                        rm -r "$output_dir/processed"
-                    else
-                        rm -r "$dirSubs/processed"
-                    fi
-                    
                     # If we're only running step2, we're done with this map
                     if [ "$run_mode" = "step2" ]; then
                         echo "Step 2 completed for $map ($hemisphere hemisphere)"

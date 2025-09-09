@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-exec > >(tee -a ~/deepRetinotopy_output.log)
-exec 2> >(tee -a ~/deepRetinotopy_error.log >&2)
+exec > >(tee -a /tmp/deepRetinotopy_output.log)
+exec 2> >(tee -a /tmp/deepRetinotopy_error.log >&2)
 
 # Auto-detect number of cores (leave 1 core free)
 auto_cores=$(($(nproc) - 1))
@@ -11,27 +11,116 @@ n_jobs=$auto_cores
 subject_id=""
 fast='yes'
 output_dir=""
+run_mode="all"  # all, step1, step2, step3
 
-while getopts s:t:d:m:g:j:i:o: flag
-do
-    case "${flag}" in
-        s) dirSubs=$(realpath "${OPTARG}");;
-        t) dirHCP=$(realpath "${OPTARG}");;
-        d) datasetName=${OPTARG};;
-        m) IFS=',' read -ra maps <<< "${OPTARG}";;
-        g) fast=${OPTARG};
+show_help() {
+    cat << EOF
+DeepRetinotopy: retinotopic mapping using deep learning
+
+Usage: $(basename "$0") [OPTIONS]
+
+Required arguments:
+  -s PATH     Path to FreeSurfer subjects directory
+  -t PATH     Path to HCP template surfaces directory
+  -d NAME     Dataset name
+  -m MAPS     Comma-separated list of maps (e.g., "polarAngle,eccentricity,pRFsize")
+
+Optional arguments:
+  -g yes/no   Fast midthickness generation (default: yes)
+  -j NUM      Number of parallel jobs (default: auto-detected or 1 if single subject)
+  -i ID       Process single subject ID only
+  -o PATH     Output directory (default: in-place within FreeSurfer structure)
+
+Step control (default: run complete pipeline):
+  --step1     Run only Step 1: Generate midthickness surfaces and curvature maps
+  --step2     Run only Step 2: Retinotopy prediction (requires Step 1 outputs)
+  --step3     Run only Step 3: Resample predicted maps to native space (requires Step 1+2 outputs)
+
+Examples:
+  # Run complete pipeline (default)
+  $(basename "$0") -s /data/subjects -t /data/templates -d hcp -m "polarAngle,eccentricity,pRFsize"
+  
+  # Only generate surfaces (useful for batch preprocessing)
+  $(basename "$0") -s /data/subjects -t /data/templates -d hcp -m "polarAngle" --step1
+  
+  # Only run prediction (surfaces already exist from previous --step1 run)
+  $(basename "$0") -s /data/subjects -t /data/templates -d hcp -m "polarAngle" --step2
+  
+  # Only resample to native space (Steps 1+2 already completed)
+  $(basename "$0") -s /data/subjects -t /data/templates -d hcp -m "polarAngle" --step3
+
+EOF
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -s)
+            dirSubs=$(realpath "$2")
+            shift 2
+            ;;
+        -t)
+            dirHCP=$(realpath "$2")
+            shift 2
+            ;;
+        -d)
+            datasetName="$2"
+            shift 2
+            ;;
+        -m)
+            IFS=',' read -ra maps <<< "$2"
+            shift 2
+            ;;
+        -g)
+            fast="$2"
             case "$fast" in
                 'yes'|'no') ;;
-                *) echo "Invalid fast argument: $fast"; exit 1;;
-            esac;;
-        j) n_jobs=${OPTARG};;
-        i) subject_id=${OPTARG};;
-        o) output_dir=$(realpath "${OPTARG}");;
-        ?)
-            echo "script usage: $(basename "$0") [-s path to subs] [-t path to HCP surfaces] [-d name of the dataset] [-m list of maps] [-g fast generation of midthickness surface] [-j number of cores for parallelization] [-i subject ID for single subject processing] [-o output directory]" >&2
+                *) echo "Error: Invalid fast argument: $fast"; exit 1;;
+            esac
+            shift 2
+            ;;
+        -j)
+            n_jobs="$2"
+            shift 2
+            ;;
+        -i)
+            subject_id="$2"
+            shift 2
+            ;;
+        -o)
+            output_dir=$(realpath "$2")
+            shift 2
+            ;;
+        --step1)
+            run_mode="step1"
+            shift
+            ;;
+        --step2)
+            run_mode="step2"
+            shift
+            ;;
+        --step3)
+            run_mode="step3"
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Error: Unknown option $1"
+            show_help
             exit 1
-        esac
+            ;;
+    esac
 done
+
+# Validate required arguments
+if [ -z "$dirSubs" ] || [ -z "$dirHCP" ] || [ -z "$datasetName" ] || [ ${#maps[@]} -eq 0 ]; then
+    echo "Error: Missing required arguments"
+    show_help
+    exit 1
+fi
 
 # Check if realpath failed
 if [ ! -d "$dirSubs" ]; then
@@ -71,6 +160,22 @@ else
     echo "Using $n_jobs parallel jobs for multiple subjects"
 fi
 
+# Determine what will run based on mode
+case "$run_mode" in
+    "all")
+        run_description="Complete pipeline (Steps 1, 2, and 3)"
+        ;;
+    "step1")
+        run_description="Step 1 only: Surface generation and curvature"
+        ;;
+    "step2")
+        run_description="Step 2 only: Retinotopy prediction"
+        ;;
+    "step3")
+        run_description="Step 3 only: Native space resampling"
+        ;;
+esac
+
 # create a print box
 echo "--------------------------------------------------------------------------------"
 echo "DeepRetinotopy: retinotopic mapping using deep learning"
@@ -92,26 +197,32 @@ if [ -n "$output_dir" ]; then
 else
     echo "Output mode: In-place (within FreeSurfer directory structure)";
 fi
+echo "Execution mode: $run_description"
 echo "--------------------------------------------------------------------------------"
 
 if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
-    # check if template surfaces are available
-    if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] && [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
-        echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii 
-        and/or $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii do not exist!"
-        exit 1
-    else
-        for hemisphere in 'lh' 'rh';
-        do 
-            if [ $hemisphere == 'lh' ]; then
-                echo "Generating retinotopic maps for the left hemisphere"
-            else
-                echo "Generating retinotopic maps for the right hemisphere"
-            fi
-            echo "--------------------------------------------------------------------------------"
+    # check if template surfaces are available (only if we're running steps that need them)
+    if [ "$run_mode" = "all" ] || [ "$run_mode" = "step1" ] || [ "$run_mode" = "step3" ]; then
+        if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] && [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
+            echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii 
+            and/or $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii do not exist!"
+            exit 1
+        fi
+    fi
+    
+    for hemisphere in 'lh' 'rh';
+    do 
+        if [ $hemisphere == 'lh' ]; then
+            echo "Processing left hemisphere"
+        else
+            echo "Processing right hemisphere"
+        fi
+        echo "--------------------------------------------------------------------------------"
+        
+        # Step 1: Generate surfaces (runs in 'all' and 'step1' modes)
+        if [ "$run_mode" = "all" ] || [ "$run_mode" = "step1" ]; then
             echo "[Step 1] Generating mid-thickness surface and curvature data..."
             
-            # Pass subject_id and output_dir flags to step 1 if provided
             step1_args="-s $dirSubs -t $dirHCP -h $hemisphere -g $fast"
             if [ -n "$subject_id" ]; then
                 step1_args="$step1_args -j 1 -i $subject_id"
@@ -127,15 +238,27 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
             if [ $? -eq 1 ]; then
                 echo "Error in Step 1: Please check surface files."
                 exit 1
-            else
-                for map in "${maps[@]}";
-                do
-                    echo "--------------------------------------------------------------------------------"
-                    echo "Map: $map"
-                    echo "--------------------------------------------------------------------------------"
+            fi
+            
+            # If we're only running step1, we're done with this hemisphere
+            if [ "$run_mode" = "step1" ]; then
+                echo "Step 1 completed for $hemisphere hemisphere"
+                continue
+            fi
+        fi
+
+        # Steps 2 and 3: Process each map (only in relevant modes)
+        if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ] || [ "$run_mode" = "step3" ]; then
+            for map in "${maps[@]}";
+            do
+                echo "--------------------------------------------------------------------------------"
+                echo "Map: $map"
+                echo "--------------------------------------------------------------------------------"
+                
+                # Step 2: Prediction (runs in 'all' and 'step2' modes)
+                if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ]; then
                     echo "[Step 2] Retinotopy prediction..."
                     
-                    # Pass subject_id and output_dir flags to step 2 if provided
                     step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere"
                     if [ -n "$subject_id" ]; then
                         step2_args="$step2_args --subject_id $subject_id"
@@ -147,7 +270,6 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     2_inference.py $step2_args
                     
                     if [ $? -eq 1 ]; then
-                        # if output_dir is specified, processed folder will be in output_dir
                         if [ -n "$output_dir" ]; then
                             rm -r "$output_dir/processed"
                         else
@@ -162,11 +284,18 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     else
                         rm -r "$dirSubs/processed"
                     fi
+                    
+                    # If we're only running step2, we're done with this map
+                    if [ "$run_mode" = "step2" ]; then
+                        echo "Step 2 completed for $map ($hemisphere hemisphere)"
+                        continue
+                    fi
+                fi
 
-                    echo "--------------------------------------------------------------------------------"
+                # Step 3: Resampling (runs in 'all' and 'step3' modes)
+                if [ "$run_mode" = "all" ] || [ "$run_mode" = "step3" ]; then
                     echo "[Step 3] Resampling predictions to native space..."
                     
-                    # Pass subject_id and output_dir flags to step 3 if provided
                     step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model"
                     if [ -n "$subject_id" ]; then
                         step3_args="$step3_args -j 1 -i $subject_id"
@@ -184,15 +313,16 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                         exit 1
                     fi
                     
-                    echo "$map predictions resampling for $hemisphere is done!"
-                    echo "--------------------------------------------------------------------------------"
-                done
-            fi
-        done
-        echo "All done!"
-        if [ -n "$output_dir" ]; then
-            echo "All output files have been saved to: $output_dir"
+                    echo "$map resampling completed for $hemisphere hemisphere"
+                fi
+                echo "--------------------------------------------------------------------------------"
+            done
         fi
+    done
+    
+    echo "Execution completed!"
+    if [ -n "$output_dir" ]; then
+        echo "All output files have been saved to: $output_dir"
     fi
 else
     echo "Directories do not exist! Please check the paths to the directories."

@@ -32,7 +32,7 @@ def generate_signMaps(args):
             raise FileNotFoundError(f"Path {args.path} does not exist.")
         else:
             list_subs = os.listdir(args.path)
-            list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed' and not sub.endswith('.txt')]
+            list_subs = [sub for sub in list_subs if sub != 'fsaverage' and not sub.startswith('.') and sub != 'processed' and not sub.endswith('.txt') and sub != 'logs']
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")
     

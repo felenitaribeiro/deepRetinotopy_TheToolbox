@@ -205,14 +205,14 @@ def inference(args):
             # Load model weights
             if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
                 if num_of_models != 1:
-                    model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt'
+                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt'
                 else:
-                    model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt'
+                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt'
             else:
                 if num_of_models != 1:
-                    model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt'
+                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt'
                 else:
-                    model_path = '/opt/deepRetinotopy_TheToolbox/models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
+                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
             
             print(f'Loading model from: {osp.basename(model_path)}')
             model.load_state_dict(torch.load(model_path, map_location=device))

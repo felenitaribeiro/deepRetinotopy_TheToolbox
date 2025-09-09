@@ -36,6 +36,7 @@ def generate_signMaps(args):
                          and not sub.startswith('.') 
                          and not sub.startswith('processed_') 
                          and not sub.endswith('.txt') 
+                         and not sub.endswith('.log') 
                          and sub != 'logs']
     
     print(f"Found {len(list_subs)} subjects to process: {list_subs}")

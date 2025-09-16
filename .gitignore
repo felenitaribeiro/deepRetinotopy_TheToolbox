@@ -1,0 +1,6 @@
+
+# macOS metadata
+.DS_Store
+
+# Sphinx build output
+docs/_build/*

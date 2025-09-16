@@ -18,6 +18,7 @@ jobs:
 
     - name: Build the docs
       run: |
+        pip install -r requirements-dev.txt
         cd docs && make clean html
     - name: GitHub Pages action
       uses: peaceiris/actions-gh-pages@v3.6.1

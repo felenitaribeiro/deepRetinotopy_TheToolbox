@@ -251,6 +251,14 @@ If you want to contribute to this repository, please follow the instructions bel
 
 Please cite our earlier work if you find it helpful:
 
+	@misc{Ribeiro2025,
+		title = {Predicting functional topography of the human visual cortex from cortical anatomy at scale},
+		doi = {https://doi.org/10.1101/2025.11.27.690210},
+		language = {en},
+		author = {Ribeiro, Fernanda L and Satzger, Robert and Hoffstaedter, Felix and Bürger, Christian and Herholz, Peer and Linhardt, David and Benson, Noah C and Schwarzkopf, D Samuel and Puckett, Alexander M. and Bollmann, Steffen and Hebart, Martin N},
+		year = {2025},
+	}
+	
 	@article{Ribeiro2021,
 		author = {Ribeiro, Fernanda L and Bollmann, Steffen and Puckett, Alexander M},
 		doi = {https://doi.org/10.1016/j.neuroimage.2021.118624},

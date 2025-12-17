@@ -20,7 +20,7 @@ jobs:
       run: |
         pip install -r requirements-dev.txt
         cd docs && make clean html
-        touch docs/_build/html/.nojekyll
+        mkdir -p docs/_build/html
     - name: GitHub Pages action
       uses: peaceiris/actions-gh-pages@v3.6.1
       with:

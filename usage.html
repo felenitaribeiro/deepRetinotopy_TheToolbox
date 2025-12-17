@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-examples.css?v=e236af4b" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a0fc1631" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -55,14 +55,14 @@
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'usage';</script>
-    <link rel="icon" href="_static/logo_v1.png"/>
+    <link rel="icon" href="_static/icon.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tutorial walkthrough" href="walkthrough.html" />
-    <link rel="prev" title="Installation" href="installation.html" />
+    <link rel="prev" title="Requirements" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Dec 10, 2025"/>
+    <meta name="docbuild:last-update" content="Dec 17, 2025"/>
   </head>
   
   
@@ -171,7 +171,8 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="walkthrough.html">Tutorial walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
@@ -338,16 +339,13 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line-arguments">Command-Line Arguments</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-call-s">Example Call(s)</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1">Example 1</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2">Example 2</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and communication</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#not-running-on-a-local-machine-data-transfer">Not running on a local machine? - Data transfer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-step-control">Processing Step Control</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-options">Advanced Options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#single-subject-processing">Single Subject Processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-output-directory">Custom Output Directory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-sign-maps">Field Sign Maps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and Communication</a></li>
 </ul>
             </nav>
         </div>
@@ -360,134 +358,108 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="usage">
-<span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h1>
-<p>The general usage of <cite>deepRetinotopy</cite> is ADD DESCRIPTION HERE.
-The exact command to run <cite>deepRetinotopy</cite> depends on the Installation method and user.
-<cite>deepRetinotopy</cite> can be used as a <code class="docutils literal notranslate"><span class="pre">command</span> <span class="pre">line</span> <span class="pre">tool</span></code>.
-Please refer to the <a class="reference external" href="https://felenitaribeiro.github.io/deepRetinotopy/walkthrough">Tutorial</a> for a more detailed walkthrough.</p>
-<p>Here’s a very conceptual example of running <cite>deepRetinotopy</cite> via <code class="docutils literal notranslate"><span class="pre">CLI</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy
--s<span class="w"> </span>/path/to/freesurfer
--t<span class="w"> </span>/path/to/hcp/surfaces
--d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity,pRFsize&quot;</span>
-</pre></div>
-</div>
-<p>More detailed information regarding the <code class="docutils literal notranslate"><span class="pre">command-line</span> <span class="pre">arguments</span></code> and process control can be found below.</p>
-<section id="command-line-arguments">
-<h2>Command-Line Arguments<a class="headerlink" href="#command-line-arguments" title="Link to this heading">#</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-s<span class="w"> </span>FREESURFER<span class="w"> </span>DIRECTORY<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-t<span class="w"> </span>HCP<span class="w"> </span>SURFACE<span class="w"> </span>DIRECTORY<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-d<span class="w"> </span>DATASET<span class="w"> </span>NAME<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-m<span class="w"> </span>MAPS<span class="w"> </span>TO<span class="w"> </span>BE<span class="w"> </span>GENERATED<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-g<span class="w"> </span>FAST<span class="w"> </span>GENERATION<span class="w"> </span>OF<span class="w"> </span>MIDTHICKNESS<span class="w"> </span>SURFACE<span class="w"> </span><span class="o">{</span>yes,no<span class="o">}]</span>
-<span class="w">               </span><span class="o">[</span>-j<span class="w"> </span>NUMBER<span class="w"> </span>OF<span class="w"> </span>CORES<span class="w"> </span>FOR<span class="w"> </span>PARALLELIZATION<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-i<span class="w"> </span>SUBJECT<span class="w"> </span>ID<span class="w"> </span>FOR<span class="w"> </span>SINGLE<span class="w"> </span>SUBJECT<span class="w"> </span>PROCESSING<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-o<span class="w"> </span>OUTPUT<span class="w"> </span>DIRECTORY<span class="w"> </span>FOR<span class="w"> </span>GENERATED<span class="w"> </span>FILES<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>--step1<span class="w"> </span>GENERATE<span class="w"> </span>MIDTHICKNESS<span class="w"> </span>SURFACES<span class="w"> </span>AND<span class="w"> </span>CURVATURE<span class="w"> </span>MAPS<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>--step2<span class="w"> </span>RETINOTOPIC<span class="w"> </span>MAP<span class="w"> </span>PREDICTION<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>--step3<span class="w"> </span>RESAMPLE<span class="w"> </span>PREDICTIONS<span class="w"> </span>TO<span class="w"> </span>NATIVE<span class="w"> </span>SPACE<span class="o">]</span>
-<span class="w">               </span><span class="o">[</span>-v<span class="o">]</span>
-</pre></div>
-</div>
-<p><strong>Basic arguments:</strong></p>
-<p>The following arguments are <strong>required</strong> to run <cite>deepRetinotopy</cite>:</p>
-<dl class="option-list">
-<dt><kbd><span class="option">-s</span></kbd></dt>
-<dd><p>path to the FreeSurfer directory</p>
-</dd>
-<dt><kbd><span class="option">-t</span></kbd></dt>
-<dd><p>path to the folder containing the HCP “fs_LR-deformed_to-fsaverage” surfaces</p>
-</dd>
-<dt><kbd><span class="option">-d</span></kbd></dt>
-<dd><p>dataset name (e.g. “hcp”)</p>
-</dd>
-<dt><kbd><span class="option">-m</span></kbd></dt>
-<dd><p>maps to be generated (e.g. “polarAngle,eccentricity,pRFsize”)</p>
-</dd>
-</dl>
-<p><strong>Processing step control</strong></p>
-<p>The following arguments can be used to control which processing steps are executed.</p>
-<dl class="option-list">
-<dt><kbd><span class="option">--step1</span></kbd></dt>
-<dd><p>Generate midthickness surfaces and curvature maps</p>
-</dd>
-<dt><kbd><span class="option">--step2</span></kbd></dt>
-<dd><p>Retinotopic map prediction (Requires Step 1 outputs)</p>
-</dd>
-<dt><kbd><span class="option">--step3</span></kbd></dt>
-<dd><p>Resample predictions to native space (Requires Steps 1+2 outputs)</p>
-</dd>
-</dl>
-<p><strong>Advanced Options</strong></p>
-<p>The following arguments are optional and can be used to further customize the processing.</p>
-<dl class="option-list">
-<dt><kbd><span class="option">-g</span></kbd></dt>
-<dd><p>Fast generation of midthickness surface</p>
-</dd>
-<dt><kbd><span class="option">-j</span></kbd></dt>
-<dd><p>Number of cores for parallelization</p>
-</dd>
-<dt><kbd><span class="option">-i</span></kbd></dt>
-<dd><p>Subject ID for single subject processing</p>
-</dd>
-<dt><kbd><span class="option">-o</span></kbd></dt>
-<dd><p>Output directory for generated files</p>
-</dd>
-</dl>
-<section id="example-call-s">
-<h3>Example Call(s)<a class="headerlink" href="#example-call-s" title="Link to this heading">#</a></h3>
-<p>Below you’ll find two examples calls that hopefully help
-you to familiarize yourself with <cite>deepRetinotopy</cite> and its options.</p>
-<section id="example-1">
-<h4>Example 1<a class="headerlink" href="#example-1" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span><span class="se">\</span>
-input
-optional_arguments
-</pre></div>
-</div>
-<p>Here’s what’s in this call:</p>
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> is a toolkit designed to generate retinotopic maps (polar angle, eccentricity, and pRF size) from FreeSurfer-based data. The exact command to run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> depends on the installation method and user preferences. Below, we provide detailed instructions and examples for using the toolkit.</p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h2>
+<p>The main functionality of this toolbox is to generate retinotopic maps from FreeSurfer-based data (specifically, data in the ‘surf’ directory).</p>
+<p><strong>Required arguments:</strong></p>
 <ul class="simple">
-<li><p>The 1st positional argument is</p></li>
-<li><p>The 2nd positional argument indicates that</p></li>
+<li><p><strong>-s</strong>: Path to the FreeSurfer directory</p></li>
+<li><p><strong>-t</strong>: Path to the folder containing the HCP “fs_LR-deformed_to-fsaverage” surfaces</p></li>
+<li><p><strong>-d</strong>: Dataset name (e.g., “hcp”)</p></li>
+<li><p><strong>-m</strong>: Maps to be generated (e.g., “polarAngle,eccentricity,pRFsize”)</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity,pRFsize&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="processing-step-control">
+<h2>Processing Step Control<a class="headerlink" href="#processing-step-control" title="Link to this heading">#</a></h2>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> runs the complete pipeline (Steps 1-3). For greater flexibility and efficiency, you can run individual steps using the following flags:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Requirements</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--step1</span></code></p></td>
+<td><p>Generate midthickness surfaces and curvature maps</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--step2</span></code></p></td>
+<td><p>Retinotopic map prediction</p></td>
+<td><p>Requires Step 1 outputs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--step3</span></code></p></td>
+<td><p>Resample predictions to native space</p></td>
+<td><p>Requires Steps 1+2 outputs</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate input data only</span>
+deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity,pRFsize&quot;</span><span class="w"> </span>--step1
+</pre></div>
+</div>
+</section>
+<section id="advanced-options">
+<h2>Advanced Options<a class="headerlink" href="#advanced-options" title="Link to this heading">#</a></h2>
+<p><strong>Optional arguments:</strong></p>
+<ul class="simple">
+<li><p><strong>-g</strong>: Fast generation of midthickness surface (<cite>yes</cite> or <cite>no</cite>, default: <cite>yes</cite>)</p></li>
+<li><p><strong>-j</strong>: Number of cores for parallelization (default: auto-detected or 1 for single subject processing)</p></li>
+<li><p><strong>-i</strong>: Subject ID for single subject processing</p></li>
+<li><p><strong>-o</strong>: Output directory for generated files</p></li>
 </ul>
 </section>
-<section id="example-2">
-<h4>Example 2<a class="headerlink" href="#example-2" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span><span class="se">\</span>
-input
-optional_arguments
-optional_arguments
+<section id="single-subject-processing">
+<h2>Single Subject Processing<a class="headerlink" href="#single-subject-processing" title="Link to this heading">#</a></h2>
+<p>Process a specific subject instead of all subjects in the directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity&quot;</span><span class="w"> </span>-i<span class="w"> </span>sub-001
 </pre></div>
 </div>
-<p>Here’s what’s in this call:</p>
+</section>
+<section id="custom-output-directory">
+<h2>Custom Output Directory<a class="headerlink" href="#custom-output-directory" title="Link to this heading">#</a></h2>
+<p>Store generated files in a separate directory (useful for DataLad and version control workflows):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># All outputs to custom directory</span>
+deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity&quot;</span><span class="w"> </span>-o<span class="w"> </span>/path/to/output
+
+<span class="c1"># Single subject with custom output</span>
+deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle&quot;</span><span class="w"> </span>-i<span class="w"> </span>sub-001<span class="w"> </span>-o<span class="w"> </span>/path/to/output
+</pre></div>
+</div>
+</section>
+<section id="field-sign-maps">
+<h2>Field Sign Maps<a class="headerlink" href="#field-sign-maps" title="Link to this heading">#</a></h2>
+<p>Generate visual field sign maps after running <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> to help with manual delineation of visual areas:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Process all subjects</span>
+signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted
+
+<span class="c1"># Process single subject</span>
+signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted<span class="w"> </span>--subject_id<span class="w"> </span>sub-001
+
+<span class="c1"># Process from custom output directory</span>
+signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/output<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted<span class="w"> </span>--subject_id<span class="w"> </span>sub-001
+</pre></div>
+</div>
+<p><strong>signMaps arguments:</strong></p>
 <ul class="simple">
-<li><p>The 1st positional argument is</p></li>
-<li><p>The 2nd positional argument indicates that</p></li>
-<li><p>The 3rd positional argument indicates that</p></li>
+<li><p><strong>–path</strong>: Path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)</p></li>
+<li><p><strong>–hemisphere</strong>: Hemisphere to process (<cite>lh</cite> or <cite>rh</cite>)</p></li>
+<li><p><strong>–map</strong>: Map type to use (default: <cite>fs_predicted</cite>)</p></li>
+<li><p><strong>–subject_id</strong>: Subject ID for single subject processing (optional)</p></li>
 </ul>
-</section>
-</section>
 </section>
 <section id="support-and-communication">
-<h2>Support and communication<a class="headerlink" href="#support-and-communication" title="Link to this heading">#</a></h2>
-<p>The documentation of this project is found here: <a class="reference external" href="https://felenitaribeiro.github.io/deepRetinotopy">https://felenitaribeiro.github.io/deepRetinotopy</a>.</p>
-<p>All bugs, concerns and enhancement requests for this software can be submitted here:
-<a class="github reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/issues">felenitaribeiro/deepRetinotopy#issues</a>.</p>
-<p>If you have a problem or would like to ask a question about how to use <cite>deepRetinotopy</cite>,
-please submit a question to <a class="reference external" href="http://neurostars.org/tags/deepRetinotopy">NeuroStars.org</a> with an <cite>deepRetinotopy</cite> tag.
-NeuroStars.org is a platform similar to StackOverflow but dedicated to neuroinformatics.</p>
-<p>All previous <cite>deepRetinotopy</cite> questions are available here:
-<a class="reference external" href="http://neurostars.org/tags/deepRetinotopy/">http://neurostars.org/tags/deepRetinotopy/</a></p>
-</section>
-<section id="not-running-on-a-local-machine-data-transfer">
-<h2>Not running on a local machine? - Data transfer<a class="headerlink" href="#not-running-on-a-local-machine-data-transfer" title="Link to this heading">#</a></h2>
-<p>Please contact you local system administrator regarding
-possible and favourable transfer options (e.g., <a class="reference external" href="https://rsync.samba.org/">rsync</a>
-or <a class="reference external" href="https://filezilla-project.org/">FileZilla</a>).</p>
-<p>A very comprehensive approach would be <a class="reference external" href="http://www.datalad.org/">Datalad</a>, which will handle data transfers with the
-appropriate settings and commands.
-Datalad also performs version control over your data.</p>
+<h2>Support and Communication<a class="headerlink" href="#support-and-communication" title="Link to this heading">#</a></h2>
+<p>All bugs, concerns, and enhancement requests for this software can be submitted here: <a class="github reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/issues">felenitaribeiro/deepRetinotopy#issues</a>.</p>
+<p>If you have a problem or would like to ask a question about how to use <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>, please send an email to Fernanda (<a class="reference external" href="mailto:fernanda&#46;ribeiro&#37;&#52;&#48;uq&#46;edu&#46;au">fernanda<span>&#46;</span>ribeiro<span>&#64;</span>uq<span>&#46;</span>edu<span>&#46;</span>au</a>)</p>
 </section>
 </section>
 
@@ -508,7 +480,7 @@ Datalad also performs version control over your data.</p>
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Installation</p>
+        <p class="prev-next-title">Requirements</p>
       </div>
     </a>
     <a class="right-next"
@@ -536,16 +508,13 @@ Datalad also performs version control over your data.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line-arguments">Command-Line Arguments</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-call-s">Example Call(s)</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#example-1">Example 1</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#example-2">Example 2</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and communication</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#not-running-on-a-local-machine-data-transfer">Not running on a local machine? - Data transfer</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-step-control">Processing Step Control</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-options">Advanced Options</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#single-subject-processing">Single Subject Processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-output-directory">Custom Output Directory</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-sign-maps">Field Sign Maps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and Communication</a></li>
 </ul>
   </nav></div>
 
@@ -579,7 +548,7 @@ By Fernanda Ribeiro
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Dec 10, 2025.
+  Last updated on Dec 17, 2025.
   <br/>
 </p>
   </div>

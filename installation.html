@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Installation &#8212; deepRetinotopy</title>
+    <title>Requirements &#8212; deepRetinotopy</title>
   
   
   
@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-examples.css?v=e236af4b" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a0fc1631" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -55,14 +55,14 @@
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'installation';</script>
-    <link rel="icon" href="_static/logo_v1.png"/>
+    <link rel="icon" href="_static/icon.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Usage" href="usage.html" />
     <link rel="prev" title="Contents" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Dec 10, 2025"/>
+    <meta name="docbuild:last-update" content="Dec 17, 2025"/>
   </head>
   
   
@@ -171,7 +171,8 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Requirements</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="walkthrough.html">Tutorial walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
@@ -328,7 +329,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Installation</h1>
+    <h1>Requirements</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -338,14 +339,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Requirements</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">Docker</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#singularity">Singularity</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-a-singularity-image-singularity-version-2-5">Preparing a Singularity image (Singularity version &gt;= 2.5)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Preparing a Singularity image (Singularity version &lt; 2.5)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-a-singularity-image">Running a Singularity Image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#singularity">Singularity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-inference">GPU inference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#neurodesk">Neurodesk</a></li>
 </ul>
 </li>
 </ul>
+
             </nav>
         </div>
     </div>
@@ -356,147 +359,66 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="installation">
+  <section id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">#</a></h1>
+<p>To use <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>, ensure the following dependencies are available:</p>
+<ul class="simple">
+<li><p>Docker / Singularity container / Neurodesk</p></li>
+<li><p>FreeSurfer directory</p></li>
+<li><p>HCP “fs_LR-deformed_to-fsaverage” surfaces (available at: <a class="github reference external" href="https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage">Washington-University/HCPpipelines</a>)</p></li>
+</ul>
+</section>
+<section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>In general, there are two distinct ways to install and use <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>:
 either through virtualization/container technology, that is <a class="reference internal" href="#docker">Docker</a> or
-<a class="reference external" href="https://github.com/singularityware/singularity">Singularity</a>, or .
+<a class="reference internal" href="#singularity">Singularity</a>, or via Neurodesk.
 Once you are ready to run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>, see <a class="reference external" href="https://felenitaribeiro.github.io/deepRetinotopy/usage">Usage</a> for details.</p>
 <section id="docker">
 <h2>Docker<a class="headerlink" href="#docker" title="Link to this heading">#</a></h2>
-<p>In order to run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> in a Docker container, Docker must be <a class="reference external" href="https://docs.docker.com/engine/installation/">installed</a> on your system.
-Once Docker is installed, you can get <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> through  running one of the following
-commands in the terminal of your choice.</p>
-<p>Option 1: pulling from the <a class="reference external" href="https://hub.docker.com/repository/docker/felenitaribeiro/deepRetinotopy/general">dockerhub registry</a> :</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>felenitaribeiro/deepRetinotopy:version
+<p>If you prefer running <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> locally via Docker, you can pull our container from Dockerhub and run it using the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>vnmd/deepretinotopy_1.0.18
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.18
 </pre></div>
 </div>
-<p>Option 2: pulling from the <a class="reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/pkgs/container/deepRetinotopy">github container registry</a> :</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/felenitaribeiro/deepRetinotopy:version
+<p>If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">PYTHONUNBUFFERED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.18
 </pre></div>
 </div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">version</span></code> is the specific version of <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> you would like to use. For example, if you want
-to employ the <code class="docutils literal notranslate"><span class="pre">latest</span></code>/most up to date <code class="docutils literal notranslate"><span class="pre">version</span></code> you can either run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>felenitaribeiro/deepRetinotopy:latest
+<p>Once in the container (the working directory is <code class="docutils literal notranslate"><span class="pre">deepRetinotopy_TheToolbox</span></code>), you can run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/felenitaribeiro/deepRetinotopy:latest
-</pre></div>
-</div>
-<p>or the same command withouth the <code class="docutils literal notranslate"><span class="pre">:latest</span></code> tag, as <code class="docutils literal notranslate"><span class="pre">Docker</span></code> searches for the <code class="docutils literal notranslate"><span class="pre">latest</span></code> tag by default.
-However, as the <code class="docutils literal notranslate"><span class="pre">latest</span></code> version is subject to changes and not necessarily in synch with the most recent <code class="docutils literal notranslate"><span class="pre">numbered</span> <span class="pre">version</span></code>, it
-is recommend to utilize the latter to ensure reproducibility. For example, if you want to employ <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span> <span class="pre">v0.0.1</span></code> the command would look as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>felenitaribeiro/deepRetinotopy:v0.0.1
-</pre></div>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/felenitaribeiro/deepRetinotopy:v0.0.1
-</pre></div>
-</div>
-<p>After the command finished (it may take a while depending on your internet connection),
-you can run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> like this:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-ti<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>felenitaribeiro/deepRetinotopy:latest<span class="w"> </span><span class="se">\</span>
-</pre></div>
-</div>
-<p>Please have a look at the examples under <a class="reference external" href="https://felenitaribeiro.github.io/deepRetinotopy/usage">Usage</a> to get more information
-about and familiarize yourself with <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>’s functionality.</p>
 </section>
 <section id="singularity">
 <h2>Singularity<a class="headerlink" href="#singularity" title="Link to this heading">#</a></h2>
-<p>For security reasons, many HPCs do not allow Docker containers, but support/allow <a class="reference external" href="https://github.com/singularityware/singularity">Singularity</a> containers. Depending
-on the <code class="docutils literal notranslate"><span class="pre">Singularity</span></code> version available to you, there are two options to get <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> as
-a <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code>.</p>
-<section id="preparing-a-singularity-image-singularity-version-2-5">
-<h3>Preparing a Singularity image (Singularity version &gt;= 2.5)<a class="headerlink" href="#preparing-a-singularity-image-singularity-version-2-5" title="Link to this heading">#</a></h3>
-<p>If the version of Singularity on your HPC is modern enough you can create a <code class="docutils literal notranslate"><span class="pre">Singularity</span>
-<span class="pre">image</span></code> directly on the HCP.
-This is as simple as:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>singularity<span class="w"> </span>build<span class="w"> </span>/my_images/deepRetinotopy-&lt;version&gt;.simg<span class="w"> </span>docker://felenitaribeiro/deepRetinotopy:&lt;version&gt;
+<p>Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">date_tag</span><span class="o">=</span><span class="m">20250902</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">container</span><span class="o">=</span>deepretinotopy_1.0.18_<span class="nv">$date_tag</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span>https://neurocontainers.neurodesk.org/<span class="si">${</span><span class="nv">container</span><span class="si">}</span>.simg<span class="w"> </span>-O
 </pre></div>
 </div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code> should be replaced with the desired version of <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> that you want to download.
-For example, if you want to use <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span> <span class="pre">v0.0.4</span></code>, the command would look as follows.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>singularity<span class="w"> </span>build<span class="w"> </span>/my_images/deepRetinotopy-v0.0.4.simg<span class="w"> </span>docker://felenitaribeiro/deepRetinotopy:v0.0.4
+<p>Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>./deepretinotopy_1.0.18_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h3>Preparing a Singularity image (Singularity version &lt; 2.5)<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
-<p>In this case, start with a machine (e.g., your personal computer) with <code class="docutils literal notranslate"><span class="pre">Docker</span></code> installed and
-the use <a class="reference external" href="https://github.com/singularityware/docker2singularity">docker2singularity</a> to
-create a <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code>. You will need an active internet connection and some time.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--privileged<span class="w"> </span>-t<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>/absolute/path/to/output/folder:/output<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>singularityware/docker2singularity<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>felenitaribeiro/deepRetinotopy:&lt;version&gt;
+<section id="gpu-inference">
+<h2>GPU inference<a class="headerlink" href="#gpu-inference" title="Link to this heading">#</a></h2>
+<p>You can use the same container for CPU-based inference pipeline as well as GPU-based inference.</p>
+<p>To run our tool using a GPU, you need to pass the <code class="docutils literal notranslate"><span class="pre">--nv</span></code> flag:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>./deepretinotopy_1.0.18_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
-</div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code> should be replaced with the desired version of <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> that you want
-to download and <code class="docutils literal notranslate"><span class="pre">/absolute/path/to/output/folder</span></code> with the absolute path where the created <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code>
-should be stored. Sticking with the example of <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span> <span class="pre">v0.0.4</span></code> this would look as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--privileged<span class="w"> </span>-t<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>/absolute/path/to/output/folder:/output<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>singularityware/docker2singularity<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>felenitaribeiro/deepRetinotopy:v0.0.4
-</pre></div>
-</div>
-<p>Beware of the back slashes, expected for Windows systems. The above command would translate to Windows systems as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--privileged<span class="w"> </span>-t<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-v<span class="w"> </span>D:<span class="se">\h</span>ost<span class="se">\p</span>ath<span class="se">\w</span>here<span class="se">\t</span>o<span class="se">\o</span>utput<span class="se">\s</span>ingularity<span class="se">\i</span>mage:/output<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>singularityware/docker2singularity<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>felenitaribeiro/deepRetinotopy:&lt;version&gt;
-</pre></div>
-</div>
-<p>You can then transfer the resulting <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code> to the HPC, for example, using <code class="docutils literal notranslate"><span class="pre">scp</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ scp felenitaribeiro_deepRetinotopy&lt;version&gt;.simg &lt;user&gt;@&lt;hcpserver.edu&gt;:/my_images
-</pre></div>
-</div>
-<p>Where <code class="docutils literal notranslate"><span class="pre">&lt;version&gt;</span></code> should be replaced with the version of <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> that you used to create the <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;user&gt;</span></code>
-with your <code class="docutils literal notranslate"><span class="pre">user</span> <span class="pre">name</span></code> on the HPC and <code class="docutils literal notranslate"><span class="pre">&lt;hcpserver.edu&gt;</span></code> with the address of the HPC.</p>
-</section>
-<section id="running-a-singularity-image">
-<h3>Running a Singularity Image<a class="headerlink" href="#running-a-singularity-image" title="Link to this heading">#</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>singularity<span class="w"> </span>run<span class="w"> </span>--cleanenv<span class="w"> </span>/my_images/deepRetinotopy-&lt;version&gt;.simg<span class="w"> </span><span class="se">\</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Make sure to check the name of the created <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">image</span></code> as that might
-diverge based on the method you used. Here and going forward it is assumed that you used <code class="docutils literal notranslate"><span class="pre">Singularity</span> <span class="pre">&gt;=</span> <span class="pre">2.5</span></code>
-and thus <code class="docutils literal notranslate"><span class="pre">deepRetinotopy-&lt;version&gt;.simg</span></code> instead of <code class="docutils literal notranslate"><span class="pre">felenitaribeiro_deepRetinotopy&lt;version&gt;.simg</span></code>.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Singularity by default <a class="reference external" href="https://github.com/singularityware/singularity/issues/445">exposes all environment variables from the host inside
-the container</a>.
-Because of this your host libraries (such as nipype) could be accidentally used
-instead of the ones inside the container - if they are included in <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>.
-To avoid such situation we recommend using the <code class="docutils literal notranslate"><span class="pre">--cleanenv</span></code> singularity flag
-in production use. For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ singularity run --cleanenv /my_images/deepRetinotopy-&lt;version&gt;.simg \
-</pre></div>
-</div>
-<p>or, unset the <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> variable before running:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ unset PYTHONPATH; singularity /my_images/deepRetinotopy-&lt;version&gt;.simg \
-</pre></div>
-</div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Depending on how <code class="docutils literal notranslate"><span class="pre">Singularity</span></code> is configured on your cluster it might or might not
-automatically <code class="docutils literal notranslate"><span class="pre">bind</span></code> (<code class="docutils literal notranslate"><span class="pre">mount</span></code> or <code class="docutils literal notranslate"><span class="pre">expose</span></code>) <code class="docutils literal notranslate"><span class="pre">host</span> <span class="pre">folders</span></code> to the container.
-If this is not done automatically you will need to <code class="docutils literal notranslate"><span class="pre">bind</span></code> the necessary folders using
-the <code class="docutils literal notranslate"><span class="pre">-B</span> <span class="pre">&lt;host_folder&gt;:&lt;container_folder&gt;</span></code> <code class="docutils literal notranslate"><span class="pre">Singularity</span></code> argument.
-For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ singularity run --cleanenv -B path/to/deepRetinotopy/on_host:/deepRetinotopy \
-    /my_images/deepRetinotopy-&lt;version&gt;.simg \
-</pre></div>
-</div>
 </div>
 </section>
+<section id="neurodesk">
+<h2>Neurodesk<a class="headerlink" href="#neurodesk" title="Link to this heading">#</a></h2>
+<p>You can run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> on <a class="reference external" href="https://neurodesk.org">Neurodesktop</a> or using <a class="reference external" href="https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/">Neurocommand</a> through the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>deepretinotopy/1.0.18
+deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
+</pre></div>
+</div>
+<p>This method allows you to leverage the pre-configured environment provided by Neurodesk, ensuring compatibility and ease of use.</p>
 </section>
 </section>
 
@@ -545,14 +467,16 @@ For example:</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Requirements</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">Docker</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#singularity">Singularity</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-a-singularity-image-singularity-version-2-5">Preparing a Singularity image (Singularity version &gt;= 2.5)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Preparing a Singularity image (Singularity version &lt; 2.5)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-a-singularity-image">Running a Singularity Image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#singularity">Singularity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-inference">GPU inference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#neurodesk">Neurodesk</a></li>
 </ul>
 </li>
 </ul>
+
   </nav></div>
 
 </div></div>
@@ -585,7 +509,7 @@ By Fernanda Ribeiro
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Dec 10, 2025.
+  Last updated on Dec 17, 2025.
   <br/>
 </p>
   </div>

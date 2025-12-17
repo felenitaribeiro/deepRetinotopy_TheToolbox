@@ -35,7 +35,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-examples.css?v=e236af4b" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=a0fc1631" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -55,13 +55,13 @@
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
-    <link rel="icon" href="_static/logo_v1.png"/>
+    <link rel="icon" href="_static/icon.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="next" title="Requirements" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Dec 10, 2025"/>
+    <meta name="docbuild:last-update" content="Dec 17, 2025"/>
   </head>
   
   
@@ -172,7 +172,8 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="walkthrough.html">Tutorial walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
@@ -344,28 +345,20 @@ document.write(`
   <a class="reference internal image-reference" href="_images/logo_v1.png"><img alt="_images/logo_v1.png" class="align-center" src="_images/logo_v1.png" style="width: 400px;" />
 </a>
 <p class="centered">
-<strong>A deep learning-based toolkit for retinotopic mapping</strong></p><a class="reference external image-reference" href="https://github.com/felenitaribeiro/deepRetinotopy/actions/workflows/docs.yml"><img alt="https://github.com/felenitaribeiro/deepRetinotopy/actions/workflows/docs.yml/badge.svg" src="https://github.com/felenitaribeiro/deepRetinotopy/actions/workflows/docs.yml/badge.svg" />
-</a>
-<a class="reference external image-reference" href="https://cloud.docker.com/u/felenitaribeiro/repository/docker/felenitaribeiro/deepRetinotopy"><img alt="Dockerpulls" src="https://img.shields.io/docker/pulls/felenitaribeiro/deepRetinotopy" />
-</a>
-<a class="reference external image-reference" href="https://img.shields.io/github/repo-size/felenitaribeiro/deepRetinotopy.zip"><img alt="https://img.shields.io/github/repo-size/felenitaribeiro/deepRetinotopy.svg" src="https://img.shields.io/github/repo-size/felenitaribeiro/deepRetinotopy.svg" />
-</a>
-<a class="reference external image-reference" href="https://img.shields.io/github/issues/felenitaribeiro/deepRetinotopy/issues"><img alt="https://img.shields.io/github/issues/felenitaribeiro/deepRetinotopy.svg" src="https://img.shields.io/github/issues/felenitaribeiro/deepRetinotopy.svg" />
-</a>
-<a class="reference external image-reference" href="https://img.shields.io/github/issues-pr/felenitaribeiro/deepRetinotopy/pulls"><img alt="https://img.shields.io/github/issues-pr/felenitaribeiro/deepRetinotopy.svg" src="https://img.shields.io/github/issues-pr/felenitaribeiro/deepRetinotopy.svg" />
-</a>
-<a class="reference external image-reference" href="https://github.com/felenitaribeiro/deepRetinotopy"><img alt="https://img.shields.io/github/license/felenitaribeiro/deepRetinotopy.svg" src="https://img.shields.io/github/license/felenitaribeiro/deepRetinotopy.svg" />
-</a>
-<p><code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> aims to provide a set of tools for ADD description here.</p>
-<p>This documentation showcases the respective functionality and provides details concerning
-its application and modules.
-If you still have questions after going through provided here you can refer to
-the <span class="xref std std-ref">api_ref</span> or ask a question on <a class="reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/issues">GitHub</a>.</p>
+<strong>A deep learning-based toolkit for retinotopic mapping</strong></p><p><code class="docutils literal notranslate"><span class="pre">DeepRetinotopy</span></code> is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. It integrates:</p>
+<ol class="arabic simple">
+<li><p>Standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing.</p></li>
+<li><p>A deep-learning model for predicting retinotopic maps at the individual level.</p></li>
+<li><p>An efficient implementation of the visual field sign analysis for aiding early visual areas parcellation.</p></li>
+</ol>
+<p>These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on <a class="reference external" href="https://www.neurodesk.org/">NeuroDesk</a>.</p>
+<p>This documentation showcases the respective functionality and provides details concerning its application and modules. If you still have questions after going through the provided documentation, you can ask a question on <a class="reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/issues">GitHub</a>.</p>
 <section id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Link to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installation">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="walkthrough.html">Tutorial walkthrough</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
@@ -389,7 +382,7 @@ the <span class="xref std std-ref">api_ref</span> or ask a question on <a class=
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installation</p>
+        <p class="prev-next-title">Requirements</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -428,7 +421,7 @@ By Fernanda Ribeiro
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Dec 10, 2025.
+  Last updated on Dec 17, 2025.
   <br/>
 </p>
   </div>

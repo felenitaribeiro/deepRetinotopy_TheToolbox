@@ -1,3 +1,65 @@
 section {
     text-align: justify;
 }
+
+/* Adjusting colors for better dark mode support */
+
+/* Background color for dark mode */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Link colors for better contrast */
+a {
+    color: #bb86fc;
+}
+
+a:hover {
+    color: #3700b3;
+}
+
+/* Header colors */
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+}
+
+/* Sidebar background and text */
+.wy-side-nav-search {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+.wy-menu-vertical {
+    background-color: #1f1f1f;
+}
+
+.wy-menu-vertical a {
+    color: #e0e0e0;
+}
+
+.wy-menu-vertical a:hover {
+    color: #bb86fc;
+}
+
+/* Code block background */
+pre {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+/* Table styling */
+table {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+table th {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}

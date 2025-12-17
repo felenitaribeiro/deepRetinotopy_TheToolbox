@@ -4,5 +4,8 @@
 Tutorial walkthrough
 ====================
 
-To better familiarize interested users with the application of ``deepRetinotopy``, we created a tutorial walkthrough below,
-that outlines how the different functions are implemented.
+For a detailed tutorial on using ``deepRetinotopy``, click the link below:
+
+`DeepRetinotopy tutorial on Neurodesk <https://neurodesk.org/example-notebooks/functional_imaging/deepretinotopy.html>`_
+
+This tutorial provides step-by-step instructions and examples for running ``deepRetinotopy`` in a Neurodesk environment.

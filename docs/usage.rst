@@ -1,146 +1,113 @@
-.. _usage:
-
 ======
 Usage
 ======
 
-The general usage of `deepRetinotopy` is ADD DESCRIPTION HERE.
-The exact command to run `deepRetinotopy` depends on the Installation method and user. 
-`deepRetinotopy` can be used as a ``command line tool``.
-Please refer to the `Tutorial <https://felenitaribeiro.github.io/deepRetinotopy/walkthrough>`_ for a more detailed walkthrough.
+``deepRetinotopy`` is a toolkit designed to generate retinotopic maps (polar angle, eccentricity, and pRF size) from FreeSurfer-based data. The exact command to run ``deepRetinotopy`` depends on the installation method and user preferences. Below, we provide detailed instructions and examples for using the toolkit.
 
-Here's a very conceptual example of running `deepRetinotopy` via ``CLI``:
+Basic Usage
+===========
 
-.. code-block:: bash 
+The main functionality of this toolbox is to generate retinotopic maps from FreeSurfer-based data (specifically, data in the 'surf' directory).
 
-        deepRetinotopy 
-        -s /path/to/freesurfer 
-        -t /path/to/hcp/surfaces 
-        -d hcp -m "polarAngle,eccentricity,pRFsize"
+**Required arguments:**
 
-More detailed information regarding the ``command-line arguments`` and process control can be found below.
+- **-s**: Path to the FreeSurfer directory
+- **-t**: Path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
+- **-d**: Dataset name (e.g., "hcp")
+- **-m**: Maps to be generated (e.g., "polarAngle,eccentricity,pRFsize")
 
-
-Command-Line Arguments
-======================
-
+Example:
 
 .. code-block:: bash
 
-    deepRetinotopy [-h]
-                   [-s FREESURFER DIRECTORY]
-                   [-t HCP SURFACE DIRECTORY]
-                   [-d DATASET NAME]
-                   [-m MAPS TO BE GENERATED]
-                   [-g FAST GENERATION OF MIDTHICKNESS SURFACE {yes,no}]
-                   [-j NUMBER OF CORES FOR PARALLELIZATION]
-                   [-i SUBJECT ID FOR SINGLE SUBJECT PROCESSING]
-                   [-o OUTPUT DIRECTORY FOR GENERATED FILES]
-                   [--step1 GENERATE MIDTHICKNESS SURFACES AND CURVATURE MAPS]
-                   [--step2 RETINOTOPIC MAP PREDICTION]
-                   [--step3 RESAMPLE PREDICTIONS TO NATIVE SPACE]
-                   [-v]
-                   
-**Basic arguments:**  
+    deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity,pRFsize"
 
-The following arguments are **required** to run `deepRetinotopy`:
+Processing Step Control
+=======================
 
+By default, ``deepRetinotopy`` runs the complete pipeline (Steps 1-3). For greater flexibility and efficiency, you can run individual steps using the following flags:
 
--s
-    path to the FreeSurfer directory
--t
-    path to the folder containing the HCP "fs_LR-deformed_to-fsaverage" surfaces
--d
-    dataset name (e.g. "hcp")
--m
-    maps to be generated (e.g. "polarAngle,eccentricity,pRFsize")
+.. list-table::
+   :header-rows: 1
 
-**Processing step control** 
+   * - Flag
+     - Description
+     - Requirements
+   * - ``--step1``
+     - Generate midthickness surfaces and curvature maps
+     - None
+   * - ``--step2``
+     - Retinotopic map prediction
+     - Requires Step 1 outputs
+   * - ``--step3``
+     - Resample predictions to native space
+     - Requires Steps 1+2 outputs
 
-The following arguments can be used to control which processing steps are executed.
-
---step1
-    Generate midthickness surfaces and curvature maps
---step2
-    Retinotopic map prediction (Requires Step 1 outputs)
---step3
-    Resample predictions to native space (Requires Steps 1+2 outputs)  
-
-**Advanced Options**
-
-The following arguments are optional and can be used to further customize the processing.
-
--g
-    Fast generation of midthickness surface
--j
-    Number of cores for parallelization
--i
-    Subject ID for single subject processing
--o
-    Output directory for generated files
-
-
-Example Call(s)
----------------
-
-Below you'll find two examples calls that hopefully help
-you to familiarize yourself with `deepRetinotopy` and its options.
-
-Example 1
-~~~~~~~~~
+Example:
 
 .. code-block:: bash
 
-    deepRetinotopy \
-    input
-    optional_arguments
+    # Generate input data only
+    deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity,pRFsize" --step1
 
-Here's what's in this call:
+Advanced Options
+=================
 
-- The 1st positional argument is 
-- The 2nd positional argument indicates that 
+**Optional arguments:**
 
+- **-g**: Fast generation of midthickness surface (`yes` or `no`, default: `yes`)
+- **-j**: Number of cores for parallelization (default: auto-detected or 1 for single subject processing)
+- **-i**: Subject ID for single subject processing
+- **-o**: Output directory for generated files
 
-Example 2
-~~~~~~~~~
+Single Subject Processing
+==========================
+
+Process a specific subject instead of all subjects in the directory:
 
 .. code-block:: bash
 
-    deepRetinotopy \
-    input
-    optional_arguments
-    optional_arguments
+    deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -i sub-001
 
-Here's what's in this call:
+Custom Output Directory
+========================
 
-- The 1st positional argument is 
-- The 2nd positional argument indicates that 
-- The 3rd positional argument indicates that 
+Store generated files in a separate directory (useful for DataLad and version control workflows):
 
+.. code-block:: bash
 
-Support and communication
-=========================
+    # All outputs to custom directory
+    deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -o /path/to/output
 
-The documentation of this project is found here: https://felenitaribeiro.github.io/deepRetinotopy.
+    # Single subject with custom output
+    deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle" -i sub-001 -o /path/to/output
 
-All bugs, concerns and enhancement requests for this software can be submitted here:
-https://github.com/felenitaribeiro/deepRetinotopy/issues.
+Field Sign Maps
+===============
 
-If you have a problem or would like to ask a question about how to use `deepRetinotopy`,
-please submit a question to `NeuroStars.org <http://neurostars.org/tags/deepRetinotopy>`_ with an `deepRetinotopy` tag.
-NeuroStars.org is a platform similar to StackOverflow but dedicated to neuroinformatics.
+Generate visual field sign maps after running ``deepRetinotopy`` to help with manual delineation of visual areas:
 
-All previous `deepRetinotopy` questions are available here:
-http://neurostars.org/tags/deepRetinotopy/
+.. code-block:: bash
 
-Not running on a local machine? - Data transfer
-===============================================
+    # Process all subjects
+    signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted
 
-Please contact you local system administrator regarding
-possible and favourable transfer options (e.g., `rsync <https://rsync.samba.org/>`_
-or `FileZilla <https://filezilla-project.org/>`_).
+    # Process single subject
+    signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted --subject_id sub-001
 
-A very comprehensive approach would be `Datalad
-<http://www.datalad.org/>`_, which will handle data transfers with the
-appropriate settings and commands.
-Datalad also performs version control over your data.
+    # Process from custom output directory
+    signMaps --path /path/to/output --hemisphere lh --map fs_predicted --subject_id sub-001
+
+**signMaps arguments:**
+
+- **--path**: Path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)
+- **--hemisphere**: Hemisphere to process (`lh` or `rh`)
+- **--map**: Map type to use (default: `fs_predicted`)
+- **--subject_id**: Subject ID for single subject processing (optional)
+
+Support and Communication
+==========================
+
+All bugs, concerns, and enhancement requests for this software can be submitted here: https://github.com/felenitaribeiro/deepRetinotopy/issues.
+
+If you have a problem or would like to ask a question about how to use ``deepRetinotopy``, please send an email to Fernanda (fernanda.ribeiro@uq.edu.au)

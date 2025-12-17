@@ -2,5 +2,8 @@
 Release History
 ===============
 
-Initial Release (YYYY-MM-DD)
+Version 1.0.18
+-------------
+Released on 2025-09-02.
+
 ----------------------------

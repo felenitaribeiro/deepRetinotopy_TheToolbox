@@ -50,7 +50,7 @@ html_static_path = ['_static']
 html_logo = "_static/logo_v1.png"
 html_title = "deepRetinotopy"
 html_copy_source = True
-html_favicon = "_static/logo_v1.png"
+html_favicon = "_static/icon.png"
 html_last_updated_fmt = ""
 
 html_sidebars = {
@@ -72,5 +72,5 @@ html_theme_options = {
 }
 
 html_css_files = [
-    '_static/custom.css',
+    'custom.css',
 ]

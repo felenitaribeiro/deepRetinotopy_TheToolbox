@@ -2,64 +2,80 @@ section {
     text-align: justify;
 }
 
-/* Adjusting colors for better dark mode support */
+/* Adjusting colors for light and dark mode */
 
-/* Background color for dark mode */
-body {
+/* Default (light mode) styles */
+body.light-mode {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Dark mode styles */
+body.dark-mode {
     background-color: #121212;
     color: #e0e0e0;
 }
 
-/* Link colors for better contrast */
-a {
+body.dark-mode a {
     color: #bb86fc;
 }
 
-a:hover {
+body.dark-mode a:hover {
     color: #3700b3;
 }
 
-/* Header colors */
-h1, h2, h3, h4, h5, h6 {
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
     color: #ffffff;
 }
 
-/* Sidebar background and text */
-.wy-side-nav-search {
+body.dark-mode .wy-side-nav-search {
     background-color: #1f1f1f;
     color: #e0e0e0;
 }
 
-.wy-menu-vertical {
+body.dark-mode .wy-menu-vertical {
     background-color: #1f1f1f;
 }
 
-.wy-menu-vertical a {
+body.dark-mode .wy-menu-vertical a {
     color: #e0e0e0;
 }
 
-.wy-menu-vertical a:hover {
+body.dark-mode .wy-menu-vertical a:hover {
     color: #bb86fc;
 }
 
-/* Code block background */
-pre {
+body.dark-mode pre {
     background-color: #2d2d2d;
     color: #e0e0e0;
 }
 
-/* Table styling */
-table {
+body.dark-mode table {
     background-color: #1f1f1f;
     color: #e0e0e0;
 }
 
-table th {
+body.dark-mode table th {
     background-color: #2d2d2d;
     color: #ffffff;
 }
 
-table td {
+body.dark-mode table td {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .wy-nav-top {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-mode .wy-nav-content {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .wy-breadcrumbs {
     background-color: #1f1f1f;
     color: #e0e0e0;
 }

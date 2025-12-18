@@ -26,4 +26,8 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/_build/html
-        commit_message: ${{ github.event.head_commit.message }}
+        publish_branch: gh-pages
+        allow_empty_commit: true
+        keep_files: true
+        cname: ''
+        enable_jekyll: false

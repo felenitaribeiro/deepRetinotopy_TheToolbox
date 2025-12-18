@@ -68,7 +68,7 @@ To run our tool using a GPU, you need to pass the ``--nv`` flag:
     apptainer exec --nv ./deepretinotopy_1.0.18_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 
 Neurodesk
-========
+=============
 
 You can run ``deepRetinotopy`` on `Neurodesktop <https://neurodesk.org>`_ or using `Neurocommand <https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/>`_ through the following commands:
 

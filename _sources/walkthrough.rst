@@ -1,5 +1,3 @@
-.. _walkthrough:
-
 ====================
 Tutorial walkthrough
 ====================

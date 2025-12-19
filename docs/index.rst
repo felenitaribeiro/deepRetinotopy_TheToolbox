@@ -1,3 +1,5 @@
+DeepRetinotopy
+===============
 .. image:: _static/logo_v1.png
    :align: center
    :width: 400px

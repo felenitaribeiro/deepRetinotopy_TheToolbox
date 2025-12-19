@@ -1,11 +1,11 @@
-DeepRetinotopy
-===============
 .. image:: _static/logo_v1.png
    :align: center
    :width: 400px
 
 .. centered:: A deep learning-based toolkit for retinotopic mapping
 
+About
+===============
 ``DeepRetinotopy`` is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. It integrates:
 
 1. Standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing.

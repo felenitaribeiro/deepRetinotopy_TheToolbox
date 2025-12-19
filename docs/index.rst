@@ -14,12 +14,7 @@ These components are packaged into Docker and Singularity software containers, w
 
 This documentation showcases the respective functionality and provides details concerning its application and modules. If you still have questions after going through the provided documentation, you can ask a question on `GitHub <https://github.com/felenitaribeiro/deepRetinotopy/issues>`_.
 
-Contents
-========
-.. toctree::
-   :maxdepth: 1
+Acknowledgements
+===============
 
-   installation
-   usage
-   walkthrough
-   release-history
+This work is supported through the European Union's Horizon Europe research and innovation funding program under the Marie Skłodowska-Curie Actions project ID 709 101146996.

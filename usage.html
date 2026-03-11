@@ -62,7 +62,7 @@
     <link rel="prev" title="Requirements" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Dec 23, 2025"/>
+    <meta name="docbuild:last-update" content="Mar 11, 2026"/>
   </head>
   
   
@@ -344,7 +344,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-options">Advanced Options</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#single-subject-processing">Single Subject Processing</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-output-directory">Custom Output Directory</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-sign-maps">Field Sign Maps</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and Communication</a></li>
 </ul>
             </nav>
@@ -435,27 +434,6 @@ deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesur
 </pre></div>
 </div>
 </section>
-<section id="field-sign-maps">
-<h2>Field Sign Maps<a class="headerlink" href="#field-sign-maps" title="Link to this heading">#</a></h2>
-<p>Generate visual field sign maps after running <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> to help with manual delineation of visual areas:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Process all subjects</span>
-signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted
-
-<span class="c1"># Process single subject</span>
-signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted<span class="w"> </span>--subject_id<span class="w"> </span>sub-001
-
-<span class="c1"># Process from custom output directory</span>
-signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/output<span class="w"> </span>--hemisphere<span class="w"> </span>lh<span class="w"> </span>--map<span class="w"> </span>fs_predicted<span class="w"> </span>--subject_id<span class="w"> </span>sub-001
-</pre></div>
-</div>
-<p><strong>signMaps arguments:</strong></p>
-<ul class="simple">
-<li><p><strong>–path</strong>: Path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)</p></li>
-<li><p><strong>–hemisphere</strong>: Hemisphere to process (<cite>lh</cite> or <cite>rh</cite>)</p></li>
-<li><p><strong>–map</strong>: Map type to use (default: <cite>fs_predicted</cite>)</p></li>
-<li><p><strong>–subject_id</strong>: Subject ID for single subject processing (optional)</p></li>
-</ul>
-</section>
 <section id="support-and-communication">
 <h2>Support and Communication<a class="headerlink" href="#support-and-communication" title="Link to this heading">#</a></h2>
 <p>All bugs, concerns, and enhancement requests for this software can be submitted here: <a class="github reference external" href="https://github.com/felenitaribeiro/deepRetinotopy/issues">felenitaribeiro/deepRetinotopy#issues</a>.</p>
@@ -513,7 +491,6 @@ signMaps<span class="w"> </span>--path<span class="w"> </span>/path/to/output<sp
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-options">Advanced Options</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#single-subject-processing">Single Subject Processing</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-output-directory">Custom Output Directory</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-sign-maps">Field Sign Maps</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#support-and-communication">Support and Communication</a></li>
 </ul>
   </nav></div>
@@ -548,7 +525,7 @@ By Fernanda Ribeiro
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Dec 23, 2025.
+  Last updated on Mar 11, 2026.
   <br/>
 </p>
   </div>

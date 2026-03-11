@@ -82,28 +82,6 @@ Store generated files in a separate directory (useful for DataLad and version co
     # Single subject with custom output
     deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle" -i sub-001 -o /path/to/output
 
-Field Sign Maps
-===============
-
-Generate visual field sign maps after running ``deepRetinotopy`` to help with manual delineation of visual areas:
-
-.. code-block:: bash
-
-    # Process all subjects
-    signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted
-
-    # Process single subject
-    signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted --subject_id sub-001
-
-    # Process from custom output directory
-    signMaps --path /path/to/output --hemisphere lh --map fs_predicted --subject_id sub-001
-
-**signMaps arguments:**
-
-- **--path**: Path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)
-- **--hemisphere**: Hemisphere to process (`lh` or `rh`)
-- **--map**: Map type to use (default: `fs_predicted`)
-- **--subject_id**: Subject ID for single subject processing (optional)
 
 Support and Communication
 ==========================

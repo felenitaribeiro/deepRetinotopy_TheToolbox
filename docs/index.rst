@@ -12,7 +12,7 @@ About
 
 1. Standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing.
 2. A deep-learning model for predicting retinotopic maps at the individual level.
-3. An efficient implementation of the visual field sign analysis for aiding early visual areas parcellation.
+3. Coming soon: An efficient implementation of the visual field sign analysis for aiding early visual areas parcellation.
 
 These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on `NeuroDesk <https://www.neurodesk.org/>`_.
 

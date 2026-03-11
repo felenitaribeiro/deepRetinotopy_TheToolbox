@@ -1,7 +1,7 @@
 # DeepRetinotopy - A deep learning-based toolkit for retinotopic mapping
 ![Logo](/figures/logo_v1.png)
 
-DeepRetinotopy is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation. These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
+DeepRetinotopy is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation (coming soon). These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
 
 ## Table of Contents
 * [Requirements](#installation-and-requirements)
@@ -180,27 +180,6 @@ Pipeline execution logs are automatically saved with timestamps for easy identif
 
 **Automatic Subject Exclusion:**
 If subjects are missing required curvature files from Step 1, they will be automatically excluded from processing and logged in `removed_subjects_*.txt` files. These exclusion logs are saved in the output directory (if previously provided) or the FreeSurfer directory.
-
-### Field Sign Maps
-
-Generate visual field sign maps after running `deepRetinotopy` to help with manual delineation of visual areas:
-
-```bash
-# Process all subjects
-signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted
-
-# Process single subject
-signMaps --path /path/to/freesurfer --hemisphere lh --map fs_predicted --subject_id sub-001
-
-# Process from custom output directory
-signMaps --path /path/to/output --hemisphere lh --map fs_predicted --subject_id sub-001
-```
-
-**signMaps arguments:**
-- **--path** path to the directory containing deepRetinotopy results (FreeSurfer or custom output directory)
-- **--hemisphere** hemisphere to process (`lh` or `rh`)
-- **--map** map type to use (default: `fs_predicted`)
-- **--subject_id** subject ID for single subject processing (optional)
 
 ## Output
 

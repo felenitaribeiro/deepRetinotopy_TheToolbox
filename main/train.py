@@ -75,7 +75,7 @@ def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=N
 
     if epoch == 100:
         for param_group in optimizer.param_groups:
-            param_group['lr'] = 0.005
+            param_group['lr'] = param_group['lr'] * 0.5
 
     for data in train_loader:
         data = data.to(device)

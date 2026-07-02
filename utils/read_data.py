@@ -5,6 +5,23 @@ import os.path as osp
 import nibabel as nib
 from torch_geometric.data import Data
 
+ECC_MAX = 8.0
+
+
+def _coords_from_pa_ecc(pa_values, ecc_values):
+    """Convert (polar angle in deg, eccentricity in deg) to normalized Cartesian
+    coordinates (x, y) = ecc * (cos, sin) / ECC_MAX, with a validity mask.
+    Invalid (NaN) vertices get coordinate (0, 0) and mask False. No polar-angle
+    shift is applied: the Cartesian representation is smooth across the 0/360
+    wrap for both hemispheres."""
+    valid = ~(torch.isnan(pa_values) | torch.isnan(ecc_values))  # (N, 1)
+    pa_rad = torch.deg2rad(pa_values)
+    x_coord = ecc_values * torch.cos(pa_rad)
+    y_coord = ecc_values * torch.sin(pa_rad)
+    coords = torch.cat([x_coord, y_coord], dim=1) / ECC_MAX  # (N, 2)
+    coords[~valid.view(-1)] = 0.0
+    return coords.float(), valid
+
 
 def read_HCP(path, hemisphere=None, sub_id=None,
              visual_mask_L=None, visual_mask_R=None,
@@ -36,14 +53,17 @@ def read_HCP(path, hemisphere=None, sub_id=None,
         """
     # Loading the measures
     R2 = scipy.io.loadmat(osp.join(path, 'cifti_R2_all.mat'))['cifti_R2']
-    if prediction == 'polarAngle':
+    if prediction == 'visualCoord' and stimulus != 'original':
+        raise NotImplementedError(
+            "visualCoord prediction currently supports stimulus='original' only")
+    if prediction in ('polarAngle', 'visualCoord'):
         polarAngle = scipy.io.loadmat(osp.join(path, 'cifti_polarAngle_all.mat'))[
             'cifti_polarAngle']
-    elif prediction == 'eccentricity':
+    if prediction in ('eccentricity', 'visualCoord'):
         eccentricity = \
             scipy.io.loadmat(osp.join(path, 'cifti_eccentricity_all.mat'))[
                 'cifti_eccentricity']
-    elif prediction == 'pRFsize':
+    if prediction == 'pRFsize':
         pRFsize = scipy.io.loadmat(osp.join(path, 'cifti_pRFsize_all.mat'))[
             'cifti_pRFsize']
     if myelination == True:
@@ -92,6 +112,17 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                         number_hemi_nodes:number_cortical_nodes].reshape(
                         (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
                     dtype=torch.float)
+            elif prediction == 'visualCoord':
+                pa_values = torch.tensor(np.reshape(
+                    polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][0][
+                        number_hemi_nodes:number_cortical_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                    dtype=torch.float)
+                ecc_values = torch.tensor(np.reshape(
+                    eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][0][0][
+                        number_hemi_nodes:number_cortical_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_R == 1], (-1, 1)),
+                    dtype=torch.float)
         else:
             R2_values = torch.tensor(np.reshape(
                 nib.load(osp.join(path,'../../empirical_data_bars/' + str(sub_id) + '.fs_empirical_variance_explained_rh_masked_' + str(stimulus) + '.func.gii')).agg_data().reshape(
@@ -132,18 +163,24 @@ def read_HCP(path, hemisphere=None, sub_id=None,
         noR2 = np.isnan(R2_values)
         R2_values[noR2 == 1] = 0
 
-        condition = np.isnan(retinotopicMap_values)
-        retinotopicMap_values[condition == 1] = -1
+        if prediction == 'visualCoord':
+            y_values, mask_values = _coords_from_pa_ecc(pa_values, ecc_values)
+        else:
+            condition = np.isnan(retinotopicMap_values)
+            retinotopicMap_values[condition == 1] = -1
+            y_values = retinotopicMap_values
+            mask_values = R2_values > 0
 
         if myelination == False:
-            data = Data(x=curvature, y=retinotopicMap_values, pos=pos)
+            data = Data(x=curvature, y=y_values, pos=pos)
 
         else:
             data = Data(x=torch.cat((curvature, myelin_values), 1),
-                        y=retinotopicMap_values, pos=pos)
+                        y=y_values, pos=pos)
 
         data.face = faces
         data.R2 = R2_values
+        data.mask = mask_values
 
     elif (hemisphere == 'Left' or hemisphere == 'LH' or hemisphere == 'left' or hemisphere == 'lh'):
         # Loading connectivity of triangles
@@ -175,6 +212,17 @@ def read_HCP(path, hemisphere=None, sub_id=None,
                 retinotopicMap_values = torch.tensor(np.reshape(
                     pRFsize['x' + str(sub_id) + '_fit1_receptivefieldsize_msmall'][
                         0][0][0:number_hemi_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                    dtype=torch.float)
+            elif prediction == 'visualCoord':
+                pa_values = torch.tensor(np.reshape(
+                    polarAngle['x' + str(sub_id) + '_fit1_polarangle_msmall'][0][0][
+                        0:number_hemi_nodes].reshape(
+                        (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
+                    dtype=torch.float)
+                ecc_values = torch.tensor(np.reshape(
+                    eccentricity['x' + str(sub_id) + '_fit1_eccentricity_msmall'][0][0][
+                        0:number_hemi_nodes].reshape(
                         (number_hemi_nodes))[visual_mask_L == 1], (-1, 1)),
                     dtype=torch.float)
         else:
@@ -217,24 +265,31 @@ def read_HCP(path, hemisphere=None, sub_id=None,
         noR2 = np.isnan(R2_values)
         R2_values[noR2 == 1] = 0
 
-        condition = np.isnan(retinotopicMap_values)
-        retinotopicMap_values[condition == 1] = -1
+        if prediction == 'visualCoord':
+            y_values, mask_values = _coords_from_pa_ecc(pa_values, ecc_values)
+        else:
+            condition = np.isnan(retinotopicMap_values)
+            retinotopicMap_values[condition == 1] = -1
 
-        if prediction == 'polarAngle':
-            # Rescaling polar angle values
-            sum_180 = retinotopicMap_values < 180
-            minus_180 = retinotopicMap_values > 180
-            retinotopicMap_values[sum_180] = retinotopicMap_values[sum_180] + 180
-            retinotopicMap_values[minus_180] = retinotopicMap_values[minus_180] - 180
+            if prediction == 'polarAngle':
+                # Rescaling polar angle values
+                sum_180 = retinotopicMap_values < 180
+                minus_180 = retinotopicMap_values > 180
+                retinotopicMap_values[sum_180] = retinotopicMap_values[sum_180] + 180
+                retinotopicMap_values[minus_180] = retinotopicMap_values[minus_180] - 180
+
+            y_values = retinotopicMap_values
+            mask_values = R2_values > 0
 
         if myelination == False:
-            data = Data(x=curvature, y=retinotopicMap_values, pos=pos)
+            data = Data(x=curvature, y=y_values, pos=pos)
         else:
             data = Data(x=torch.cat((curvature, myelin_values), 1),
-                        y=retinotopicMap_values, pos=pos)
+                        y=y_values, pos=pos)
 
         data.face = faces
         data.R2 = R2_values
+        data.mask = mask_values
     return data
 
 

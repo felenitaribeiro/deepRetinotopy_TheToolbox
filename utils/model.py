@@ -4,8 +4,10 @@ import sys
 from torch_geometric.nn import SplineConv
 
 class deepRetinotopy(torch.nn.Module):
-    def __init__(self, num_features):
+    def __init__(self, num_features, num_outputs=1, output_activation='elu'):
         super(deepRetinotopy, self).__init__()
+        self.num_outputs = num_outputs
+        self.output_activation = output_activation
         self.conv1 = SplineConv(num_features, 8, dim=3, kernel_size=25)
         self.bn1 = torch.nn.BatchNorm1d(8)
 
@@ -39,7 +41,7 @@ class deepRetinotopy(torch.nn.Module):
         self.conv11 = SplineConv(16, 8, dim=3, kernel_size=25)
         self.bn11 = torch.nn.BatchNorm1d(8)
 
-        self.conv12 = SplineConv(8, 1, dim=3, kernel_size=25)
+        self.conv12 = SplineConv(8, num_outputs, dim=3, kernel_size=25)
 
     def forward(self, data):
         x, edge_index, pseudo = data.x, data.edge_index, data.edge_attr
@@ -87,7 +89,11 @@ class deepRetinotopy(torch.nn.Module):
         x = self.bn11(x)
         x = F.dropout(x, p=.10, training=self.training)
 
-        x = F.elu(self.conv12(x, edge_index, pseudo)).view(-1)
+        x = self.conv12(x, edge_index, pseudo)
+        if self.output_activation == 'elu':
+            x = F.elu(x)
+        if self.num_outputs == 1:
+            x = x.view(-1)
         return x
 
 

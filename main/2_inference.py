@@ -22,6 +22,39 @@ from utils.model import deepRetinotopy
 from torch_geometric.data import DataLoader
 from utils.dataset import Retinotopy
 
+ECC_MAX = 8.0
+
+
+def _reconstruct_coords(pred_xy):
+    """Convert (N, 2) normalized Cartesian predictions back to visual-field maps.
+
+    Returns (eccentricity in deg, polar angle in deg mapped to [0, 360)).
+    Inverse of utils.read_data._coords_from_pa_ecc."""
+    xy = np.asarray(pred_xy) * ECC_MAX
+    ecc = np.sqrt(xy[:, 0] ** 2 + xy[:, 1] ** 2)
+    pa = np.degrees(np.arctan2(xy[:, 1], xy[:, 0]))
+    pa[pa < 0] += 360.0
+    return ecc, pa
+
+
+def _save_coord_maps(pred_xy, final_mask, template_path, output_dir, subject,
+                     hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord'):
+    """Reconstruct and save polarAngle + eccentricity GIFTIs from a joint
+    Cartesian-coordinate model output (one forward pass -> two maps). The output
+    filename token <tag> keeps different experiment variants from colliding."""
+    ecc_vals, pa_vals = _reconstruct_coords(pred_xy)
+    for map_name, vals in (('polarAngle', pa_vals), ('eccentricity', ecc_vals)):
+        template = nib.load(template_path)
+        pred = np.zeros((num_of_cortical_nodes, 1))
+        pred[final_mask == 1] = np.reshape(vals, (-1, 1))
+        pred[final_mask != 1] = -1
+        template.agg_data()[:] = np.reshape(pred, (-1))
+        output_filename = (f'{subject}.fs_predicted_{map_name}_{hemi}'
+                           f'_curvatureFeat_{tag}{stimulus_name}.func.gii')
+        nib.save(template, osp.join(output_dir, output_filename))
+        print(f'[{subject}] Saved {map_name} ({hemi}) [{tag}]')
+
+
 def test(model, data_loader, device):
     model.eval()
     y_hat = []
@@ -197,7 +230,10 @@ def inference(args):
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             print(f'Using device: {device}')
             
-            model = deepRetinotopy(num_features=args.num_features).to(device)
+            coords = args.prediction_type == 'visualCoord'
+            model = deepRetinotopy(num_features=args.num_features,
+                                   num_outputs=2 if coords else 1,
+                                   output_activation=None if coords else 'elu').to(device)
             if args.stimulus == 'original':
                 stimulus_name = ''
             else:
@@ -215,6 +251,9 @@ def inference(args):
                 else:
                     model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
             
+            # Explicit weights path (experiment variants) overrides the default lookup
+            if args.model_path:
+                model_path = args.model_path
             print(f'Loading model from: {osp.basename(model_path)}')
             model.load_state_dict(torch.load(model_path, map_location=device))
 
@@ -249,21 +288,27 @@ def inference(args):
                         print(f'[{subject}] ERROR: Template file not found: {template_path}')
                         continue
                         
-                    template = nib.load(template_path)
-                    pred = np.zeros((num_of_cortical_nodes, 1))
-                    pred[final_mask_L == 1] = np.reshape(
-                        np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
-                    predictions[j, i, :] = pred[:, 0]
-                    pred[final_mask_L != 1] = -1
-
-                    template.agg_data()[:] = np.reshape(pred, (-1))
-                    if num_of_models != 1:
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
+                    if coords:
+                        _save_coord_maps(
+                            np.array(evaluation['Predicted_values'][j].cpu()),
+                            final_mask_L, template_path, output_dir, subject,
+                            'lh', stimulus_name, num_of_cortical_nodes, tag=args.tag)
                     else:
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{stimulus_name}.func.gii'
-                    
-                    output_path = osp.join(output_dir, output_filename)
-                    nib.save(template, output_path)
+                        template = nib.load(template_path)
+                        pred = np.zeros((num_of_cortical_nodes, 1))
+                        pred[final_mask_L == 1] = np.reshape(
+                            np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
+                        predictions[j, i, :] = pred[:, 0]
+                        pred[final_mask_L != 1] = -1
+
+                        template.agg_data()[:] = np.reshape(pred, (-1))
+                        if num_of_models != 1:
+                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
+                        else:
+                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{stimulus_name}.func.gii'
+
+                        output_path = osp.join(output_dir, output_filename)
+                        nib.save(template, output_path)
                     
                 else:
                     template_path = osp.join(surf_dir, f'{subject}.curvature-midthickness.rh.32k_fs_LR.func.gii')
@@ -271,23 +316,29 @@ def inference(args):
                         print(f'[{subject}] ERROR: Template file not found: {template_path}')
                         continue
                         
-                    template = nib.load(template_path)
-                    pred = np.zeros((num_of_cortical_nodes, 1))
-                    pred[final_mask_R == 1] = np.reshape(
-                        np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
-                    predictions[j, i, :] = pred[:, 0]
-
-                    pred[final_mask_R != 1] = -1
-
-                    template.agg_data()[:] = np.reshape(pred, (-1))
-
-                    if num_of_models != 1:
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
+                    if coords:
+                        _save_coord_maps(
+                            np.array(evaluation['Predicted_values'][j].cpu()),
+                            final_mask_R, template_path, output_dir, subject,
+                            'rh', stimulus_name, num_of_cortical_nodes, tag=args.tag)
                     else:
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{stimulus_name}.func.gii'
-                    
-                    output_path = osp.join(output_dir, output_filename)
-                    nib.save(template, output_path)
+                        template = nib.load(template_path)
+                        pred = np.zeros((num_of_cortical_nodes, 1))
+                        pred[final_mask_R == 1] = np.reshape(
+                            np.array(evaluation['Predicted_values'][j].cpu()), (-1, 1))
+                        predictions[j, i, :] = pred[:, 0]
+
+                        pred[final_mask_R != 1] = -1
+
+                        template.agg_data()[:] = np.reshape(pred, (-1))
+
+                        if num_of_models != 1:
+                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
+                        else:
+                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{stimulus_name}.func.gii'
+
+                        output_path = osp.join(output_dir, output_filename)
+                        nib.save(template, output_path)
                 
                 subject_time = (time.time() - subject_start_time)
                 print(f'[{subject}] Completed in {subject_time:.1f}s')
@@ -338,7 +389,7 @@ def main():
     parser.add_argument('--path', type=str, help='Path to the data folder')
     parser.add_argument('--dataset', type=str, default='HCP', help='Dataset to use')
     parser.add_argument('--prediction_type', type=str, default='polarAngle',
-                        choices=['polarAngle', 'eccentricity', 'pRFsize'],
+                        choices=['polarAngle', 'eccentricity', 'pRFsize', 'visualCoord'],
                         help='Prediction type')
     parser.add_argument('--hemisphere', type=str,
                         default='lh', choices=['lh', 'rh'], help='Hemisphere to use')
@@ -348,6 +399,12 @@ def main():
                         help='Subject ID to process. If None, all subjects will be processed.')
     parser.add_argument('--output_dir', type=str, default=None,
                         help='Output directory for generated files. If None, files will be saved within the FreeSurfer directory structure.')
+    parser.add_argument('--model_path', type=str, default=None,
+                        help='Explicit path to model weights (.pt). Overrides the '
+                             'default models/ lookup; use for experiment variants.')
+    parser.add_argument('--tag', type=str, default='visualCoord',
+                        help='Output filename token for visualCoord predictions '
+                             '(e.g. loss-mse_ep300_bs4). Keeps variants from colliding.')
     args = parser.parse_args()
     inference(args)
 

@@ -1,6 +1,8 @@
 import os
 import os.path as osp
 import torch
+from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
+from torch.optim.lr_scheduler import CosineAnnealingLR
 import torch_geometric.transforms as T
 import sys
 import time
@@ -70,10 +72,11 @@ def _git_info(repo):
     return sha, (dirty not in ('', 'unknown'))
 
 
-def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=None):
+def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=None,
+          grad_clip=0.0, step_lr=True):
     model.train()
 
-    if epoch == 100:
+    if step_lr and epoch == 100:
         for param_group in optimizer.param_groups:
             param_group['lr'] = param_group['lr'] * 0.5
 
@@ -89,6 +92,8 @@ def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=N
             mask = data.mask.view(-1)
             output_loss = loss_fn(pred, target, R2, mask)
             output_loss.backward()
+            if grad_clip:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
             optimizer.step()
             with torch.no_grad():
                 dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
@@ -106,6 +111,8 @@ def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=N
                 data.to(device).y.view(-1)[threshold == 1] - model(data)[
                     threshold == 1])).item()
 
+            if grad_clip:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
             optimizer.step()
     return output_loss.detach(), MAE
 
@@ -199,15 +206,35 @@ def train_loop(args):
             json.dump(config, f, indent=2)
 
     stim_suffix = '' if args.stimulus == 'original' else '_bars'
+    use_step = (args.lr_schedule == 'step') and (not args.swa)
+    swa_start = args.swa_start if args.swa_start is not None else int(0.75 * args.n_epochs)
+    swa_lr = args.swa_lr if args.swa_lr is not None else args.lr * 0.1
     for i in range(args.n_seeds):
+        torch.manual_seed(i)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(i)
         model = deepRetinotopy(num_features=args.num_features,
                                num_outputs=2 if coords else 1,
                                output_activation=None if coords else 'elu').to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+
+        cos = swalr = swa_model = None
+        if args.swa:
+            cos = CosineAnnealingLR(optimizer, T_max=max(1, swa_start))
+            swalr = SWALR(optimizer, swa_lr=swa_lr)
+            swa_model = AveragedModel(model)
+        elif args.lr_schedule == 'cosine':
+            cos = CosineAnnealingLR(optimizer, T_max=args.n_epochs)
+
         log_rows = []
         for epoch in range(1, args.n_epochs + 1):
             loss, MAE = train(epoch, model, optimizer, train_loader, device,
-                              coords=coords, loss_fn=loss_fn)
+                              coords=coords, loss_fn=loss_fn,
+                              grad_clip=args.grad_clip, step_lr=use_step)
+            if args.swa and epoch >= swa_start:
+                swa_model.update_parameters(model); swalr.step()
+            elif cos is not None:
+                cos.step()
             test_output = test(model, dev_loader, device, coords=coords)
             print(
                 'Epoch: {:02d}, Train_loss: {:.4f}, Train_MAE: {:.4f}, Test_MAE: '
@@ -216,9 +243,16 @@ def train_loop(args):
             log_rows.append((epoch, float(loss), MAE,
                              test_output['MAE'], test_output['MAE_thr']))
 
+        if args.swa:
+            update_bn(train_loader, swa_model, device=device)
+            swa_eval = test(swa_model, dev_loader, device, coords=coords)
+            print('SWA dev MAE: {:.4f} (thr {:.4f})'.format(swa_eval['MAE'], swa_eval['MAE_thr']))
+            state = swa_model.module.state_dict()
+        else:
+            state = model.state_dict()
         model_name = 'deepRetinotopy_{}_{}_model{}{}.pt'.format(
             args.prediction_type, args.hemisphere, i + 1, stim_suffix)
-        torch.save(model.state_dict(), osp.join(outdir, model_name))
+        torch.save(state, osp.join(outdir, model_name))
 
         if coords:
             log_name = 'trainlog_{}_model{}{}.csv'.format(
@@ -251,6 +285,17 @@ def main():
                         help='Training batch size (number of subjects/graphs)')
     parser.add_argument('--lr', type=float, default=0.01,
                         help='Initial Adam learning rate')
+    parser.add_argument('--grad_clip', type=float, default=0.0,
+                        help='Max gradient norm for clipping (0 = off)')
+    parser.add_argument('--lr_schedule', type=str, default='step',
+                        choices=['step', 'cosine'],
+                        help="LR schedule ('step'=legacy halve@100; ignored if --swa)")
+    parser.add_argument('--swa', action='store_true',
+                        help='Stochastic Weight Averaging (saves one averaged model)')
+    parser.add_argument('--swa_start', type=int, default=None,
+                        help='Epoch to start SWA averaging (default 0.75*n_epochs)')
+    parser.add_argument('--swa_lr', type=float, default=None,
+                        help='Constant SWA learning rate (default lr/10)')
     parser.add_argument('--tag', type=str, default='',
                         help='Experiment tag: output subdir output/<tag>/ and '
                              'provenance. Default: loss-<loss>_ep<n_epochs>_bs<batch_size>')

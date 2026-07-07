@@ -221,7 +221,7 @@ def inference(args):
         print(f'Dataset loading time: {dataset_load_time:.2f} minutes')
         
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-        num_of_models = 1
+        num_of_models = args.num_of_models
         num_of_cortical_nodes = 32492
         predictions = np.zeros((len(list_subs), num_of_models, num_of_cortical_nodes))
         
@@ -241,21 +241,21 @@ def inference(args):
             else:
                 stimulus_name = '_' + args.stimulus
             
-            # Load model weights
-            if (args.hemisphere == 'Left' or args.hemisphere == 'LH' or args.hemisphere == 'left' or args.hemisphere == 'lh'):
-                if num_of_models != 1:
-                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + str(i + 1) + stimulus_name + '.pt'
-                else:
-                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_LH_model' + stimulus_name + '.pt'
-            else:
-                if num_of_models != 1:
-                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + str(i + 1) + stimulus_name + '.pt'
-                else:
-                    model_path = osp.dirname(osp.realpath(__file__)) + '/../models/deepRetinotopy_' + args.prediction_type + '_RH_model' + stimulus_name + '.pt'
-            
-            # Explicit weights path (experiment variants) overrides the default lookup
-            if args.model_path:
+            # Resolve model weights + per-model output tag. Default source is the
+            # toolbox models/ dir (override with --model_dir, e.g. an experiment
+            # output dir). --num_of_models>1 loops over the per-seed files
+            # model1..modelN and writes one output per seed; --model_path is an
+            # explicit single-file override (only meaningful for --num_of_models 1).
+            HU = 'LH' if args.hemisphere in ('Left', 'LH', 'left', 'lh') else 'RH'
+            model_dir = args.model_dir if args.model_dir else osp.join(
+                osp.dirname(osp.realpath(__file__)), '..', 'models')
+            if args.model_path and num_of_models == 1:
                 model_path = args.model_path
+            else:
+                seed = str(i + 1) if num_of_models != 1 else ''
+                model_path = osp.join(model_dir, 'deepRetinotopy_{}_{}_model{}{}.pt'.format(
+                    args.prediction_type, HU, seed, stimulus_name))
+            out_tag = args.tag if num_of_models == 1 else '{}_model{}'.format(args.tag, i + 1)
             print(f'Loading model from: {osp.basename(model_path)}')
             model.load_state_dict(torch.load(model_path, map_location=device))
 
@@ -294,7 +294,7 @@ def inference(args):
                         _save_coord_maps(
                             np.array(evaluation['Predicted_values'][j].cpu()),
                             final_mask_L, template_path, output_dir, subject,
-                            'lh', stimulus_name, num_of_cortical_nodes, tag=args.tag)
+                            'lh', stimulus_name, num_of_cortical_nodes, tag=out_tag)
                     else:
                         template = nib.load(template_path)
                         pred = np.zeros((num_of_cortical_nodes, 1))
@@ -322,7 +322,7 @@ def inference(args):
                         _save_coord_maps(
                             np.array(evaluation['Predicted_values'][j].cpu()),
                             final_mask_R, template_path, output_dir, subject,
-                            'rh', stimulus_name, num_of_cortical_nodes, tag=args.tag)
+                            'rh', stimulus_name, num_of_cortical_nodes, tag=out_tag)
                     else:
                         template = nib.load(template_path)
                         pred = np.zeros((num_of_cortical_nodes, 1))
@@ -401,6 +401,15 @@ def main():
                         help='Subject ID to process. If None, all subjects will be processed.')
     parser.add_argument('--output_dir', type=str, default=None,
                         help='Output directory for generated files. If None, files will be saved within the FreeSurfer directory structure.')
+    parser.add_argument('--num_of_models', type=int, default=1,
+                        help='Number of seed models to run per hemisphere. >1 loops '
+                             'over the per-seed files model1..modelN in the model dir '
+                             'and writes one output per seed (visualCoord: tag_model<i>; '
+                             'single-map: ..._model<i>). Default 1 (toolbox behavior).')
+    parser.add_argument('--model_dir', type=str, default=None,
+                        help='Directory holding deepRetinotopy_<type>_<H>_model[<i>].pt '
+                             '(default: the toolbox models/ dir). Point at an experiment '
+                             'output dir to run its seeds without deploying to models/.')
     parser.add_argument('--model_path', type=str, default=None,
                         help='Explicit path to model weights (.pt). Overrides the '
                              'default models/ lookup; use for experiment variants.')

@@ -31,25 +31,33 @@ NORM_VALUE = 70
 def _reconstruct_coords(pred_xy):
     """Convert (N, 2) normalized Cartesian predictions back to visual-field maps.
 
-    Returns (eccentricity in deg, polar angle in deg mapped to [0, 360)).
+    Returns (eccentricity deg, polar angle deg in [0, 360), x deg, y deg).
     Inverse of utils.read_data._coords_from_pa_ecc."""
     xy = np.asarray(pred_xy) * ECC_MAX
-    ecc = np.sqrt(xy[:, 0] ** 2 + xy[:, 1] ** 2)
-    pa = np.degrees(np.arctan2(xy[:, 1], xy[:, 0]))
+    x, y = xy[:, 0], xy[:, 1]
+    ecc = np.sqrt(x ** 2 + y ** 2)
+    pa = np.degrees(np.arctan2(y, x))
     pa[pa < 0] += 360.0
-    return ecc, pa
+    return ecc, pa, x, y
 
 
 def _save_coord_maps(pred_xy, final_mask, template_path, output_dir, subject,
                      hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord'):
-    """Reconstruct and save polarAngle + eccentricity GIFTIs from a joint
-    Cartesian-coordinate model output (one forward pass -> two maps). The output
-    filename token <tag> keeps different experiment variants from colliding."""
-    ecc_vals, pa_vals = _reconstruct_coords(pred_xy)
-    for map_name, vals in (('polarAngle', pa_vals), ('eccentricity', ecc_vals)):
+    """Save the joint Cartesian-coordinate model outputs as GIFTIs: the raw
+    x/y visual-field coordinates AND the reconstructed polarAngle + eccentricity
+    (one forward pass -> four maps). The x/y maps are CONTINUOUS (no 0/360 wrap),
+    so Step 3 should resample x and y to native space and reconstruct PA/ecc there
+    (PA = atan2(y, x)); resampling the polarAngle map directly would corrupt the
+    0/360 seam. The <tag> token keeps experiment variants from colliding."""
+    ecc_vals, pa_vals, x_vals, y_vals = _reconstruct_coords(pred_xy)
+    for map_name, vals in (('polarAngle', pa_vals), ('eccentricity', ecc_vals),
+                           ('x', x_vals), ('y', y_vals)):
         template = nib.load(template_path)
         pred = np.zeros((num_of_cortical_nodes, 1))
         pred[final_mask == 1] = np.reshape(vals, (-1, 1))
+        # -1 background for all maps (incl. x/y). Verified safe: Step 3 resamples
+        # with -current-roi, which excludes out-of-ROI vertices from the weighted
+        # average, so the -1 fill never bleeds into the reconstructed native maps.
         pred[final_mask != 1] = -1
         template.agg_data()[:] = np.reshape(pred, (-1))
         output_filename = (f'{subject}.fs_predicted_{map_name}_{hemi}'

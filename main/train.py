@@ -145,27 +145,31 @@ def train_loop(args):
     coords = args.prediction_type == 'visualCoord'
     loss_fn = LOSSES[args.loss]
 
-    # Per-experiment output directory + provenance. Experiment runs (visualCoord)
-    # go in output/<tag>/ with a config.json (args + git SHA) and per-seed
-    # trainlog.csv; the legacy single-map path keeps writing flat to output/.
+    # Per-experiment output directory + provenance. visualCoord runs go in
+    # output/<tag>/ (config.json + per-seed trainlog.csv). The single-map paths
+    # (polarAngle/eccentricity/pRFsize) write weights flat to output/, so their
+    # provenance filenames are namespaced by prediction_type to avoid collisions.
+    # `prov` is the provenance filename token: <hemisphere> in the (already
+    # per-tag) coords dir, <prediction_type>_<hemisphere> in the flat dir.
     script_dir = osp.dirname(osp.realpath(__file__))
     if coords:
         tag = args.tag if args.tag else 'loss-{}_ep{}_bs{}'.format(
             args.loss, args.n_epochs, args.batch_size)
         outdir = osp.join(script_dir, 'output', tag)
+        prov = args.hemisphere
     else:
         tag = ''
         outdir = osp.join(script_dir, 'output')
+        prov = '{}_{}'.format(args.prediction_type, args.hemisphere)
     if not osp.exists(outdir):
         os.makedirs(outdir)
 
-    if coords:
-        sha, dirty = _git_info(script_dir)
-        config = dict(vars(args))
-        config.update(tag=tag, git_sha=sha, git_dirty=dirty,
-                      timestamp=datetime.datetime.now().isoformat())
-        with open(osp.join(outdir, 'config_{}.json'.format(args.hemisphere)), 'w') as f:
-            json.dump(config, f, indent=2)
+    sha, dirty = _git_info(script_dir)
+    config = dict(vars(args))
+    config.update(tag=tag, git_sha=sha, git_dirty=dirty,
+                  timestamp=datetime.datetime.now().isoformat())
+    with open(osp.join(outdir, 'config_{}.json'.format(prov)), 'w') as f:
+        json.dump(config, f, indent=2)
 
     stim_suffix = '' if args.stimulus == 'original' else '_bars'
     use_step = (args.lr_schedule == 'step') and (not args.swa)
@@ -216,13 +220,11 @@ def train_loop(args):
             args.prediction_type, args.hemisphere, i + 1, stim_suffix)
         torch.save(state, osp.join(outdir, model_name))
 
-        if coords:
-            log_name = 'trainlog_{}_model{}{}.csv'.format(
-                args.hemisphere, i + 1, stim_suffix)
-            with open(osp.join(outdir, log_name), 'w') as f:
-                f.write('epoch,train_loss,train_mae,test_mae,test_mae_thr\n')
-                for r in log_rows:
-                    f.write('{},{:.6f},{:.6f},{:.6f},{:.6f}\n'.format(*r))
+        log_name = 'trainlog_{}_model{}{}.csv'.format(prov, i + 1, stim_suffix)
+        with open(osp.join(outdir, log_name), 'w') as f:
+            f.write('epoch,train_loss,train_mae,test_mae,test_mae_thr\n')
+            for r in log_rows:
+                f.write('{},{:.6f},{:.6f},{:.6f},{:.6f}\n'.format(*r))
 
 def main():
     parser = argparse.ArgumentParser(description='Train deepRetinotopy model')

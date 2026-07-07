@@ -10,54 +10,17 @@ import argparse
 import json
 import subprocess
 import datetime
-import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 
 sys.path.append('..')
 
 from utils.model import deepRetinotopy
 from utils.dataset import Retinotopy
+from utils.losses import LOSSES
 
-EPS = 1e-8
-
-
-def _weighted_mean(per_vertex, weight):
-    return (weight * per_vertex).sum() / (weight.sum() + EPS)
-
-
-def loss_euclidean(pred, target, R2, mask):
-    """R2-weighted mean Euclidean distance in Cartesian visual-field space."""
-    dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
-    return _weighted_mean(dist, R2 * mask.float())
-
-
-def loss_mse(pred, target, R2, mask):
-    """R2-weighted mean squared error on (x, y). Up-weights large (peripheral)
-    errors relative to the plain distance."""
-    se = ((pred - target) ** 2).sum(dim=1)
-    return _weighted_mean(se, R2 * mask.float())
-
-
-def loss_smoothl1(pred, target, R2, mask):
-    """R2-weighted Smooth-L1 (Huber) on the 2D residual; robust to outliers."""
-    per = F.smooth_l1_loss(pred, target, reduction='none').sum(dim=1)
-    return _weighted_mean(per, R2 * mask.float())
-
-
-def loss_ecc_weighted(pred, target, R2, mask):
-    """R2-weighted Euclidean distance, additionally weighted by empirical
-    eccentricity (normalized radius) to push the model to fit the periphery."""
-    dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
-    r_emp = torch.sqrt((target ** 2).sum(dim=1) + 1e-12)  # normalized ecc in [0, 1]
-    return _weighted_mean(dist, R2 * mask.float() * r_emp)
-
-
-LOSSES = {
-    'euclidean': loss_euclidean,
-    'mse': loss_mse,
-    'smoothl1': loss_smoothl1,
-    'ecc_weighted': loss_ecc_weighted,
-}
+# max_value for T.Cartesian: normalizes edge-vector (relative-position) components.
+# Must match the value used at inference (main/2_inference.py).
+NORM_VALUE = 70
 
 
 def _git_info(repo):
@@ -165,13 +128,12 @@ def train_loop(args):
     if subjects[-1] == '':
         subjects = subjects[0:len(subjects) - 1]    
 
-    norm_value = 70
     pre_transform = T.Compose([T.FaceToEdge()])
 
-    train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=norm_value),
+    train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
                             prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
-    dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=norm_value),
+    dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
                             prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)

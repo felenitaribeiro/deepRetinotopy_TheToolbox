@@ -23,6 +23,9 @@ from torch_geometric.data import DataLoader
 from utils.dataset import Retinotopy
 
 ECC_MAX = 8.0
+# max_value for T.Cartesian: normalizes edge-vector (relative-position) components.
+# Must match the value used at training (main/train.py).
+NORM_VALUE = 70
 
 
 def _reconstruct_coords(pred_xy):
@@ -185,7 +188,6 @@ def inference(args):
             os.makedirs(args.output_dir, exist_ok=True)
             print(f"Created output directory: {args.output_dir}")
         
-        norm_value = 70 
         pre_transform = T.Compose([T.FaceToEdge()])
         
         # Load the dataset (this will create the processed directory)
@@ -209,7 +211,7 @@ def inference(args):
                     shutil.copytree(original_subject_path, temp_subject_path, symlinks=True)
         
         test_dataset = Retinotopy(temp_data_path, 'Test',
-                                  transform=T.Cartesian(max_value=norm_value),
+                                  transform=T.Cartesian(max_value=NORM_VALUE),
                                   pre_transform=pre_transform, dataset=args.dataset,
                                   list_subs=list_subs,
                                   prediction=args.prediction_type, hemisphere=args.hemisphere)

@@ -1,0 +1,28 @@
+# Source of truth for the deepretinotopy Neurodesk container recipe.
+#
+# `container/render_recipe.py` reads this file plus the current git tag/commit
+# and fills `container/build.yaml.tmpl` to produce the neurocontainers recipe
+# (recipes/deepretinotopy/build.yaml). The recipe is a generated artifact --
+# edit *this* file (or the template), never the rendered YAML by hand.
+#
+# Per release you normally only touch `models` below (the best-performing seed
+# picked for each map/hemisphere). `version` and `commit` come from git and are
+# supplied by the renderer / CI, not stored here.
+
+# OSF project that hosts the trained model weights, and the path prefix within
+# it. Files are fetched as: <osf_model_dir>/deepRetinotopy_<map>_<hemi>_model<seed>.pt
+osf_project: ermbz
+osf_model_dir: osfstorage/new_models
+
+# Which trained seed ships for each hemisphere + map. The renderer emits the
+# download list in a fixed order (LH block first, then RH; within each,
+# polarAngle, eccentricity, pRFsize) regardless of the ordering here.
+models:
+  LH:
+    polarAngle: 5
+    eccentricity: 2
+    pRFsize: 5
+  RH:
+    polarAngle: 4
+    eccentricity: 2
+    pRFsize: 5

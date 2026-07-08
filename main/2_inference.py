@@ -42,7 +42,7 @@ def _reconstruct_coords(pred_xy):
 
 
 def _save_coord_maps(pred_xy, final_mask, template_path, output_dir, subject,
-                     hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord'):
+                     hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord-model'):
     """Save the joint Cartesian-coordinate model outputs as GIFTIs: the raw
     x/y visual-field coordinates AND the reconstructed polarAngle + eccentricity
     (one forward pass -> four maps). The x/y maps are CONTINUOUS (no 0/360 wrap),
@@ -263,7 +263,13 @@ def inference(args):
                 seed = str(i + 1) if num_of_models != 1 else ''
                 model_path = osp.join(model_dir, 'deepRetinotopy_{}_{}_model{}{}.pt'.format(
                     args.prediction_type, HU, seed, stimulus_name))
-            out_tag = args.tag if num_of_models == 1 else '{}_model{}'.format(args.tag, i + 1)
+            # MODEL-name token in the output filename (= Step 3's -m value):
+            # "<name>-model[<seed>]". The coords path names the model via --tag
+            # (default visualCoord, overridable for variant sweeps); the single-
+            # variable path names it by prediction_type (e.g. pRFsize-model).
+            seed_suffix = '' if num_of_models == 1 else str(i + 1)
+            out_tag = '{}-model{}'.format(args.tag, seed_suffix)
+            model_token = '{}-model{}'.format(args.prediction_type, seed_suffix)
             print(f'Loading model from: {osp.basename(model_path)}')
             if not osp.exists(model_path):
                 raise FileNotFoundError(
@@ -320,10 +326,7 @@ def inference(args):
                         pred[final_mask_L != 1] = -1
 
                         template.agg_data()[:] = np.reshape(pred, (-1))
-                        if num_of_models != 1:
-                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
-                        else:
-                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_model{stimulus_name}.func.gii'
+                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_{model_token}{stimulus_name}.func.gii'
 
                         output_path = osp.join(output_dir, output_filename)
                         nib.save(template, output_path)
@@ -350,10 +353,7 @@ def inference(args):
 
                         template.agg_data()[:] = np.reshape(pred, (-1))
 
-                        if num_of_models != 1:
-                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{i + 1}{stimulus_name}.func.gii'
-                        else:
-                            output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_model{stimulus_name}.func.gii'
+                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_{model_token}{stimulus_name}.func.gii'
 
                         output_path = osp.join(output_dir, output_filename)
                         nib.save(template, output_path)
@@ -420,8 +420,9 @@ def main():
     parser.add_argument('--num_of_models', type=int, default=1,
                         help='Number of seed models to run per hemisphere. >1 loops '
                              'over the per-seed files model1..modelN in the model dir '
-                             'and writes one output per seed (visualCoord: tag_model<i>; '
-                             'single-map: ..._model<i>). Default 1 (toolbox behavior).')
+                             'and writes one output per seed, token "<name>-model<i>" '
+                             '(visualCoord: <tag>-model<i>; single-map: <type>-model<i>). '
+                             'Default 1 (toolbox behavior).')
     parser.add_argument('--model_dir', type=str, default=None,
                         help='Directory holding deepRetinotopy_<type>_<H>_model[<i>].pt '
                              '(default: the toolbox models/ dir). Point at an experiment '
@@ -430,8 +431,10 @@ def main():
                         help='Explicit path to model weights (.pt). Overrides the '
                              'default models/ lookup; use for experiment variants.')
     parser.add_argument('--tag', type=str, default='visualCoord',
-                        help='Output filename token for visualCoord predictions '
-                             '(e.g. loss-mse_ep300_bs4). Keeps variants from colliding.')
+                        help='Model-name stem for the visualCoord output token, '
+                             'written as "<tag>-model[<seed>]" (default visualCoord '
+                             '-> visualCoord-model). Override for variant sweeps, '
+                             'e.g. --tag loss-mse_ep300 -> loss-mse_ep300-model.')
     args = parser.parse_args()
     inference(args)
 

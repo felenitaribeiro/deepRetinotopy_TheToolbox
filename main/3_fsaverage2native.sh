@@ -29,6 +29,10 @@ do
        esac;;
     m) model=${OPTARG};
        case "$model" in
+         # <modelname>-model[<seed>] tokens written by Step 2, e.g.
+         # visualCoord-model, pRFsize-model3, polarAngle-model.
+         polarAngle-model*|eccentricity-model*|pRFsize-model*|visualCoord-model*) ;;
+         # Legacy tokens (pre-rename) kept for back-compat.
          model1|model2|model3|model4|model5|average|model) ;;
          *) echo "Invalid model argument: $model"; exit 1;;
        esac;;

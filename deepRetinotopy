@@ -21,7 +21,9 @@ Required arguments:
   -s PATH     Path to FreeSurfer subjects directory
   -t PATH     Path to HCP template surfaces directory
   -d NAME     Dataset name
-  -m MAPS     Comma-separated list of maps (e.g., "polarAngle,eccentricity,pRFsize")
+  -m MAPS     Comma-separated list of maps (e.g., "polarAngle,eccentricity,pRFsize").
+              polarAngle and eccentricity are produced jointly by the visualCoord
+              model, so requesting either (or both) runs a single visualCoord pass.
 
 Optional arguments:
   -g yes/no   Fast midthickness generation (default: yes)
@@ -219,6 +221,33 @@ fi
 echo "Execution mode: $run_description"
 echo "--------------------------------------------------------------------------------"
 
+# --- Route requested variables to the model that produces them ------------------
+# The visualCoord model predicts polarAngle, eccentricity, x and y in a single
+# forward pass, so requests for polarAngle and/or eccentricity collapse to ONE
+# visualCoord job (Step 2 --prediction_type visualCoord; Step 3 -r visualCoord
+# reconstructs native PA + ecc from the continuous x/y maps). Other maps (e.g.
+# pRFsize) route to their own variable-specific model. Order is preserved.
+prediction_jobs=()
+seen_visualcoord="no"
+for map in "${maps[@]}"; do
+    case "$map" in
+        polarAngle|eccentricity|visualCoord)
+            if [ "$seen_visualcoord" = "no" ]; then
+                prediction_jobs+=("visualCoord")
+                seen_visualcoord="yes"
+            fi
+            ;;
+        *)
+            prediction_jobs+=("$map")
+            ;;
+    esac
+done
+if [ "$seen_visualcoord" = "yes" ]; then
+    echo "Note: polarAngle/eccentricity are produced jointly by the visualCoord model."
+fi
+echo "Models to run: ${prediction_jobs[@]}"
+echo "--------------------------------------------------------------------------------"
+
 if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
     # check if template surfaces are available (only if we're running steps that need them)
     if [ "$run_mode" = "all" ] || [ "$run_mode" = "step1" ] || [ "$run_mode" = "step3" ]; then
@@ -268,10 +297,10 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
 
         # Steps 2 and 3: Process each map (only in relevant modes)
         if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ] || [ "$run_mode" = "step3" ]; then
-            for map in "${maps[@]}";
+            for map in "${prediction_jobs[@]}";
             do
                 echo "--------------------------------------------------------------------------------"
-                echo "Map: $map"
+                echo "Model: $map"
                 echo "--------------------------------------------------------------------------------"
                 
                 # Step 2: Prediction (runs in 'all' and 'step2' modes)
@@ -299,7 +328,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step3" ]; then
                     echo "[Step 3] Resampling predictions to native space..."
                     
-                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m model"
+                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m ${map}-model"
                     if [ -n "$subject_id" ]; then
                         step3_args="$step3_args -j 1 -i $subject_id"
                     else

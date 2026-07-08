@@ -1,0 +1,107 @@
+name: publish neurocontainer recipe
+
+# On a version tag (e.g. v1.0.19), regenerate the neurocontainers recipe from
+# container/manifest.yaml + container/build.yaml.tmpl and open a PR against
+# neurodesk/neurocontainers from your fork. Also runnable by hand
+# (workflow_dispatch) with dry_run: true to just render and inspect the output.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 1.0.19). Defaults to the triggering tag."
+        required: false
+      commit:
+        description: "Commit SHA to pin. Defaults to the checked-out commit."
+        required: false
+      dry_run:
+        description: "Render only; do not open a PR."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  # Your fork of neurocontainers that the PR branch is pushed to.
+  FORK: felenitaribeiro/neurocontainers
+  UPSTREAM: neurodesk/neurocontainers
+  RECIPE_PATH: recipes/deepretinotopy/build.yaml
+
+jobs:
+  render-and-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deepRetinotopy_TheToolbox
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install renderer dependencies
+        run: pip install pyyaml
+
+      - name: Resolve version and commit
+        id: vars
+        run: |
+          version="${{ github.event.inputs.version }}"
+          if [ -z "$version" ]; then version="${GITHUB_REF_NAME#v}"; fi
+          commit="${{ github.event.inputs.commit }}"
+          if [ -z "$commit" ]; then commit="${GITHUB_SHA}"; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "Publishing deepretinotopy $version @ $commit"
+
+      - name: Render build.yaml
+        run: |
+          python container/render_recipe.py \
+            --version "${{ steps.vars.outputs.version }}" \
+            --commit "${{ steps.vars.outputs.commit }}" \
+            --output "${RUNNER_TEMP}/build.yaml"
+          echo "::group::rendered recipe"
+          cat "${RUNNER_TEMP}/build.yaml"
+          echo "::endgroup::"
+
+      - name: Checkout upstream neurocontainers
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM }}
+          token: ${{ secrets.NEUROCONTAINERS_PAT }}
+          path: neurocontainers
+          fetch-depth: 0
+
+      - name: Copy rendered recipe into place
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          mkdir -p "neurocontainers/$(dirname "$RECIPE_PATH")"
+          cp "${RUNNER_TEMP}/build.yaml" "neurocontainers/${RECIPE_PATH}"
+
+      - name: Open pull request
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.NEUROCONTAINERS_PAT }}
+          path: neurocontainers
+          push-to-fork: ${{ env.FORK }}
+          base: main
+          branch: deepretinotopy-${{ steps.vars.outputs.version }}
+          delete-branch: true
+          commit-message: "deepretinotopy ${{ steps.vars.outputs.version }}"
+          title: "deepretinotopy ${{ steps.vars.outputs.version }}"
+          body: |
+            Automated recipe update for **deepretinotopy ${{ steps.vars.outputs.version }}**.
+
+            - version: `${{ steps.vars.outputs.version }}`
+            - pinned commit: `${{ steps.vars.outputs.commit }}`
+
+            Generated from `container/manifest.yaml` via `container/render_recipe.py`
+            in [deepRetinotopy_TheToolbox](https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox).
+            Do not edit the recipe by hand -- change the manifest/template and re-tag.

@@ -21,7 +21,9 @@ test_signmaps() {
     sudo chmod 777 -R "$DIR_SUBS/1/deepRetinotopy/"
 
     cd "$TOOLBOX_PATH/main"
-    signMaps -s "$DIR_SUBS" -t "$DIR_HCP" -d "$DATASET_NAME"
+    # Fixtures (deepRetinotopy.zip) use the legacy 'model' token, so request it
+    # explicitly (the wrapper now defaults to 'visualCoord-model').
+    signMaps -s "$DIR_SUBS" -t "$DIR_HCP" -d "$DATASET_NAME" -m model
 
     # Validate output
     local file_path="$DIR_SUBS/1/deepRetinotopy/1.fs_predicted_fieldSignMap_lh_model.func.gii"

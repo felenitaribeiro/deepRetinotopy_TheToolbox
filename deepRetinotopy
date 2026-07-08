@@ -22,8 +22,9 @@ Required arguments:
   -t PATH     Path to HCP template surfaces directory
   -d NAME     Dataset name
   -m MAPS     Comma-separated list of maps (e.g., "polarAngle,eccentricity,pRFsize").
-              polarAngle and eccentricity are produced jointly by the visualCoord
-              model, so requesting either (or both) runs a single visualCoord pass.
+              If a visualCoord model is deployed, polarAngle and eccentricity are
+              produced jointly by it (requesting either runs a single visualCoord
+              pass); otherwise they fall back to legacy per-map models.
 
 Optional arguments:
   -g yes/no   Fast midthickness generation (default: yes)
@@ -225,16 +226,38 @@ echo "--------------------------------------------------------------------------
 # The visualCoord model predicts polarAngle, eccentricity, x and y in a single
 # forward pass, so requests for polarAngle and/or eccentricity collapse to ONE
 # visualCoord job (Step 2 --prediction_type visualCoord; Step 3 -r visualCoord
-# reconstructs native PA + ecc from the continuous x/y maps). Other maps (e.g.
-# pRFsize) route to their own variable-specific model. Order is preserved.
+# reconstructs native PA + ecc from the continuous x/y maps) -- but ONLY when a
+# visualCoord model is actually deployed in models/. If not, polarAngle and
+# eccentricity fall back to their own legacy variable-specific models, so the
+# toolbox keeps working on releases that predate visualCoord. An explicit
+# 'visualCoord' request always uses the visualCoord model. Other maps (e.g.
+# pRFsize) always route to their own model. Order is preserved.
+script_dir=$(dirname "$(realpath "$0")")
+if [ -f "$script_dir/models/deepRetinotopy_visualCoord_LH_model.pt" ] || \
+   [ -f "$script_dir/models/deepRetinotopy_visualCoord_RH_model.pt" ]; then
+    has_visualcoord="yes"
+else
+    has_visualcoord="no"
+fi
 prediction_jobs=()
 seen_visualcoord="no"
+routed_pa_ecc=""   # set to "visualcoord" or "legacy" once a PA/ecc request is seen
 for map in "${maps[@]}"; do
     case "$map" in
-        polarAngle|eccentricity|visualCoord)
+        visualCoord)
             if [ "$seen_visualcoord" = "no" ]; then
-                prediction_jobs+=("visualCoord")
-                seen_visualcoord="yes"
+                prediction_jobs+=("visualCoord"); seen_visualcoord="yes"
+            fi
+            ;;
+        polarAngle|eccentricity)
+            if [ "$has_visualcoord" = "yes" ]; then
+                routed_pa_ecc="visualcoord"
+                if [ "$seen_visualcoord" = "no" ]; then
+                    prediction_jobs+=("visualCoord"); seen_visualcoord="yes"
+                fi
+            else
+                routed_pa_ecc="legacy"
+                prediction_jobs+=("$map")
             fi
             ;;
         *)
@@ -242,8 +265,10 @@ for map in "${maps[@]}"; do
             ;;
     esac
 done
-if [ "$seen_visualcoord" = "yes" ]; then
+if [ "$routed_pa_ecc" = "visualcoord" ]; then
     echo "Note: polarAngle/eccentricity are produced jointly by the visualCoord model."
+elif [ "$routed_pa_ecc" = "legacy" ]; then
+    echo "Note: no visualCoord model deployed; polarAngle/eccentricity use legacy per-map models."
 fi
 echo "Models to run: ${prediction_jobs[@]}"
 echo "--------------------------------------------------------------------------------"

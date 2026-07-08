@@ -79,7 +79,7 @@ setup_data_directories() {
 setup_path_and_bins() {
     echo "[DEBUG]: Setting up PATH and DEPLOY_BINS..."
     export PATH="$TOOLBOX_PATH:$TOOLBOX_PATH/main/:$TOOLBOX_PATH/utils/:$PATH"
-    export DEPLOY_BINS="wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:midthickness_surf.py"
+    export DEPLOY_BINS="wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:reconstruct_coords_native.py:midthickness_surf.py"
 }
 
 get_deepretinotopy_paths() {

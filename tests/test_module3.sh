@@ -24,7 +24,7 @@ test_module3() {
     cp /storage/deep_retinotopy/resampling/resampling/* "$DIR_SUBS/1/deepRetinotopy/" 2>/dev/null || true
 
     cd "$TOOLBOX_PATH/main"
-    export DEPLOY_BINS="$DEPLOY_BINS:transform_polarangle_lh.py"
+    export DEPLOY_BINS="$DEPLOY_BINS:transform_polarangle_lh.py:reconstruct_coords_native.py"
 
     for hemisphere in lh; do  # Could expand to rh
         for map in polarAngle; do  # Could expand to others

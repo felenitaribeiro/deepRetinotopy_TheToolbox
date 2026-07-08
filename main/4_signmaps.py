@@ -51,8 +51,8 @@ def generate_signMaps(args):
         path = os.path.join(args.path, sub, 'deepRetinotopy/')
         
         # Check if required files exist
-        polar_angle_file = sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_model.func.gii'
-        eccentricity_file = sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_model.func.gii'
+        polar_angle_file = sub + '.' + args.map + '_polarAngle_' + args.hemisphere + '_curvatureFeat_' + args.model + '.func.gii'
+        eccentricity_file = sub + '.' + args.map + '_eccentricity_' + args.hemisphere + '_curvatureFeat_' + args.model + '.func.gii'
         
         polar_angle_path = os.path.join(path, polar_angle_file)
         eccentricity_path = os.path.join(path, eccentricity_file)
@@ -64,7 +64,8 @@ def generate_signMaps(args):
         if os.path.exists(polar_angle_path) and os.path.exists(eccentricity_path):
             try:
                 print(f"[{sub}] Generating field sign map...")
-                field_sign(path, args.hemisphere, polar_angle_file, eccentricity_file)
+                field_sign(path, args.hemisphere, polar_angle_file, eccentricity_file,
+                           map=args.map, model=args.model)
                 
                 subject_time = time.time() - subject_start_time
                 print(f"[{sub}] Field sign generation completed in {subject_time:.1f}s")
@@ -112,6 +113,11 @@ def main():
     parser.add_argument('--hemisphere', type=str,
                         default='lh', choices=['lh', 'rh'], help='Hemisphere to use')
     parser.add_argument('--map', type=str, default='fs_predicted', help='Map type to use')
+    parser.add_argument('--model', type=str, default='visualCoord-model',
+                        help='Model-name token of the input polarAngle/eccentricity '
+                             'maps; also names the field sign output. Default '
+                             '"visualCoord-model" (the pipeline default); pass "model" '
+                             'for legacy data.')
     parser.add_argument('--subject_id', type=str, default=None,
                         help='Subject ID to process. If None, all subjects will be processed.')
     args = parser.parse_args()

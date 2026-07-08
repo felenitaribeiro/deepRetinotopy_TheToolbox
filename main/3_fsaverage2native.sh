@@ -24,7 +24,7 @@ do
        esac;;
     r) map=${OPTARG};
        case "$map" in
-         'polarAngle'|'eccentricity'|'pRFsize') ;;
+         'polarAngle'|'eccentricity'|'pRFsize'|'visualCoord') ;;
          *) echo "Invalid map argument: $map"; exit 1;;
        esac;;
     m) model=${OPTARG};
@@ -76,7 +76,12 @@ process_subject_step3() {
     local output_dir=$8
     
     echo "=== Processing Step 3 for subject: $dirSub ==="
-    
+
+    # visualCoord resamples the CONTINUOUS x/y coordinate maps (then reconstructs
+    # PA/ecc). Resolve input paths / the existence check against the x map.
+    local check_map="$map"
+    [ "$map" == "visualCoord" ] && check_map="x"
+
     # Determine input and output paths
     if [ -n "$output_dir" ]; then
         local subject_output_dir="$output_dir/$dirSub"
@@ -86,9 +91,9 @@ process_subject_step3() {
         echo "[$dirSub] Using custom output directory: $subject_output_dir"
         
         # Check for input files in custom output directory first, then original location
-        local input_prediction_file="$deepret_output_dir/$dirSub.fs_predicted_${map}_${hemisphere}_curvatureFeat_${model}.func.gii"
+        local input_prediction_file="$deepret_output_dir/$dirSub.fs_predicted_${check_map}_${hemisphere}_curvatureFeat_${model}.func.gii"
         if [ ! -f "$input_prediction_file" ]; then
-            input_prediction_file="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_${map}_${hemisphere}_curvatureFeat_${model}.func.gii"
+            input_prediction_file="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_${check_map}_${hemisphere}_curvatureFeat_${model}.func.gii"
         fi
         
         # Surface files for resampling
@@ -108,7 +113,7 @@ process_subject_step3() {
         fi
     else
         local deepret_output_dir="$dirSubs/$dirSub/deepRetinotopy"
-        local input_prediction_file="$deepret_output_dir/$dirSub.fs_predicted_${map}_${hemisphere}_curvatureFeat_${model}.func.gii"
+        local input_prediction_file="$deepret_output_dir/$dirSub.fs_predicted_${check_map}_${hemisphere}_curvatureFeat_${model}.func.gii"
         local surf_midthickness_32k="$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii"
         local surf_midthickness_native="$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii"
         local surf_sphere_reg="$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii"
@@ -128,6 +133,38 @@ process_subject_step3() {
             "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
             -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native"
 
+            if [ "$map" == "visualCoord" ]; then
+                echo "[$dirSub] Resampling x/y coordinate maps + reconstructing polarAngle/eccentricity (left hemisphere)..."
+                x_in="$deepret_output_dir/$dirSub.fs_predicted_x_${hemisphere}_curvatureFeat_${model}.func.gii"
+                [ ! -f "$x_in" ] && x_in="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_x_${hemisphere}_curvatureFeat_${model}.func.gii"
+                y_in="$deepret_output_dir/$dirSub.fs_predicted_y_${hemisphere}_curvatureFeat_${model}.func.gii"
+                [ ! -f "$y_in" ] && y_in="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_y_${hemisphere}_curvatureFeat_${model}.func.gii"
+
+                wb_command -metric-resample "$x_in" \
+                "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
+                "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
+                -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii"
+
+                wb_command -metric-resample "$y_in" \
+                "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
+                "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
+                -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii"
+
+                reconstruct_coords_native.py \
+                --x "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
+                --y "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
+                --polarangle "$deepret_output_dir/$dirSub.predicted_polarAngle_${model}.$hemisphere.native.func.gii" \
+                --eccentricity "$deepret_output_dir/$dirSub.predicted_eccentricity_${model}.$hemisphere.native.func.gii"
+
+                echo "[$dirSub] Applying mask to x/y/polarAngle/eccentricity (left hemisphere)..."
+                for _m in x y polarAngle eccentricity; do
+                    wb_command -metric-mask "$deepret_output_dir/$dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii" \
+                    "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
+                    "$deepret_output_dir/$dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii"
+                done
+            else
             echo "[$dirSub] Resampling predicted map from fsaverage to native space for the left hemisphere..."
             wb_command -metric-resample "$input_prediction_file" \
             "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
@@ -139,11 +176,12 @@ process_subject_step3() {
                 echo "[$dirSub] Transforming polar angle map of the left hemisphere..."
                 transform_polarangle_lh.py --path "$deepret_output_dir/" --model "$model"
             fi
-            
+
             echo "[$dirSub] Applying mask to the predicted map of the left hemisphere..."
             wb_command -metric-mask "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" \
             "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
             "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii"
+            fi
 
         else
             echo "[$dirSub] Resampling ROI from fsaverage to native space for the right hemisphere..."
@@ -152,6 +190,38 @@ process_subject_step3() {
             "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
             -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native"
 
+            if [ "$map" == "visualCoord" ]; then
+                echo "[$dirSub] Resampling x/y coordinate maps + reconstructing polarAngle/eccentricity (right hemisphere)..."
+                x_in="$deepret_output_dir/$dirSub.fs_predicted_x_${hemisphere}_curvatureFeat_${model}.func.gii"
+                [ ! -f "$x_in" ] && x_in="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_x_${hemisphere}_curvatureFeat_${model}.func.gii"
+                y_in="$deepret_output_dir/$dirSub.fs_predicted_y_${hemisphere}_curvatureFeat_${model}.func.gii"
+                [ ! -f "$y_in" ] && y_in="$dirSubs/$dirSub/deepRetinotopy/$dirSub.fs_predicted_y_${hemisphere}_curvatureFeat_${model}.func.gii"
+
+                wb_command -metric-resample "$x_in" \
+                "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
+                "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
+                -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii"
+
+                wb_command -metric-resample "$y_in" \
+                "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
+                "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
+                -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii"
+
+                reconstruct_coords_native.py \
+                --x "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
+                --y "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
+                --polarangle "$deepret_output_dir/$dirSub.predicted_polarAngle_${model}.$hemisphere.native.func.gii" \
+                --eccentricity "$deepret_output_dir/$dirSub.predicted_eccentricity_${model}.$hemisphere.native.func.gii"
+
+                echo "[$dirSub] Applying mask to x/y/polarAngle/eccentricity (right hemisphere)..."
+                for _m in x y polarAngle eccentricity; do
+                    wb_command -metric-mask "$deepret_output_dir/$dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii" \
+                    "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
+                    "$deepret_output_dir/$dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii"
+                done
+            else
             echo "[$dirSub] Resampling predicted map from fsaverage to native space for the right hemisphere..."
             wb_command -metric-resample "$input_prediction_file" \
             "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
@@ -163,6 +233,7 @@ process_subject_step3() {
             wb_command -metric-mask "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" \
             "$deepret_output_dir/$dirSub.ROI.$hemisphere.native.label.gii" \
             "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii"
+            fi
         fi
         
         end_time=$(date +%s)

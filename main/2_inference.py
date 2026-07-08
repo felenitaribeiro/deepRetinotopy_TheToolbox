@@ -265,6 +265,14 @@ def inference(args):
                     args.prediction_type, HU, seed, stimulus_name))
             out_tag = args.tag if num_of_models == 1 else '{}_model{}'.format(args.tag, i + 1)
             print(f'Loading model from: {osp.basename(model_path)}')
+            if not osp.exists(model_path):
+                raise FileNotFoundError(
+                    'Model weights not found: {}\nExpected a file named '
+                    'deepRetinotopy_{}_{}_model{}{}.pt in {} . Deploy the trained '
+                    'model there, or pass --model_dir / --model_path.'.format(
+                        model_path, args.prediction_type, HU,
+                        '' if num_of_models == 1 else '<seed>', stimulus_name,
+                        model_dir))
             model.load_state_dict(torch.load(model_path, map_location=device))
 
             # Run the model on the test set

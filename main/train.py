@@ -160,8 +160,11 @@ def train_loop(args):
         outdir = osp.join(script_dir, 'output', tag)
         prov = args.hemisphere
     else:
-        tag = ''
-        outdir = osp.join(script_dir, 'output')
+        # Single-map path (polarAngle/eccentricity/pRFsize). Honor --tag when
+        # given (namespaces the output dir, e.g. per ROI); default to flat
+        # output/ for backward compatibility.
+        tag = args.tag if args.tag else ''
+        outdir = osp.join(script_dir, 'output', tag) if tag else osp.join(script_dir, 'output')
         prov = '{}_{}'.format(args.prediction_type, args.hemisphere)
     if not osp.exists(outdir):
         os.makedirs(outdir)
@@ -170,6 +173,10 @@ def train_loop(args):
     config = dict(vars(args))
     config.update(tag=tag, git_sha=sha, git_dirty=dirty,
                   timestamp=datetime.datetime.now().isoformat())
+    if not coords:
+        # The non-coords path trains with a fixed Smooth-L1 objective and ignores
+        # --loss; record what was actually used so the provenance isn't misleading.
+        config['loss'] = 'smoothl1'
     with open(osp.join(outdir, 'config_{}.json'.format(prov)), 'w') as f:
         json.dump(config, f, indent=2)
 

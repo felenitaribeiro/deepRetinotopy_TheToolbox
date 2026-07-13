@@ -22,32 +22,25 @@ def labels(input, labels):
             faces, 3)
     """
 
-    # Append to faces_indexes the location of faces containing nodes from the
-    # visual cortex
-    faces_indexes = np.array([])
-    for j in range(len(labels)):
-        faces_indexes = np.concatenate(
-            (faces_indexes, np.where(input == labels[j])[0]), axis=0)
+    # Vectorized equivalent of the original O(vertices x faces) loop: keep only
+    # faces whose three vertices are ALL inside the ROI, and remap their global
+    # vertex ids to ROI-local ids 0..len(labels)-1 (local id = position of the
+    # vertex in `labels`, which is the ascending in-ROI order used for pos/x/y).
+    #
+    # The original built each interior face 3x (once per in-ROI vertex); those
+    # duplicates are removed by T.FaceToEdge + to_undirected downstream, so the
+    # resulting graph (edge_index) is identical. Verified edge-set-equal for the
+    # visual-cortex ROIs (e.g. wang_fovea). This makes the whole-brain ROI (32492
+    # vertices) build instantly instead of taking several minutes per hemisphere.
+    input = np.asarray(input)
+    labels = np.asarray(labels)
+    number_hemi_nodes = int(32492)
+    local = np.full(number_hemi_nodes, -1, dtype=np.int64)
+    local[labels] = np.arange(len(labels))
 
-    # Select indexed faces (faces_indexes)
-    faces = []
-    for i in range(len(faces_indexes)):
-        faces.append(input[int(faces_indexes[i])])
-
-    # Change the nodes' indeces from the visual system to range
-    # from 0:len(labels)
-    faces = np.array(faces) * 10000
-    index = np.array(labels) * 10000
-    for i in range(len(labels)):
-        faces[np.where(faces == index[i])] = i
-
-    # Select only faces composed of vertices that are within the ROI
-    final_faces = []
-    for i in range(len(faces)):
-        if np.sum(faces <= len(labels) - 1, axis=1)[i] == 3:
-            final_faces.append(faces[i])
-
-    return np.reshape(final_faces, (len(final_faces), 3))
+    remapped = local[input]                     # (num_faces, 3), -1 outside ROI
+    interior = (remapped >= 0).all(axis=1)       # faces fully inside the ROI
+    return remapped[interior].astype(np.int64)
 
 
 if __name__ == '__main__':

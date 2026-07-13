@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 
 sys.path.append(osp.dirname(osp.realpath(__file__)) + '/..')
 
-from utils.rois import ROI_WangParcelsPlusFovea as roi
+from utils.rois import get_roi
 from utils.model import deepRetinotopy
 from torch_geometric.data import DataLoader
 from utils.dataset import Retinotopy
@@ -222,7 +222,8 @@ def inference(args):
                                   transform=T.Cartesian(max_value=NORM_VALUE),
                                   pre_transform=pre_transform, dataset=args.dataset,
                                   list_subs=list_subs,
-                                  prediction=args.prediction_type, hemisphere=args.hemisphere)
+                                  prediction=args.prediction_type, hemisphere=args.hemisphere,
+                                  roi_name=args.roi)
         print('Dataset loaded successfully')
         end_time = time.time()
         dataset_load_time = (end_time - init_time) / 60
@@ -288,9 +289,8 @@ def inference(args):
             inference_time = (time.time() - inference_start_time) / 60
             print(f'Inference completed in {inference_time:.2f} minutes')
 
-            # Setting the ROI
-            label_primary_visual_areas = ['ROI']
-            final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(label_primary_visual_areas)
+            # Setting the ROI (must match the ROI the model was trained on)
+            final_mask_L, final_mask_R, index_L_mask, index_R_mask = get_roi(args.roi)
 
             print(f'Saving predictions for {len(list_subs)} subjects...')
             for j, subject in enumerate(list_subs):
@@ -411,6 +411,11 @@ def main():
                         help='Prediction type')
     parser.add_argument('--hemisphere', type=str,
                         default='lh', choices=['lh', 'rh'], help='Hemisphere to use')
+    parser.add_argument('--roi', type=str, default='wholebrain',
+                        help="ROI subgraph used for inference (utils.rois "
+                             "registry). MUST match the ROI the model was "
+                             "trained on: 'wholebrain' (default) or "
+                             "'wang_fovea'.")
     parser.add_argument('--num_features', type=int, default=1, help='Number of features')
     parser.add_argument('--stimulus', type=str, default='original')
     parser.add_argument('--subject_id', type=str, default=None,

@@ -132,10 +132,12 @@ def train_loop(args):
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
+                            roi_name=args.roi)
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
+                            roi_name=args.roi)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
@@ -236,6 +238,11 @@ def main():
                         help='Prediction type')
     parser.add_argument('--hemisphere', type=str, default='LH',
                         choices=['LH', 'RH'], help='Hemisphere to use')
+    parser.add_argument('--roi', type=str, default='wholebrain',
+                        help="ROI subgraph the model trains on (utils.rois "
+                             "registry): 'wholebrain' (default, all 32492 "
+                             "vertices/hemisphere) or 'wang_fovea' (Wang V1-3 + "
+                             "fovea). Baked into the processed cache filename.")
     parser.add_argument('--num_features', type=int, default=1, 
                         help='Number of features')
     parser.add_argument('--stimulus', type=str, default='original')

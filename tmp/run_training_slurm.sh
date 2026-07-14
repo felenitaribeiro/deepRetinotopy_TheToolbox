@@ -36,17 +36,14 @@ do
     echo "=== Training visualCoord model ($ROI) for $hemisphere hemisphere ==="
     python -u ./train.py --path ./../HCP/ --path2list ./../HCP/subs.txt \
         --roi "$ROI" --prediction_type visualCoord --hemisphere "$hemisphere" \
-        --loss euclidean --n_epochs "$EP" --batch_size "$BS" --lr "$LR" \
+        --n_epochs "$EP" --batch_size "$BS" --lr "$LR" \
         --grad_clip "$CLIP" --swa --swa_start "$SWA_START" --n_seeds "$SEEDS" --tag "$TAG"
 done
 
-# 2) pRF size: single-output model, SAME hyperparameters. This is the legacy
-#    (non-coordinate) path, so --loss is not used here -- it trains with the
-#    built-in Smooth-L1 objective. The single-map path writes flat to
-#    output/deepRetinotopy_pRFsize_<H>_model<k>.pt (it does not use --tag for the
-#    output dir), so this OVERWRITES the previous wang_fovea pRFsize weights; the
-#    ROI is recorded in output/config_pRFsize_<H>.json. Archive the old pRFsize
-#    first if you need to keep it.
+# 2) pRF size: single-output model, SAME hyperparameters. Single-output maps
+#    always train with the legacy Smooth-L1 objective (fixed by prediction_type,
+#    no loss flag). With --tag the weights go to output/<TAG>/ alongside the
+#    visualCoord models; provenance in output/<TAG>/config_pRFsize_<H>.json.
 for hemisphere in LH RH;
 do
     echo "=== Training pRFsize model ($ROI) for $hemisphere hemisphere ==="

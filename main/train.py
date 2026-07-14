@@ -16,7 +16,7 @@ sys.path.append('..')
 
 from utils.model import deepRetinotopy
 from utils.dataset import Retinotopy
-from utils.losses import LOSSES
+from utils.losses import loss_weighted_euclidean, loss_legacy
 
 # max_value for T.Cartesian: normalizes edge-vector (relative-position) components.
 # Must match the value used at inference (main/2_inference.py).
@@ -65,14 +65,14 @@ def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=N
                 MAE = (dist[thr] * 8.0).mean().item()
         else:
             threshold = R2.view(-1) > 2.2
-
-            loss = torch.nn.SmoothL1Loss()
-            output_loss = loss(R2 * model(data), R2 * data.y.view(-1))
+            pred = model(data)
+            target = data.y.view(-1)
+            mask = data.mask.view(-1)
+            output_loss = loss_fn(pred, target, R2, mask)
             output_loss.backward()
 
             MAE = torch.mean(abs(
-                data.to(device).y.view(-1)[threshold == 1] - model(data)[
-                    threshold == 1])).item()
+                target[threshold == 1] - pred[threshold == 1])).item()
 
             if grad_clip:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
@@ -143,9 +143,11 @@ def train_loop(args):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Model training
+    # Model training. Loss is fixed by prediction type: the visualCoord model
+    # uses the weighted-Euclidean loss; every single-output map (pRFsize /
+    # polarAngle / eccentricity) uses the legacy Smooth-L1 loss.
     coords = args.prediction_type == 'visualCoord'
-    loss_fn = LOSSES[args.loss]
+    loss_fn = loss_weighted_euclidean if coords else loss_legacy
 
     # Per-experiment output directory + provenance. visualCoord runs go in
     # output/<tag>/ (config.json + per-seed trainlog.csv). The single-map paths
@@ -155,8 +157,8 @@ def train_loop(args):
     # per-tag) coords dir, <prediction_type>_<hemisphere> in the flat dir.
     script_dir = osp.dirname(osp.realpath(__file__))
     if coords:
-        tag = args.tag if args.tag else 'loss-{}_ep{}_bs{}'.format(
-            args.loss, args.n_epochs, args.batch_size)
+        tag = args.tag if args.tag else 'weighted_euclidean_ep{}_bs{}'.format(
+            args.n_epochs, args.batch_size)
         outdir = osp.join(script_dir, 'output', tag)
         prov = args.hemisphere
     else:
@@ -172,11 +174,8 @@ def train_loop(args):
     sha, dirty = _git_info(script_dir)
     config = dict(vars(args))
     config.update(tag=tag, git_sha=sha, git_dirty=dirty,
-                  timestamp=datetime.datetime.now().isoformat())
-    if not coords:
-        # The non-coords path trains with a fixed Smooth-L1 objective and ignores
-        # --loss; record what was actually used so the provenance isn't misleading.
-        config['loss'] = 'smoothl1'
+                  timestamp=datetime.datetime.now().isoformat(),
+                  loss=('weighted_euclidean' if coords else 'legacy'))
     with open(osp.join(outdir, 'config_{}.json'.format(prov)), 'w') as f:
         json.dump(config, f, indent=2)
 
@@ -254,9 +253,6 @@ def main():
                         help='Number of features')
     parser.add_argument('--stimulus', type=str, default='original')
     parser.add_argument('--n_seeds', type=int, default=5)
-    parser.add_argument('--loss', type=str, default='euclidean',
-                        choices=list(LOSSES.keys()),
-                        help='Loss function for visualCoord (coordinate) training')
     parser.add_argument('--n_epochs', type=int, default=200,
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=1,

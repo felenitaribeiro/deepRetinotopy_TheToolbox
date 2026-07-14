@@ -1,11 +1,10 @@
-"""Loss functions for the visualCoord (joint Cartesian visual-field) model.
+"""Loss functions for training.
 
-Each loss takes (pred, target, R2, mask) where pred/target are (N, 2) normalized
-Cartesian coordinates, R2 is the per-vertex variance explained (used as a
-weight), and mask is the per-vertex validity boolean. All are R2-weighted means
-over valid vertices; they differ in how they weight across the visual field.
-
-LOSSES maps the --loss CLI name to the function (used by main/train.py).
+visualCoord losses take (pred, target, R2, mask) with (N, 2) normalized Cartesian
+coordinates; the pRF-size loss takes the (N,) scalar prediction/target. R2 is the
+per-vertex variance explained (used as a weight) and mask is the per-vertex
+validity boolean. LOSSES / PRF_LOSSES map the --loss / --prf_loss CLI name to the
+function (used by main/train.py).
 """
 import torch
 import torch.nn.functional as F
@@ -18,50 +17,47 @@ def _weighted_mean(per_vertex, weight):
 
 
 def loss_euclidean(pred, target, R2, mask):
-    """R2-weighted mean Euclidean distance in Cartesian visual-field space."""
+    """R2-weighted mean Euclidean distance in Cartesian visual-field space
+    (weighted AVERAGE: divided by the sum of weights)."""
     dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
     return _weighted_mean(dist, R2 * mask.float())
 
 
-def loss_mse(pred, target, R2, mask):
-    """R2-weighted mean squared error on (x, y). Up-weights large (peripheral)
-    errors relative to the plain distance."""
-    se = ((pred - target) ** 2).sum(dim=1)
-    return _weighted_mean(se, R2 * mask.float())
-
-
-def loss_smoothl1(pred, target, R2, mask):
-    """R2-weighted Smooth-L1 (Huber) on the 2D residual; robust to outliers."""
-    per = F.smooth_l1_loss(pred, target, reduction='none').sum(dim=1)
-    return _weighted_mean(per, R2 * mask.float())
-
-
-def loss_ecc_weighted(pred, target, R2, mask):
-    """R2-weighted Euclidean distance, additionally weighted by empirical
-    eccentricity (normalized radius) to push the model to fit the periphery."""
+def loss_weighted_euclidean(pred, target, R2, mask):
+    """R2-WEIGHTED Euclidean distance, NOT averaged by the weights: sum over
+    vertices divided by N (not by sum of weights). The 'weighted but not
+    averaged' counterpart of loss_euclidean (which divides by Σ R2). Retains more
+    individual variability at matched accuracy (Stage 6) -- the visualCoord
+    default. With fixed graph size /N is constant, so this is the R2-weighted SUM
+    up to a constant; per-batch scale floats with total R2 mass (grad-clip keeps
+    it stable)."""
     dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
-    r_emp = torch.sqrt((target ** 2).sum(dim=1) + 1e-12)  # normalized ecc in [0, 1]
-    return _weighted_mean(dist, R2 * mask.float() * r_emp)
-
-
-def loss_ecc_balanced(pred, target, R2, mask, n_bands=8):
-    """R2-weighted Euclidean distance, re-weighted so each eccentricity band
-    contributes EQUALLY (neutralizes cortical magnification: the fovea is
-    over-represented on the cortical surface). Unlike ecc_weighted this does not
-    tilt toward the periphery -- it just removes the vertex-density imbalance.
-    weight = R2*mask / (R2-weighted mass in that vertex's eccentricity band)."""
-    dist = torch.sqrt(((pred - target) ** 2).sum(dim=1) + 1e-12)
-    r = torch.sqrt((target ** 2).sum(dim=1) + 1e-12)            # normalized ecc in [0, 1]
     w = R2 * mask.float()
-    band = torch.clamp((r * n_bands).long(), 0, n_bands - 1)
-    band_mass = torch.zeros(n_bands, device=pred.device, dtype=w.dtype).scatter_add_(0, band, w)
-    return _weighted_mean(dist, w / (band_mass[band] + EPS))
+    return (w * dist).sum() / dist.numel()
 
 
+# --loss options for visualCoord. 'weighted_euclidean' is the default (see
+# train.py); 'euclidean' (the R2-weighted average) is kept as the comparison
+# baseline. (Stage-1-3 explored mse / smoothl1 / ecc_weighted / ecc_balanced --
+# all rejected; see the archived plan + QRIS provenance.)
 LOSSES = {
     'euclidean': loss_euclidean,
-    'mse': loss_mse,
-    'smoothl1': loss_smoothl1,
-    'ecc_weighted': loss_ecc_weighted,
-    'ecc_balanced': loss_ecc_balanced,
+    'weighted_euclidean': loss_weighted_euclidean,
+}
+
+
+# ---- pRF-size (single-output) loss ----------------------------------------
+# The visualCoord losses above take (N, 2) coordinates; this takes the (N,)
+# scalar pRF-size prediction/target. Stage 5 compared 'legacy' vs a normalized
+# variant and 'legacy' won (better error + more individual variability), so it is
+# the only kept / default pRFsize loss.
+
+def prf_legacy(pred, target, R2, mask):
+    """Original toolbox pRF-size loss: Smooth-L1 on R2-scaled pred & target,
+    plain mean over all vertices (un-normalized)."""
+    return F.smooth_l1_loss(R2 * pred, R2 * target)
+
+
+PRF_LOSSES = {
+    'legacy': prf_legacy,
 }

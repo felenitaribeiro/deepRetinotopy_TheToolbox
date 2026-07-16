@@ -16,7 +16,7 @@ sys.path.append('..')
 
 from utils.model import deepRetinotopy
 from utils.dataset import Retinotopy
-from utils.losses import LOSSES
+from utils.losses import loss_weighted_euclidean, loss_legacy
 
 # max_value for T.Cartesian: normalizes edge-vector (relative-position) components.
 # Must match the value used at inference (main/2_inference.py).
@@ -65,14 +65,14 @@ def train(epoch, model, optimizer, train_loader, device, coords=False, loss_fn=N
                 MAE = (dist[thr] * 8.0).mean().item()
         else:
             threshold = R2.view(-1) > 2.2
-
-            loss = torch.nn.SmoothL1Loss()
-            output_loss = loss(R2 * model(data), R2 * data.y.view(-1))
+            pred = model(data)
+            target = data.y.view(-1)
+            mask = data.mask.view(-1)
+            output_loss = loss_fn(pred, target, R2, mask)
             output_loss.backward()
 
             MAE = torch.mean(abs(
-                data.to(device).y.view(-1)[threshold == 1] - model(data)[
-                    threshold == 1])).item()
+                target[threshold == 1] - pred[threshold == 1])).item()
 
             if grad_clip:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
@@ -128,22 +128,34 @@ def train_loop(args):
     if subjects[-1] == '':
         subjects = subjects[0:len(subjects) - 1]    
 
+    # Fail fast if no GPU: these are GPU jobs, and a silent CPU fallback (e.g. a
+    # transient CUDA-init failure on the allocated node) makes whole-brain
+    # training prohibitively slow. Check before the expensive dataset build.
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device, flush=True)
+    if device.type != 'cuda':
+        raise SystemExit(
+            'CUDA not available -- refusing to train on CPU. Check the GPU '
+            'allocation / node (torch.cuda.is_available() is False), then resubmit.')
+
     pre_transform = T.Compose([T.FaceToEdge()])
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
+                            roi_name=args.roi)
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
-                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus)
+                            prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
+                            roi_name=args.roi)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Model training
+    # Model training. Loss is fixed by prediction type: the visualCoord model
+    # uses the weighted-Euclidean loss; every single-output map (pRFsize /
+    # polarAngle / eccentricity) uses the legacy Smooth-L1 loss.
     coords = args.prediction_type == 'visualCoord'
-    loss_fn = LOSSES[args.loss]
+    loss_fn = loss_weighted_euclidean if coords else loss_legacy
 
     # Per-experiment output directory + provenance. visualCoord runs go in
     # output/<tag>/ (config.json + per-seed trainlog.csv). The single-map paths
@@ -153,13 +165,16 @@ def train_loop(args):
     # per-tag) coords dir, <prediction_type>_<hemisphere> in the flat dir.
     script_dir = osp.dirname(osp.realpath(__file__))
     if coords:
-        tag = args.tag if args.tag else 'loss-{}_ep{}_bs{}'.format(
-            args.loss, args.n_epochs, args.batch_size)
+        tag = args.tag if args.tag else 'weighted_euclidean_ep{}_bs{}'.format(
+            args.n_epochs, args.batch_size)
         outdir = osp.join(script_dir, 'output', tag)
         prov = args.hemisphere
     else:
-        tag = ''
-        outdir = osp.join(script_dir, 'output')
+        # Single-map path (polarAngle/eccentricity/pRFsize). Honor --tag when
+        # given (namespaces the output dir, e.g. per ROI); default to flat
+        # output/ for backward compatibility.
+        tag = args.tag if args.tag else ''
+        outdir = osp.join(script_dir, 'output', tag) if tag else osp.join(script_dir, 'output')
         prov = '{}_{}'.format(args.prediction_type, args.hemisphere)
     if not osp.exists(outdir):
         os.makedirs(outdir)
@@ -167,7 +182,8 @@ def train_loop(args):
     sha, dirty = _git_info(script_dir)
     config = dict(vars(args))
     config.update(tag=tag, git_sha=sha, git_dirty=dirty,
-                  timestamp=datetime.datetime.now().isoformat())
+                  timestamp=datetime.datetime.now().isoformat(),
+                  loss=('weighted_euclidean' if coords else 'legacy'))
     with open(osp.join(outdir, 'config_{}.json'.format(prov)), 'w') as f:
         json.dump(config, f, indent=2)
 
@@ -236,13 +252,15 @@ def main():
                         help='Prediction type')
     parser.add_argument('--hemisphere', type=str, default='LH',
                         choices=['LH', 'RH'], help='Hemisphere to use')
+    parser.add_argument('--roi', type=str, default='wholebrain',
+                        help="ROI subgraph the model trains on (utils.rois "
+                             "registry): 'wholebrain' (default, all 32492 "
+                             "vertices/hemisphere) or 'wang_fovea' (Wang V1-3 + "
+                             "fovea). Baked into the processed cache filename.")
     parser.add_argument('--num_features', type=int, default=1, 
                         help='Number of features')
     parser.add_argument('--stimulus', type=str, default='original')
     parser.add_argument('--n_seeds', type=int, default=5)
-    parser.add_argument('--loss', type=str, default='euclidean',
-                        choices=list(LOSSES.keys()),
-                        help='Loss function for visualCoord (coordinate) training')
     parser.add_argument('--n_epochs', type=int, default=200,
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=1,

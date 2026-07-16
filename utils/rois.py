@@ -1,6 +1,7 @@
 import numpy as np
 import os.path as osp
 import scipy.io
+import nibabel as nib
 
 def ROIs_DorsalEarlyVisualCortex(list_of_labels):
     """Mask for the selection of the region of interest in the surface
@@ -143,6 +144,69 @@ def ROI_WangParcelsPlusFovea(list_of_labels):
     return final_mask_L, final_mask_R, index_L_mask, index_R_mask
 
 
+def ROI_from_gifti(lh_label, rh_label):
+    """Region-of-interest masks from a pair of per-hemisphere 32k_fs_LR label
+    GIFTIs. Any nonzero label value counts as in-ROI. Same 4-tuple contract as
+    ROI_WangParcelsPlusFovea, so it is a drop-in for the dataset / inference
+    mask. Paths are resolved relative to the repo root unless absolute.
+
+    Args:
+        lh_label (str): path to the left-hemisphere .label.gii (32492,)
+        rh_label (str): path to the right-hemisphere .label.gii (32492,)
+
+    Returns:
+        final_mask_L, final_mask_R (numpy arrays, 32492): 0/1 ROI masks.
+        index_L_mask, index_R_mask (lists): indices of the in-ROI vertices.
+    """
+    number_hemi_nodes = int(32492)
+    base = osp.join(osp.dirname(osp.realpath(__file__)), '..')
+
+    def _load(p):
+        p = p if osp.isabs(p) else osp.join(base, p)
+        return np.asarray(nib.load(p).agg_data()).reshape(-1)[:number_hemi_nodes]
+
+    final_mask_L = (_load(lh_label) != 0).astype(float)
+    final_mask_R = (_load(rh_label) != 0).astype(float)
+    index_L_mask = [i for i, j in enumerate(final_mask_L) if j == 1]
+    index_R_mask = [i for i, j in enumerate(final_mask_R) if j == 1]
+    return final_mask_L, final_mask_R, index_L_mask, index_R_mask
+
+
+def ROI_wholebrain():
+    """Whole-hemisphere ROI: every 32k_fs_LR vertex is in-ROI. The medial wall
+    and low-signal vertices are NOT removed here -- they carry NaN pRF values
+    (mapped to the -1 sentinel) and R2 ~ 0, so both the `R2 > 0` mask and the
+    R2-weighted loss down-weight them to ~0 automatically. This is the
+    'whole brain' condition (Experiment A)."""
+    number_hemi_nodes = int(32492)
+    final_mask_L = np.ones(number_hemi_nodes)
+    final_mask_R = np.ones(number_hemi_nodes)
+    index_mask = list(range(number_hemi_nodes))
+    return final_mask_L, final_mask_R, list(index_mask), list(index_mask)
+
+
+# ROI registry: maps an `--roi` name to a zero-arg callable returning the
+# (final_mask_L, final_mask_R, index_L_mask, index_R_mask) 4-tuple.
+# 'wholebrain' is the toolbox default (all 32492 vertices/hemisphere); it matches
+# visual-cortex accuracy while keeping the model ready for later fine-tuning on
+# high-eccentricity data. 'wang_fovea' (Wang V1-V3 + fovea) is kept for
+# visual-cortex-only training / backward compatibility. Custom ROIs can be added
+# with ROI_from_gifti(lh_label, rh_label).
+ROI_REGISTRY = {
+    'wholebrain': ROI_wholebrain,
+    'wang_fovea': lambda: ROI_WangParcelsPlusFovea(['ROI']),
+}
+
+
+def get_roi(name):
+    """Return (final_mask_L, final_mask_R, index_L_mask, index_R_mask) for a
+    registered ROI name (see ROI_REGISTRY)."""
+    if name not in ROI_REGISTRY:
+        raise ValueError("Unknown ROI '{}'. Available: {}".format(
+            name, ', '.join(sorted(ROI_REGISTRY))))
+    return ROI_REGISTRY[name]()
+
+
 if __name__ == '__main__':
     # Testing
     print("Testing the ROI selection")
@@ -161,3 +225,8 @@ if __name__ == '__main__':
     mask_LH, mask_RH, _, _ = ROI_WangParcelsPlusFovea(['ROI'])
     print("Number of nodes in the left and right hemispheres: %s, %s" %
           (np.sum(mask_LH), np.sum(mask_RH)))
+
+    for roi_name in ('wholebrain', 'wang_fovea'):
+        mask_LH, mask_RH, _, _ = get_roi(roi_name)
+        print("Registry '%s': L=%s, R=%s nodes" %
+              (roi_name, int(np.sum(mask_LH)), int(np.sum(mask_RH))))

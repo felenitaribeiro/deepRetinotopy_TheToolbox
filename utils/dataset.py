@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import sys
 sys.path.append(osp.dirname(osp.realpath(__file__)))
-from utils.rois import ROI_WangParcelsPlusFovea as roi
+from utils.rois import get_roi
 from utils.labels import labels
 from utils.read_data import read_gifti, read_HCP
 from torch_geometric.data import InMemoryDataset
@@ -26,7 +26,8 @@ class Retinotopy(InMemoryDataset):
                  prediction=None,
                  hemisphere=None,
                  shuffle=False,
-                 stimulus=None):
+                 stimulus=None,
+                 roi_name='wholebrain'):
         self.root = root
         self.dataset = dataset
         self.list_subs = list_subs
@@ -35,6 +36,10 @@ class Retinotopy(InMemoryDataset):
         self.hemisphere = hemisphere
         self.shuffle = shuffle
         self.stimulus = stimulus
+        # ROI selecting the subgraph the model runs on (see utils.rois.get_roi).
+        # Baked into the processed cache filename so different ROIs never reuse
+        # each other's .pt files.
+        self.roi_name = roi_name
         super(Retinotopy, self).__init__(root, transform, pre_transform,
                                          pre_filter)
         self.set = set
@@ -57,37 +62,24 @@ class Retinotopy(InMemoryDataset):
         else:
             name_stimulus = '_' + str(self.stimulus)
 
+        # ROI-namespaced token: e.g. '_ROI-wholebrain_'. Guarantees each ROI
+        # caches to its own .pt files (no silent reuse across ROIs).
+        name_roi = '_ROI-' + str(self.roi_name) + '_'
+
         if (self.hemisphere == 'Left' or self.hemisphere == 'LH' or
                 self.hemisphere == 'left' or self.hemisphere == 'lh'):
-            if self.myelination == True:
-                return ['training_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'development_' + self.prediction +
-                        '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'test_' + self.prediction + '_LH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt']
-
-            else:
-                return ['training_' + self.prediction + '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'development_' + self.prediction +
-                        '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'test_' + self.prediction + '_LH_ROI_' + str(self.dataset) + name_stimulus + '.pt']
-
+            hemi = 'LH'
         else:
-            if self.myelination == True:
-                return ['training_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'development_' + self.prediction +
-                        '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'test_' + self.prediction + '_RH_myelincurv_ROI_' + str(self.dataset) + name_stimulus + '.pt']
-            else:
-                return ['training_' + self.prediction + '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'development_' + self.prediction +
-                        '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt',
-                        'test_' + self.prediction + '_RH_ROI_' + str(self.dataset) + name_stimulus + '.pt']
+            hemi = 'RH'
+        feat = '_myelincurv' if self.myelination == True else ''
+
+        stem = self.prediction + '_' + hemi + feat + name_roi + str(self.dataset) + name_stimulus + '.pt'
+        return ['training_' + stem, 'development_' + stem, 'test_' + stem]
 
     def process(self):
-        # Selecting all visual areas (Wang2015) plus V1-3 fovea
-        label_primary_visual_areas = ['ROI']
-        final_mask_L, final_mask_R, index_L_mask, index_R_mask = roi(
-            label_primary_visual_areas)
+        # Select the ROI subgraph (default: whole hemisphere; see utils.rois.get_roi)
+        final_mask_L, final_mask_R, index_L_mask, index_R_mask = get_roi(
+            self.roi_name)
 
         faces_R = labels(scipy.io.loadmat(osp.join(osp.dirname(osp.realpath(__file__)), '../utils/templates/tri_faces_R.mat'))[
             'tri_faces_R'] - 1, index_R_mask)

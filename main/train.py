@@ -128,6 +128,16 @@ def train_loop(args):
     if subjects[-1] == '':
         subjects = subjects[0:len(subjects) - 1]    
 
+    # Fail fast if no GPU: these are GPU jobs, and a silent CPU fallback (e.g. a
+    # transient CUDA-init failure on the allocated node) makes whole-brain
+    # training prohibitively slow. Check before the expensive dataset build.
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device, flush=True)
+    if device.type != 'cuda':
+        raise SystemExit(
+            'CUDA not available -- refusing to train on CPU. Check the GPU '
+            'allocation / node (torch.cuda.is_available() is False), then resubmit.')
+
     pre_transform = T.Compose([T.FaceToEdge()])
 
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=NORM_VALUE),
@@ -140,8 +150,6 @@ def train_loop(args):
                             roi_name=args.roi)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Model training. Loss is fixed by prediction type: the visualCoord model
     # uses the weighted-Euclidean loss; every single-output map (pRFsize /

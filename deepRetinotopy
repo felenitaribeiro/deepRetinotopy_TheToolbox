@@ -233,6 +233,18 @@ echo "--------------------------------------------------------------------------
 # 'visualCoord' request always uses the visualCoord model. Other maps (e.g.
 # pRFsize) always route to their own model. Order is preserved.
 script_dir=$(dirname "$(realpath "$0")")
+
+# Detect GPU. Step 2 batches every subject into one data loader before inferring,
+# which is optimal on GPU but, on CPU, front-loads a long serial load before the
+# first prediction is written. On CPU we instead run one subject per core.
+
+if python -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)" >/dev/null 2>&1; then
+    has_gpu="yes"
+else
+    has_gpu="no"
+fi
+echo "GPU available (torch): $has_gpu"
+
 if [ -f "$script_dir/models/deepRetinotopy_visualCoord_LH_model.pt" ] || \
    [ -f "$script_dir/models/deepRetinotopy_visualCoord_RH_model.pt" ]; then
     has_visualcoord="yes"
@@ -331,17 +343,33 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 # Step 2: Prediction (runs in 'all' and 'step2' modes)
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ]; then
                     echo "[Step 2] Retinotopy prediction..."
-                    
+
                     step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere"
-                    if [ -n "$subject_id" ]; then
-                        step2_args="$step2_args --subject_id $subject_id"
-                    fi
                     if [ -n "$output_dir" ]; then
                         step2_args="$step2_args --output_dir $output_dir"
                     fi
-                    
-                    2_inference.py $step2_args
-                    
+
+                    if [ -n "$subject_id" ]; then
+                        # Single subject: one invocation.
+                        2_inference.py $step2_args --subject_id $subject_id
+                    elif [ "$has_gpu" = "yes" ]; then
+                        # GPU: batch every subject into one data loader (optimal).
+                        2_inference.py $step2_args
+                    else
+                        # CPU: one subject per core. Predictions are written per subject as each
+                        # finishes, so an interrupted run keeps its completed work.
+                        subjects=()
+                        for dirSub in `ls "$dirSubs"`; do
+                            if [ "$dirSub" != "fsaverage" ] && [[ "$dirSub" != .* ]] && [[ "$dirSub" != processed_* ]] && [[ "$dirSub" != *.txt ]] && [[ "$dirSub" != *.log ]] && [[ "$dirSub" != "logs" ]]; then
+                                subjects+=("$dirSub")
+                            fi
+                        done
+                        echo "Found ${#subjects[@]} subjects; running Step 2 across $n_jobs core(s), one subject per core"
+                        printf '%s\n' "${subjects[@]}" | \
+                            OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+                            xargs -I {} -P $n_jobs 2_inference.py $step2_args --subject_id {}
+                    fi
+
                     # If we're only running step2, we're done with this map
                     if [ "$run_mode" = "step2" ]; then
                         echo "Step 2 completed for $map ($hemisphere hemisphere)"

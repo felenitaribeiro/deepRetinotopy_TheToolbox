@@ -29,7 +29,7 @@ DEFAULT_TEMPLATE = HERE / "build.yaml.tmpl"
 
 # Fixed emission order for the model download loop (matches the published recipe).
 HEMIS = ("LH", "RH")
-MAPS = ("polarAngle", "eccentricity", "pRFsize")
+MAPS = ("visualCoord", "pRFsize")
 
 
 def _git(*args: str) -> str:

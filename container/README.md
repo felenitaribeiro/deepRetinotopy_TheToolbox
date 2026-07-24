@@ -34,12 +34,23 @@ python container/render_recipe.py --version 1.0.19 --commit <sha> -o build.yaml
 ```
 
 The renderer validates that no `@@token@@` is left unresolved and that the output
-parses as YAML. It reproduces the published 1.0.18 recipe byte-for-byte:
+parses as YAML.
+
+Up to 1.0.18 the template reproduced the published recipe byte-for-byte:
 
 ```bash
 python container/render_recipe.py --version 1.0.18 \
   --commit fd8382bfa168727feb53946fdab4fe838908e5f2
 ```
+
+That no longer holds — the template intentionally diverges from the published
+1.0.18 recipe in two places (see the comments in `build.yaml.tmpl`):
+
+- `pyg_lib` and `torch_sparse` are no longer installed. Their `pt25cu124` wheels
+  require GLIBC_2.29+, which the CentOS 8 base image (glibc 2.28) does not
+  provide, so they never loaded at runtime.
+- The final cleanup step targets `/opt/miniconda-latest/...` rather than
+  `/opt/miniconda/...`, which does not exist and made those `rm -rf` calls no-ops.
 
 ## One-time CI setup
 

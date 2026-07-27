@@ -2,8 +2,11 @@
 #
 # `container/render_recipe.py` reads this file plus the current git tag/commit
 # and fills `container/build.yaml.tmpl` to produce the neurocontainers recipe
-# (recipes/deepretinotopy/build.yaml). The recipe is a generated artifact --
-# edit *this* file (or the template), never the rendered YAML by hand.
+# (recipes/deepretinotopy/build.yaml). `container/render_fulltest.py` reads the
+# same `models` list to fill `container/fulltest.yaml.tmpl` -> the recipe's test
+# suite (recipes/deepretinotopy/fulltest.yaml), so the model tests always match
+# what the recipe ships. Both recipe and fulltest are generated artifacts --
+# edit *this* file (or the templates), never the rendered YAML by hand.
 #
 # Per release you normally only touch `models` below (the best-performing seed
 # picked for each map/hemisphere). `version` and `commit` come from git and are

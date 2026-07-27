@@ -1,9 +1,10 @@
 name: publish neurocontainer recipe
 
-# On a version tag (e.g. v1.0.19), regenerate the neurocontainers recipe from
-# container/manifest.yaml + container/build.yaml.tmpl and open a PR against
-# neurodesk/neurocontainers from your fork. Also runnable by hand
-# (workflow_dispatch) with dry_run: true to just render and inspect the output.
+# On a version tag (e.g. v1.0.19), regenerate the neurocontainers recipe
+# (build.yaml) and its test suite (fulltest.yaml) from container/manifest.yaml +
+# the container/*.tmpl templates and open a PR against neurodesk/neurocontainers
+# from your fork. Also runnable by hand (workflow_dispatch) with dry_run: true to
+# just render and inspect the output.
 
 on:
   push:
@@ -30,6 +31,7 @@ env:
   FORK: felenitaribeiro/neurocontainers
   UPSTREAM: neurodesk/neurocontainers
   RECIPE_PATH: recipes/deepretinotopy/build.yaml
+  FULLTEST_PATH: recipes/deepretinotopy/fulltest.yaml
 
 jobs:
   render-and-pr:
@@ -69,6 +71,15 @@ jobs:
           cat "${RUNNER_TEMP}/build.yaml"
           echo "::endgroup::"
 
+      - name: Render fulltest.yaml
+        run: |
+          python container/render_fulltest.py \
+            --version "${{ steps.vars.outputs.version }}" \
+            --output "${RUNNER_TEMP}/fulltest.yaml"
+          echo "::group::rendered test suite"
+          cat "${RUNNER_TEMP}/fulltest.yaml"
+          echo "::endgroup::"
+
       - name: Checkout upstream neurocontainers
         if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: actions/checkout@v4
@@ -83,6 +94,7 @@ jobs:
         run: |
           mkdir -p "neurocontainers/$(dirname "$RECIPE_PATH")"
           cp "${RUNNER_TEMP}/build.yaml" "neurocontainers/${RECIPE_PATH}"
+          cp "${RUNNER_TEMP}/fulltest.yaml" "neurocontainers/${FULLTEST_PATH}"
 
       - name: Open pull request
         if: ${{ github.event.inputs.dry_run != 'true' }}
@@ -102,6 +114,7 @@ jobs:
             - version: `${{ steps.vars.outputs.version }}`
             - pinned commit: `${{ steps.vars.outputs.commit }}`
 
-            Generated from `container/manifest.yaml` via `container/render_recipe.py`
-            in [deepRetinotopy_TheToolbox](https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox).
-            Do not edit the recipe by hand -- change the manifest/template and re-tag.
+            Recipe generated from `container/manifest.yaml` via `container/render_recipe.py`
+            and the test suite via `container/render_fulltest.py`, in
+            [deepRetinotopy_TheToolbox](https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox).
+            Do not edit the recipe or fulltest by hand -- change the manifest/templates and re-tag.

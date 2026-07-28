@@ -1,6 +1,8 @@
 # DeepRetinotopy - A deep learning-based toolkit for retinotopic mapping
 ![Logo](/figures/logo_v1.png)
 
+[![DOI](https://zenodo.org/badge/692915906.svg)](https://doi.org/10.5281/zenodo.21646928)
+
 DeepRetinotopy is a toolkit that leverages a geometric deep learning model to predict retinotopic maps from brain shape. Our toolkit integrates (1) standard neuroimaging software (FreeSurfer 7.3.2 and Connectome Workbench 1.5.0) for anatomical MRI data preprocessing, (2) a [deep-learning model for predicting retinotopic maps](https://www.sciencedirect.com/science/article/pii/S1053811921008971) at the individual level, and (3) an efficient implementation of the visual field sign analysis for aiding early visual areas parcellation (coming soon). These components are packaged into Docker and Singularity software containers, which can be easily downloaded and are available on [NeuroDesk](https://www.neurodesk.org/).
 
 ## Table of Contents

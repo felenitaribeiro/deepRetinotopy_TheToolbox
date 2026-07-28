@@ -1,0 +1,53 @@
+# Citation File Format -- https://citation-file-format.github.io
+# GitHub renders a "Cite this repository" button from this file, and Zenodo
+# uses it to populate the archived record's metadata.
+
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: deepRetinotopy_TheToolbox
+type: software
+authors:
+  - family-names: Ribeiro
+    given-names: Fernanda L
+    orcid: "https://orcid.org/0000-0002-1620-4193"
+version: 1.0.19
+date-released: "2026-07-28"   
+doi: "10.5281/zenodo.XXXXXXX" # TODO: Zenodo concept DOI (fill after first release)
+license: GPL-3.0
+repository-code: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"
+url: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"
+keywords:
+  - retinotopy
+  - visual cortex
+  - geometric deep learning
+  - cortical surface
+preferred-citation:
+  type: article
+  status: preprint   # eLife reviewed preprint ('preprint' is a valid status, not a type)
+  title: "Predicting functional topography of the human visual cortex from cortical anatomy at scale"
+  authors:
+    - family-names: Ribeiro
+      given-names: Fernanda L
+    - family-names: Satzger
+      given-names: Robert
+    - family-names: Hoffstaedter
+      given-names: Felix
+    - family-names: Bürger
+      given-names: Christian
+    - family-names: Herholz
+      given-names: Peer
+    - family-names: Linhardt
+      given-names: David
+    - family-names: Benson
+      given-names: Noah C
+    - family-names: Schwarzkopf
+      given-names: D Samuel
+    - family-names: Puckett
+      given-names: Alexander M
+    - family-names: Bollmann
+      given-names: Steffen
+    - family-names: Hebart
+      given-names: Martin N
+  journal: eLife
+  year: 2026
+  doi: 10.7554/eLife.110784.1

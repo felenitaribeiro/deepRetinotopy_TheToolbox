@@ -62,7 +62,7 @@
     <link rel="prev" title="DeepRetinotopy" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Jul 27, 2026"/>
+    <meta name="docbuild:last-update" content="Jul 28, 2026"/>
   </head>
   
   
@@ -377,12 +377,12 @@ Once you are ready to run <code class="docutils literal notranslate"><span class
 <section id="docker">
 <h2>Docker<a class="headerlink" href="#docker" title="Link to this heading">#</a></h2>
 <p>If you prefer running <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> locally via Docker, you can pull our container from Dockerhub and run it using the following commands:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>vnmd/deepretinotopy_1.0.18
-docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.18
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>vnmd/deepretinotopy_1.0.19
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.19
 </pre></div>
 </div>
 <p>If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">PYTHONUNBUFFERED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.18
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">PYTHONUNBUFFERED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span>~:/tmp/<span class="w"> </span>--name<span class="w"> </span>deepret<span class="w"> </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>vnmd/deepretinotopy_1.0.19
 </pre></div>
 </div>
 <p>Once in the container (the working directory is <code class="docutils literal notranslate"><span class="pre">deepRetinotopy_TheToolbox</span></code>), you can run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code>:</p>
@@ -393,13 +393,13 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <section id="singularity">
 <h2>Singularity<a class="headerlink" href="#singularity" title="Link to this heading">#</a></h2>
 <p>Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">date_tag</span><span class="o">=</span><span class="m">20250902</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">container</span><span class="o">=</span>deepretinotopy_1.0.18_<span class="nv">$date_tag</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">date_tag</span><span class="o">=</span><span class="m">20260727</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">container</span><span class="o">=</span>deepretinotopy_1.0.19_<span class="nv">$date_tag</span>
 curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span>https://neurocontainers.neurodesk.org/<span class="si">${</span><span class="nv">container</span><span class="si">}</span>.simg<span class="w"> </span>-O
 </pre></div>
 </div>
 <p>Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>./deepretinotopy_1.0.18_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>./deepretinotopy_1.0.19_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
 </div>
 </section>
@@ -407,14 +407,14 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <h2>GPU inference<a class="headerlink" href="#gpu-inference" title="Link to this heading">#</a></h2>
 <p>You can use the same container for CPU-based inference pipeline as well as GPU-based inference.</p>
 <p>To run our tool using a GPU, you need to pass the <code class="docutils literal notranslate"><span class="pre">--nv</span></code> flag:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>./deepretinotopy_1.0.18_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>./deepretinotopy_1.0.19_<span class="nv">$date_tag</span>.simg<span class="w"> </span>deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
 </div>
 </section>
 <section id="neurodesk">
 <h2>Neurodesk<a class="headerlink" href="#neurodesk" title="Link to this heading">#</a></h2>
 <p>You can run <code class="docutils literal notranslate"><span class="pre">deepRetinotopy</span></code> on <a class="reference external" href="https://neurodesk.org">Neurodesktop</a> or using <a class="reference external" href="https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/">Neurocommand</a> through the following commands:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>deepretinotopy/1.0.18
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>deepretinotopy/1.0.19
 deepRetinotopy<span class="w"> </span>-s<span class="w"> </span><span class="nv">$path_freesurfer_dir</span><span class="w"> </span>-t<span class="w"> </span><span class="nv">$path_hcp_template_surfaces</span><span class="w"> </span>-d<span class="w"> </span><span class="nv">$dataset_name</span><span class="w"> </span>-m<span class="w"> </span><span class="nv">$maps</span>
 </pre></div>
 </div>
@@ -509,7 +509,7 @@ By Fernanda Ribeiro
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jul 27, 2026.
+  Last updated on Jul 28, 2026.
   <br/>
 </p>
   </div>

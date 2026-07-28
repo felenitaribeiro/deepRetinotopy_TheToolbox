@@ -24,14 +24,14 @@ If you prefer running ``deepRetinotopy`` locally via Docker, you can pull our co
 
 .. code-block:: bash
 
-    docker pull vnmd/deepretinotopy_1.0.18
-    docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.18
+    docker pull vnmd/deepretinotopy_1.0.19
+    docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.19
 
 If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container:
 
 .. code-block:: bash
 
-    docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.18
+    docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.19
 
 Once in the container (the working directory is ``deepRetinotopy_TheToolbox``), you can run ``deepRetinotopy``:
 
@@ -46,15 +46,15 @@ Alternatively, you can also download the Singularity/Apptainer container using t
 
 .. code-block:: bash
 
-    date_tag=20250902
-    export container=deepretinotopy_1.0.18_$date_tag
+    date_tag=20260727
+    export container=deepretinotopy_1.0.19_$date_tag
     curl -X GET https://neurocontainers.neurodesk.org/${container}.simg -O
 
 Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:
 
 .. code-block:: bash
 
-    apptainer exec ./deepretinotopy_1.0.18_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+    apptainer exec ./deepretinotopy_1.0.19_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 
 GPU inference
 =============
@@ -65,7 +65,7 @@ To run our tool using a GPU, you need to pass the ``--nv`` flag:
 
 .. code-block:: bash
 
-    apptainer exec --nv ./deepretinotopy_1.0.18_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+    apptainer exec --nv ./deepretinotopy_1.0.19_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 
 Neurodesk
 =============
@@ -74,7 +74,7 @@ You can run ``deepRetinotopy`` on `Neurodesktop <https://neurodesk.org>`_ or usi
 
 .. code-block:: bash
 
-    ml deepretinotopy/1.0.18
+    ml deepretinotopy/1.0.19
     deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 
 This method allows you to leverage the pre-configured environment provided by Neurodesk, ensuring compatibility and ease of use.

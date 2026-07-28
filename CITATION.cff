@@ -10,9 +10,15 @@ authors:
   - family-names: Ribeiro
     given-names: Fernanda L
     orcid: "https://orcid.org/0000-0002-1620-4193"
+  - family-names: Herholz
+    given-names: Peer
+    orcid: "https://orcid.org/0000-0002-9840-6257"
+  - family-names: Bollmann
+    given-names: Steffen
+    orcid: "https://orcid.org/0000-0002-2909-0906"
 version: 1.0.19
-date-released: "2026-07-28"   
-doi: "10.5281/zenodo.XXXXXXX" # TODO: Zenodo concept DOI (fill after first release)
+date-released: "2026-07-28"
+doi: "10.5281/zenodo.21646928"
 license: GPL-3.0
 repository-code: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"
 url: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"

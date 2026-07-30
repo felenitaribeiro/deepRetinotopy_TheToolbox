@@ -21,7 +21,7 @@ This documentation showcases the respective functionality and provides details c
 Acknowledgements
 ===============
 
-This work is supported through the European Union's Horizon Europe research and innovation funding program under the Marie Skłodowska-Curie Actions project ID 709 101146996.
+This work is supported through the European Union's Horizon Europe research and innovation funding program under the Marie Skłodowska-Curie Actions project ID 101146996.
 
 Contents
 ===============

@@ -24,7 +24,7 @@ DeepRetinotopy is a toolkit that leverages a geometric deep learning model to pr
 
 - Docker / Singularity container / Neurodesk
 - freesurfer directory
-- HCP "fs_LR-deformed_to-fsaverage" surfaces (available at: https://github.com/Washington-University/HCPpipelines/tree/master/global/templates/standard_mesh_atlases/resample_fsaverage)
+- HCP "fs_LR-deformed_to-fsaverage" surfaces, pinned to the version our models were trained with (available at: https://github.com/Washington-University/HCPpipelines/tree/ab8895fb012ab4c5764d81b3865915fe7da27f24/global/templates/standard_mesh_atlases/resample_fsaverage). Note that the current (`master`) version of these sphere files differs from the pinned one; in our tests both yield practically identical predictions, but use the pinned version for exact reproducibility.
 
 ## Software containers
 DeepRetinotopy (pre-trained models) and required software are packaged in software containers available through Neurodesk and Dockerhub.

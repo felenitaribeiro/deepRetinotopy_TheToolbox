@@ -42,7 +42,8 @@ def _reconstruct_coords(pred_xy):
 
 
 def _save_coord_maps(pred_xy, final_mask, template_path, output_dir, subject,
-                     hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord-model'):
+                     hemi, stimulus_name, num_of_cortical_nodes, tag='visualCoord-model',
+                     feat_token='curvatureFeat'):
     """Save the joint Cartesian-coordinate model outputs as GIFTIs: the raw
     x/y visual-field coordinates AND the reconstructed polarAngle + eccentricity
     (one forward pass -> four maps). The x/y maps are CONTINUOUS (no 0/360 wrap),
@@ -61,7 +62,7 @@ def _save_coord_maps(pred_xy, final_mask, template_path, output_dir, subject,
         pred[final_mask != 1] = -1
         template.agg_data()[:] = np.reshape(pred, (-1))
         output_filename = (f'{subject}.fs_predicted_{map_name}_{hemi}'
-                           f'_curvatureFeat_{tag}{stimulus_name}.func.gii')
+                           f'_{feat_token}_{tag}{stimulus_name}.func.gii')
         nib.save(template, osp.join(output_dir, output_filename))
         print(f'[{subject}] Saved {map_name} ({hemi}) [{tag}]')
 
@@ -160,10 +161,14 @@ def inference(args):
                 continue
             
             curvature_file = osp.join(subject_path, f'{subject}.curvature-midthickness.{args.hemisphere}.32k_fs_LR.func.gii')
-            
+            myelin_file = osp.join(subject_path, f'{subject}.myelinmap-midthickness.{args.hemisphere}.32k_fs_LR.func.gii')
+
             if not osp.exists(curvature_file):
                 removed_subjects.append(subject)
                 print(f"Removed subject '{subject}' due to missing curvature files.")
+            elif args.num_features == 2 and not osp.exists(myelin_file):
+                removed_subjects.append(subject)
+                print(f"Removed subject '{subject}' due to missing myelin files.")
             else:
                 valid_subjects.append(subject)
         
@@ -223,7 +228,7 @@ def inference(args):
                                   pre_transform=pre_transform, dataset=args.dataset,
                                   list_subs=list_subs,
                                   prediction=args.prediction_type, hemisphere=args.hemisphere,
-                                  roi_name=args.roi)
+                                  roi_name=args.roi, myelination=(args.num_features==2))
         print('Dataset loaded successfully')
         end_time = time.time()
         dataset_load_time = (end_time - init_time) / 60
@@ -242,6 +247,10 @@ def inference(args):
             print(f'Using device: {device}')
             
             coords = args.prediction_type == 'visualCoord'
+            # Input-feature token in output filenames: keeps predictions from
+            # 2-feature (curvature+myelin) models from overwriting the
+            # curvature-only ones in the same subject's deepRetinotopy/ dir.
+            feat_token = 'myelincurvFeat' if args.num_features == 2 else 'curvatureFeat'
             model = deepRetinotopy(num_features=args.num_features,
                                    num_outputs=2 if coords else 1,
                                    output_activation=None if coords else 'elu').to(device)
@@ -316,7 +325,8 @@ def inference(args):
                         _save_coord_maps(
                             np.array(evaluation['Predicted_values'][j].cpu()),
                             final_mask_L, template_path, output_dir, subject,
-                            'lh', stimulus_name, num_of_cortical_nodes, tag=out_tag)
+                            'lh', stimulus_name, num_of_cortical_nodes, tag=out_tag,
+                            feat_token=feat_token)
                     else:
                         template = nib.load(template_path)
                         pred = np.zeros((num_of_cortical_nodes, 1))
@@ -326,7 +336,7 @@ def inference(args):
                         pred[final_mask_L != 1] = -1
 
                         template.agg_data()[:] = np.reshape(pred, (-1))
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_curvatureFeat_{model_token}{stimulus_name}.func.gii'
+                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_lh_{feat_token}_{model_token}{stimulus_name}.func.gii'
 
                         output_path = osp.join(output_dir, output_filename)
                         nib.save(template, output_path)
@@ -341,7 +351,8 @@ def inference(args):
                         _save_coord_maps(
                             np.array(evaluation['Predicted_values'][j].cpu()),
                             final_mask_R, template_path, output_dir, subject,
-                            'rh', stimulus_name, num_of_cortical_nodes, tag=out_tag)
+                            'rh', stimulus_name, num_of_cortical_nodes, tag=out_tag,
+                            feat_token=feat_token)
                     else:
                         template = nib.load(template_path)
                         pred = np.zeros((num_of_cortical_nodes, 1))
@@ -353,7 +364,7 @@ def inference(args):
 
                         template.agg_data()[:] = np.reshape(pred, (-1))
 
-                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_curvatureFeat_{model_token}{stimulus_name}.func.gii'
+                        output_filename = f'{subject}.fs_predicted_{args.prediction_type}_rh_{feat_token}_{model_token}{stimulus_name}.func.gii'
 
                         output_path = osp.join(output_dir, output_filename)
                         nib.save(template, output_path)

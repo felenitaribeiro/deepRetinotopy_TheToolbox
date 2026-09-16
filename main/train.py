@@ -143,11 +143,11 @@ def train_loop(args):
     train_dataset = Retinotopy(args.path, 'Train', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
                             prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
-                            roi_name=args.roi)
+                            roi_name=args.roi, myelination=(args.num_features == 2))
     dev_dataset = Retinotopy(args.path, 'Development', transform=T.Cartesian(max_value=NORM_VALUE),
                             pre_transform=pre_transform, dataset = args.dataset, list_subs = subjects,
                             prediction=args.prediction_type, hemisphere=args.hemisphere, shuffle=True, stimulus=args.stimulus,
-                            roi_name=args.roi)
+                            roi_name=args.roi,  myelination=(args.num_features == 2))
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     dev_loader = DataLoader(dev_dataset, batch_size=1, shuffle=False)
 

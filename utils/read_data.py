@@ -295,7 +295,7 @@ def read_HCP(path, hemisphere=None, sub_id=None,
 
 def read_gifti(path, hemisphere=None, sub_id=None,
                visual_mask_L=None, visual_mask_R=None,
-               faces_L=None, faces_R=None):
+               faces_L=None, faces_R=None, myelination=False):
     """Read the data files and create a data object with attributes x, y, pos,
         faces and R2.
 
@@ -337,7 +337,16 @@ def read_gifti(path, hemisphere=None, sub_id=None,
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        data = Data(x=curvature, pos=pos)
+        if myelination == True:
+            # Feature order must match training (read_HCP): (curvature, myelin)
+            myelin_values = torch.tensor(np.array(nib.load(osp.join(path,
+                                 sub_id + '/surf/' + sub_id + '.myelinmap-midthickness.lh.32k_fs_LR.func.gii')).agg_data()).reshape(
+                                 number_hemi_nodes, -1)[visual_mask_L == 1], dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
+            data = Data(x=torch.cat((curvature, myelin_values), 1), pos=pos)
+        else:
+            data = Data(x=curvature, pos=pos)
         data.face = faces
 
     elif (hemisphere == 'Right' or hemisphere == 'RH' or hemisphere == 'right' or hemisphere == 'rh'):
@@ -356,7 +365,16 @@ def read_gifti(path, hemisphere=None, sub_id=None,
         nocurv = np.isnan(curvature)
         curvature[nocurv == 1] = 0
 
-        data = Data(x=curvature, pos=pos)
+        if myelination == True:
+            # Feature order must match training (read_HCP): (curvature, myelin)
+            myelin_values = torch.tensor(np.array(nib.load(osp.join(path,
+                                 sub_id + '/surf/' + sub_id + '.myelinmap-midthickness.rh.32k_fs_LR.func.gii')).agg_data()).reshape(
+                                 number_hemi_nodes, -1)[visual_mask_R == 1], dtype=torch.float)
+            nomyelin = np.isnan(myelin_values)
+            myelin_values[nomyelin == 1] = 0
+            data = Data(x=torch.cat((curvature, myelin_values), 1), pos=pos)
+        else:
+            data = Data(x=curvature, pos=pos)
         data.face = faces
 
     return data

@@ -288,10 +288,48 @@ echo "--------------------------------------------------------------------------
 if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
     # check if template surfaces are available (only if we're running steps that need them)
     if [ "$run_mode" = "all" ] || [ "$run_mode" = "step1" ] || [ "$run_mode" = "step3" ]; then
-        if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] && [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
-            echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii 
+        if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] || [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
+            echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii
             and/or $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii do not exist!"
             exit 1
+        fi
+
+        # Verify the template spheres are the fs_LR-deformed_to-fsaverage release the
+        # models were trained with: the 2016 spheres (HCPpipelines ab8895fb01; pinned
+        # download link in the README). Any other file is refused -- including the 2017
+        # "dedrifted" spheres from HCPpipelines master, which differ by ~2 mm on the
+        # registration sphere -- since the model targets are tied to the 2016 frame and
+        # a wrong sphere misregisters the data silently. Set
+        # DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to bypass (not recommended).
+        if [ "${DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK:-0}" != "1" ] && command -v md5sum > /dev/null; then
+            for H in L R; do
+                if [ "$H" = "L" ]; then
+                    ref2016=f902cf1182f6cb8546aff07b76dd6791
+                    ref2017=c1390ecd78b0f3bd7600dd655bbcf413
+                else
+                    ref2016=9b236e70328ac3382190aa0f852977c2
+                    ref2017=2d02bca8d1b82cb06ce989528c913dcf
+                fi
+                template_file="$dirHCP/fs_LR-deformed_to-fsaverage.$H.sphere.32k_fs_LR.surf.gii"
+                template_md5=$(md5sum "$template_file" | cut -d' ' -f1)
+                if [ "$template_md5" = "$ref2016" ]; then
+                    echo "Template sphere $H: 2016 release (matches model training) -- OK"
+                elif [ "$template_md5" = "$ref2017" ]; then
+                    echo "[Error]: Template sphere $H is the 2017 'dedrifted' release (HCPpipelines master),"
+                    echo "         not the 2016 release the deployed models were trained with (the two differ"
+                    echo "         by ~2 mm on the registration sphere). Download the pinned 2016 release"
+                    echo "         (HCPpipelines commit ab8895fb01; link in the README), or set"
+                    echo "         DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to proceed anyway (not recommended)."
+                    exit 1
+                else
+                    echo "[Error]: $template_file"
+                    echo "         md5 $template_md5 does not match any known fs_LR-deformed_to-fsaverage release"
+                    echo "         (2016 training sphere: $ref2016; 2017 dedrifted: $ref2017)."
+                    echo "         Download the pinned 2016 release (HCPpipelines commit ab8895fb01; link"
+                    echo "         in the README), or set DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to proceed anyway."
+                    exit 1
+                fi
+            done
         fi
     fi
     

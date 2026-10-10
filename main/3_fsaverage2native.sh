@@ -163,13 +163,13 @@ process_subject_step3() {
                 "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
                 "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
                 -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii"
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.shape.gii"
 
                 wb_command -metric-resample "$y_in" \
                 "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
                 "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
                 -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii"
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.shape.gii"
 
                 reconstruct_coords_native.py \
                 --x "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
@@ -189,7 +189,7 @@ process_subject_step3() {
             "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" \
             "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" \
             -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-            -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.label.gii"
+            -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_lh.shape.gii"
 
             if [ "$map" == "polarAngle" ]; then
                 echo "[$dirSub] Transforming polar angle map of the left hemisphere..."
@@ -220,13 +220,13 @@ process_subject_step3() {
                 "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
                 "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
                 -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii"
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.shape.gii"
 
                 wb_command -metric-resample "$y_in" \
                 "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
                 "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_y_${model}.$hemisphere.native.func.gii" \
                 -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii"
+                -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.shape.gii"
 
                 reconstruct_coords_native.py \
                 --x "$deepret_output_dir/$dirSub.predicted_x_${model}.$hemisphere.native.func.gii" \
@@ -246,7 +246,7 @@ process_subject_step3() {
             "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" \
             "$surf_sphere_reg" ADAP_BARY_AREA "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" \
             -area-surfs "$surf_midthickness_32k" "$surf_midthickness_native" \
-            -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.label.gii"
+            -current-roi "$script_dir/../labels/ROI_WangPlusFovea/ROI.fs_rh.shape.gii"
 
             echo "[$dirSub] Applying mask to the predicted map of the right hemisphere..."
             wb_command -metric-mask "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" \

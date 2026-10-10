@@ -116,7 +116,8 @@ do
 
     echo "Resampling fsaverage sign maps to native space..."
     if [ "$hemisphere" == 'lh' ]; then H=L; else H=R; fi
-    roi_fsavg="$script_dir/labels/ROI_WangPlusFovea/ROI.fs_$hemisphere.label.gii"
+    roi_fsavg_label="$script_dir/labels/ROI_WangPlusFovea/ROI.fs_$hemisphere.label.gii"
+    roi_fsavg_metric="$script_dir/labels/ROI_WangPlusFovea/ROI.fs_$hemisphere.shape.gii"
     for dirSub in "${resample_subjects[@]}";
     do
         echo $dirSub
@@ -131,7 +132,7 @@ do
         # Native-space ROI label (normally produced by pipeline Step 3); create it
         # here if missing, with the same command Step 3 uses.
         if [ ! -f "$roi_native" ]; then
-            wb_command -label-resample "$roi_fsavg" \
+            wb_command -label-resample "$roi_fsavg_label" \
             "$dirHCP/fs_LR-deformed_to-fsaverage.$H.sphere.32k_fs_LR.surf.gii" \
             "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii" ADAP_BARY_AREA "$roi_native" \
             -area-surfs "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii"
@@ -145,7 +146,7 @@ do
         "$dirHCP/fs_LR-deformed_to-fsaverage.$H.sphere.32k_fs_LR.surf.gii" \
         "$dirSubs/$dirSub/surf/$hemisphere.sphere.reg.surf.gii" ADAP_BARY_AREA "$out_map" \
         -area-surfs "$dirSubs/$dirSub/surf/$dirSub.$hemisphere.midthickness.32k_fs_LR.surf.gii" "$dirSubs/$dirSub/surf/$hemisphere.midthickness.surf.gii" \
-        -current-roi "$roi_fsavg" \
+        -current-roi "$roi_fsavg_metric" \
         && wb_command -metric-math '(x > 0) - (x < 0)' "$out_map" -var x "$out_map" > /dev/null \
         && wb_command -metric-mask "$out_map" "$roi_native" "$out_map"
         if [ $? -ne 0 ] || [ ! -f "$out_map" ]; then

@@ -33,6 +33,27 @@ do
     esac
 done
 
+# Normalize paths: the script cd's into $dirSubs, so relative -s/-t/-o arguments
+# would silently resolve against the wrong base afterwards.
+dirSubs=$(realpath "$dirSubs")
+dirHCP=$(realpath "$dirHCP")
+[ -n "$output_dir" ] && output_dir=$(realpath -m "$output_dir")
+
+# Fail fast if a required tool is missing (otherwise every subject fails
+# mid-function with 'command not found' noise).
+required_tools="mris_convert mris_curvature wb_shortcuts wb_command"
+if [ "$fast" == "yes" ]; then
+    required_tools="$required_tools midthickness_surf.py"
+else
+    required_tools="$required_tools mris_expand"
+fi
+for tool in $required_tools; do
+    if ! command -v "$tool" > /dev/null; then
+        echo "[Step 1] ERROR: required tool '$tool' not found on PATH. Run inside the deepRetinotopy container or load FreeSurfer + Connectome Workbench."
+        exit 2   # environment problem: fatal for every subject, caller must abort
+    fi
+done
+
 echo "Hemisphere: $hemisphere"
 
 # Check if processing single subject or multiple subjects
@@ -154,11 +175,18 @@ process_subject() {
         else
             echo "[$dirSub] Resampled curvature data already available"
         fi
-        
+
+        # Post-condition: a tool failure above (e.g. wb_command missing or a
+        # resample error) must fail this subject, not fall through to "completed".
+        if [ ! -f "$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" ]; then
+            echo "[$dirSub] ERROR: expected output $dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii was not produced"
+            exit 1
+        fi
+
         end_time=$(date +%s)
         execution_time=$((end_time-start_time))
         execution_time_minutes=$((execution_time / 60))
-        echo "=== Subject $dirSub completed in $execution_time_minutes minutes ==="         
+        echo "=== Subject $dirSub completed in $execution_time_minutes minutes ==="
     else
         echo "[$dirSub] ERROR: No surface directory found"
         exit 1
@@ -195,8 +223,31 @@ else
 
     echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
 
-    # Process in parallel
+    # Process in parallel. xargs returns 123 if ANY per-subject invocation failed;
+    # without this check a failed subject is silently dropped and the step
+    # reports success (the CLI then only sees missing files much later, if at all).
     printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject '{}' '$hemisphere' '$fast' '$dirSubs' '$dirHCP' '$output_dir'"
+    xargs_status=$?
+    if [ $xargs_status -ne 0 ]; then
+        # Partial failure: list who failed and exit 1 so the caller can warn and
+        # CONTINUE with the subjects that succeeded. If nobody succeeded, exit 2
+        # (fatal -- almost certainly an environment or input problem).
+        n_ok=0; failed_subjects=""
+        for s in "${subjects[@]}"; do
+            if [ -n "$output_dir" ]; then
+                out="$output_dir/$s/surf/$s.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+            else
+                out="$dirSubs/$s/surf/$s.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+            fi
+            if [ -f "$out" ]; then n_ok=$((n_ok+1)); else failed_subjects="$failed_subjects $s"; fi
+        done
+        echo "[Step 1] WARNING: $(( ${#subjects[@]} - n_ok )) of ${#subjects[@]} subjects FAILED:$failed_subjects"
+        if [ $n_ok -eq 0 ]; then
+            echo "[Step 1] ERROR: no subject produced output -- aborting."
+            exit 2
+        fi
+        exit 1
+    fi
 fi
 
 # Calculate and display total time

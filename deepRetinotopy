@@ -358,9 +358,15 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
             
             1_native2fsaverage.sh $step1_args
 
-            if [ $? -eq 1 ]; then
+            step_status=$?
+            # exit 1 = some subjects failed (continue with the rest); exit >=2 =
+            # nothing succeeded (abort). In single-subject mode any failure is fatal.
+            if [ $step_status -ge 2 ] || { [ $step_status -ne 0 ] && [ -n "$subject_id" ]; }; then
                 echo "Error in Step 1: Please check surface files."
                 exit 1
+            elif [ $step_status -ne 0 ]; then
+                echo "[Warning] Step 1 ($hemisphere): some subjects failed; continuing with the subjects that succeeded (see messages above)."
+                pipeline_errors=1
             fi
             
             # If we're only running step1, we're done with this hemisphere
@@ -431,9 +437,13 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     
                     3_fsaverage2native.sh $step3_args
                     
-                    if [ $? -eq 1 ]; then
+                    step_status=$?
+                    if [ $step_status -ge 2 ] || { [ $step_status -ne 0 ] && [ -n "$subject_id" ]; }; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."
                         exit 1
+                    elif [ $step_status -ne 0 ]; then
+                        echo "[Warning] Step 3 ($map, $hemisphere): some subjects failed; continuing with the subjects that succeeded (see messages above)."
+                        pipeline_errors=1
                     fi
                     
                     echo "$map resampling completed for $hemisphere hemisphere"
@@ -446,6 +456,14 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
     echo "Execution completed!"
     if [ -n "$output_dir" ]; then
         echo "All output files have been saved to: $output_dir"
+    fi
+    if [ -n "$pipeline_errors" ]; then
+        echo "================================================================================"
+        echo "[Warning] One or more subjects FAILED in at least one step; their outputs are"
+        echo "          missing. Search this run's logs for 'FAILED' / 'ERROR' to see which."
+        echo "          Re-running the same command only redoes the missing work."
+        echo "================================================================================"
+        exit 1
     fi
 else
     echo "Directories do not exist! Please check the paths to the directories."

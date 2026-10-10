@@ -32,6 +32,8 @@ do
          # <modelname>-model[<seed>] tokens written by Step 2, e.g.
          # visualCoord-model, pRFsize-model3, polarAngle-model.
          polarAngle-model*|eccentricity-model*|pRFsize-model*|visualCoord-model*) ;;
+         # sphere.reg-frame model family (trained on re-expressed targets)
+         visualCoord-spherereg-model*|pRFsize-spherereg-model*) ;;
          # Legacy tokens (pre-rename) kept for back-compat.
          model1|model2|model3|model4|model5|average|model) ;;
          *) echo "Invalid model argument: $model"; exit 1;;
@@ -44,6 +46,19 @@ do
       exit 1;;
   esac
 done
+
+# Normalize paths: the script cd's into $dirSubs, so relative -s/-t/-o arguments
+# would silently resolve against the wrong base afterwards.
+dirSubs=$(realpath "$dirSubs")
+dirHCP=$(realpath "$dirHCP")
+[ -n "$output_dir" ] && output_dir=$(realpath -m "$output_dir")
+
+# Fail fast if wb_command is missing (otherwise every subject fails mid-function
+# with 'command not found' noise and no output).
+if ! command -v wb_command > /dev/null; then
+    echo "[Step 3] ERROR: wb_command not found on PATH. Run inside the deepRetinotopy container or load Connectome Workbench."
+    exit 2   # environment problem: fatal for every subject, caller must abort
+fi
 
 echo "Model: $model"
 echo "Map: $map"
@@ -240,6 +255,13 @@ process_subject_step3() {
             fi
         fi
         
+        # Post-condition: a tool failure above (e.g. wb_command missing or a
+        # resample error) must fail this subject, not fall through to "completed".
+        if [ ! -f "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" ]; then
+            echo "[$dirSub] ERROR: expected output $dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii was not produced"
+            exit 1
+        fi
+
         end_time=$(date +%s)
         execution_time=$((end_time-start_time))
         execution_time_minutes=$((execution_time / 60))
@@ -277,8 +299,31 @@ else
 
     echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
 
-    # Process in parallel
+    # Process in parallel. xargs returns 123 if ANY per-subject invocation failed;
+    # without this check a failed subject is silently dropped and the step
+    # reports success.
     printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject_step3 '{}' '$hemisphere' '$map' '$model' '$dirSubs' '$dirHCP' '$script_dir' '$output_dir'"
+    xargs_status=$?
+    if [ $xargs_status -ne 0 ]; then
+        # Partial failure: list who failed and exit 1 so the caller can warn and
+        # CONTINUE with the subjects that succeeded. If nobody succeeded, exit 2
+        # (fatal -- almost certainly an environment or input problem).
+        n_ok=0; failed_subjects=""
+        for s in "${subjects[@]}"; do
+            if [ -n "$output_dir" ]; then
+                out="$output_dir/$s/deepRetinotopy/$s.predicted_${map}_${model}.$hemisphere.native.func.gii"
+            else
+                out="$dirSubs/$s/deepRetinotopy/$s.predicted_${map}_${model}.$hemisphere.native.func.gii"
+            fi
+            if [ -f "$out" ]; then n_ok=$((n_ok+1)); else failed_subjects="$failed_subjects $s"; fi
+        done
+        echo "[Step 3] WARNING: $(( ${#subjects[@]} - n_ok )) of ${#subjects[@]} subjects FAILED:$failed_subjects"
+        if [ $n_ok -eq 0 ]; then
+            echo "[Step 3] ERROR: no subject produced output -- aborting."
+            exit 2
+        fi
+        exit 1
+    fi
 fi
 
 # Calculate and display total time

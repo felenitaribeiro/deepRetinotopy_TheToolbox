@@ -4,8 +4,10 @@
 For every map/fit: load the original .mat, replace only the cortical entries of each
 participant's field with the reconstructed sphere.reg-frame values, keep subcortical
 entries and all CIFTI metadata fields untouched, save under the same variable name as
-cifti_<map>[_fitN]_all_spherereg.mat. Myelin comes from the preferred native route
-(myelin.<h>.32k_spherereg / myelin_roi.<h>.32k_spherereg).
+cifti_<map>[_fitN]_all_spherereg.mat. Myelin comes from the mat route
+(myelin_mat.<h>.32k_spherereg: 32k MSMAll -> native -> 32k sphere.reg), chosen over
+the native route because the native map carries vessel outliers HCP's own 32k maps
+exclude; see report.md "Myelin route decision".
 """
 import os, sys, gc
 import numpy as np

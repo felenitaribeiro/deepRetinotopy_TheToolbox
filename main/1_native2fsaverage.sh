@@ -99,7 +99,20 @@ process_subject() {
     
     if [ -d "$dirSubs/$dirSub/surf" ]; then
         start_time=$(date +%s)
-        
+
+        # Prerequisites for this subject, checked up front so a missing file gives
+        # one clear message instead of mid-run tool errors: white + pial +
+        # sphere.reg are always needed (freesurfer-resample-prep); non-fast mode
+        # additionally needs thickness (mris_expand -thickness).
+        required_files="$hemisphere.white $hemisphere.pial $hemisphere.sphere.reg"
+        [ "$fast" != "yes" ] && required_files="$required_files $hemisphere.thickness"
+        for req in $required_files; do
+            if [ ! -f "$dirSubs/$dirSub/surf/$req" ]; then
+                echo "[$dirSub] ERROR: required input surf/$req not found"
+                exit 1
+            fi
+        done
+
         if [ "$fast" == "yes" ]; then
             echo "[$dirSub] Fast mode enabled."
             echo "[$dirSub] [Step 1.1] Generating mid-thickness surface and curvature data if not available..."

@@ -5,7 +5,7 @@ Run after resampling. Usage: analyze_full.py [subjects...]"""
 import sys, os, csv, subprocess
 import numpy as np
 import nibabel as nib
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import (WORK, NHEMI, load_metric, reconstruct, circ_diff, roi_mask,
                  orig_maps, med_p90)
 
@@ -13,8 +13,10 @@ FSBASE = '/scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/HCP/freesurfer'
 subs = sys.argv[1:] or [s.strip() for s in open(f'{WORK}/subjects.txt') if s.strip()]
 mats = {}
 
+WB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'wb')
+
 def wb(*args):
-    subprocess.run([f'{WORK}/scripts/wb'] + list(args), check=True,
+    subprocess.run([WB] + list(args), check=True,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def native_roi(sub, hemi):
@@ -98,7 +100,9 @@ for si, sub in enumerate(subs):
 
 os.makedirs(f'{WORK}/checks', exist_ok=True)
 cols = sorted({k for r in rows for k in r}, key=lambda c: (c not in ('sub', 'hemi'), c))
-with open(f'{WORK}/checks/full_metrics.csv', 'w', newline='') as f:
+# subset runs (explicit subject args) must never clobber the full-cohort CSV
+csv_name = 'full_metrics.csv' if len(sys.argv) <= 1 else 'full_metrics_subset.csv'
+with open(f'{WORK}/checks/{csv_name}', 'w', newline='') as f:
     w = csv.DictWriter(f, fieldnames=cols)
     w.writeheader()
     w.writerows(rows)
@@ -134,4 +138,4 @@ for key in ['hemifield_frac', 'curv_corr', 'curv_maxabs', 'rt_msm_pa_med', 'rt_m
         print(f'{key}: lh {agg(key,"lh")} | rh {agg(key,"rh")}')
     except Exception:
         pass
-print('CSV written to checks/full_metrics.csv')
+print(f'CSV written to checks/{csv_name}')

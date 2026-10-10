@@ -9,7 +9,7 @@ import nibabel as nib
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import WORK, load_metric, reconstruct, roi_mask, orig_maps
 
 subs = sys.argv[1:] or ['100610', '102311', '102816']

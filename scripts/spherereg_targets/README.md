@@ -21,24 +21,29 @@ Run of record: 2026-10-09, report with all checkpoint results, versions and chec
 Working data lives in `sandbox/spherereg_targets/` (hcp/ downloads, gii/ intermediates,
 mat/ outputs, checks/ metrics+plots). Paths are hardcoded to this filesystem for exact
 provenance — to relocate, change the constants at the top of `lib.py`,
-`extract_giftis.py`, `resample_subject.sh`, `download_subject.sh`, `resample_all.sbatch`,
-`run_pipeline.sh`.
+`1_download_hcp.sh`, `2_extract_giftis.py`, `3_resample_subject.sh`,
+`3_resample_all.sbatch`, `run_pipeline.sh`.
 
-## Stages
+## Layout
+
+Numbered scripts are the pipeline, in execution order (like `main/` in the toolbox);
+`checks/` holds the checkpoint/validation scripts; `tests/` the code tests for the
+reader; `lib.py` and `wb` are shared helpers.
 
 | stage | script | what it does |
 |---|---|---|
-| download | `mk_subjects.py`, `download_subject.sh` | subject list from the `.mat` fields; HCP S1200 surfaces + native myelin from `s3://hcp-openaccess`; canonical template spheres |
-| checkpoint0 | `checkpoint0_full.py`, `provenance_census.py`, `cp1b2.py` | file census, native vertex-count identity, curvature provenance (all 362 files), `cifti_curv_all.mat` ≠ training curvature |
-| extract | `extract_giftis.py` | `.mat` → per-subject GIFTI columns: cos/sin polar angle (never the angle itself), ecc, pRF, R2, validity; invalid vertices zero-filled |
-| resample | `resample_all.sbatch` → `resample_subject.sh` | all wb_command steps: steps 2–3, both round trips, native consistency, xyz geometry, both myelin routes (Slurm, ~15 min) |
-| analyze | `analyze_full.py`, `cp23_extra.py` | checkpoints 1.2, 2.1–2.3, 3.1–3.3 → `checks/full_metrics.csv` |
-| mats | `write_mats.py` | the 11 `cifti_*_all_spherereg.mat` files (same structure as the originals; myelin = mat route) |
-| checkpoint4 | `checkpoint4.py` | coverage, distributions, ranges, myelin pattern, split halves → `checks/checkpoint4.csv` |
-| loader | `loader_test.py` | `read_HCP` loads the new files with identical shapes (symlink layout in `loader_test/`) |
-| plots | `visual_check.py` | side-by-side polar angle maps, 3 subjects (needs env `deepretinotopy_validation_plot`) |
-| export | `export_empirical_giftis.py` | per-subject GIFTIs into `HCP/freesurfer/<sub>/surf/`: `<sub>.empirical_<map>_<fit>-spherereg.<h>.32k_fs_LR.func.gii`, `…_<fit>.<h>.native.func.gii`, `<sub>.myelinmap-spherereg.<h>.32k_fs_LR.func.gii` |
-| repro | (inline) | checkpoint 5: participant 100610 end-to-end is byte-identical |
+| download | `1_download_hcp.sh` | subject list from the `.mat` fields; HCP S1200 surfaces + native myelin from `s3://hcp-openaccess`; canonical template spheres |
+| checkpoint0 | `checks/checkpoint0_inputs.py` | file census, native vertex-count identity, curvature provenance (all 362 files), `cifti_curv_all.mat` ≠ training curvature |
+| extract | `2_extract_giftis.py` | `.mat` → per-subject GIFTI columns: cos/sin polar angle (never the angle itself), ecc, pRF, R2, validity; invalid vertices zero-filled |
+| resample | `3_resample_all.sbatch` → `3_resample_subject.sh` | all wb_command steps: steps 2–3, both round trips, native consistency, xyz geometry, both myelin routes (Slurm, ~15 min) |
+| analyze | `checks/checkpoint2_3_analyze.py`, `checks/checkpoint2_3_consistency.py` | checkpoints 1.2, 2.1–2.3, 3.1–3.3 → `checks/full_metrics.csv` |
+| mats | `4_write_mats.py` | the 11 `cifti_*_all_spherereg.mat` files (same structure as the originals; myelin = mat route) |
+| checkpoint4 | `checks/checkpoint4.py` | coverage, distributions, ranges, myelin pattern, split halves → `checks/checkpoint4.csv` |
+| loader | `checks/checkpoint4_loader.py` | `read_HCP` loads the new files with identical shapes (symlink layout in `loader_test/`) |
+| plots | `checks/checkpoint4_visual.py` | side-by-side polar angle maps, 3 subjects (needs env `deepretinotopy_validation_plot`) |
+| export | `5_export_empirical_giftis.py` | per-subject GIFTIs into `HCP/freesurfer/<sub>/surf/`: `<sub>.empirical_<map>_<fit>-spherereg.<h>.32k_fs_LR.func.gii`, `…_<fit>.<h>.native.func.gii`, `<sub>.myelinmap-spherereg.<h>.32k_fs_LR.func.gii` |
+| repro | (inline in `run_pipeline.sh`) | checkpoint 5: participant 100610 end-to-end is byte-identical |
+| tests | `tests/reader_equiv_test.py`, `tests/dataset_smoke_test.py` | reader bit-exactness + full `HCP_spherereg` dataset build |
 
 ## Training on the new data
 
@@ -46,10 +51,10 @@ provenance — to relocate, change the constants at the top of `lib.py`,
 including the legacy LH polar-angle ±180° shift) reading the exported per-subject
 GIFTIs, and `utils/dataset.py` accepts `dataset='HCP_spherereg'` (same 161/10/10 split;
 cache stem includes the dataset name, so caches never mix with `HCP`). Train with
-`--dataset HCP_spherereg`; everything else unchanged. Tests:
-- `reader_equiv_test.py` — `read_HCP_gifti` is bit-exact vs `read_HCP` on the
+`--dataset HCP_spherereg`; everything else unchanged. Tests (`./run_pipeline.sh tests`):
+- `tests/reader_equiv_test.py` — `read_HCP_gifti` is bit-exact vs `read_HCP` on the
   `_spherereg.mat` files (3 subjects × 2 hemispheres × 4 predictions × myelin on/off).
-- `dataset_smoke_test.py` — full `Retinotopy(dataset='HCP_spherereg')` build, split sizes.
+- `tests/dataset_smoke_test.py` — full `Retinotopy(dataset='HCP_spherereg')` build, split sizes.
 
 Alternatively, `read_HCP` works unmodified on the `_spherereg.mat` files through a
 symlink layout like `sandbox/spherereg_targets/loader_test/HCP_new/`.

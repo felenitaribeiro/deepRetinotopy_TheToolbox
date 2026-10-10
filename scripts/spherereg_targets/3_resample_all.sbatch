@@ -11,5 +11,5 @@
 WORK=/scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/sandbox/spherereg_targets
 SCRIPTS=/scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/scripts/spherereg_targets
 cat $WORK/subjects.txt | xargs -P 12 -I{} bash -c \
-  "$SCRIPTS/resample_subject.sh {} pilot > $WORK/gii/{}.resample.log 2>&1 || echo 'FAILED {}'"
+  "$SCRIPTS/3_resample_subject.sh {} pilot > $WORK/gii/{}.resample.log 2>&1 || echo 'FAILED {}'"
 echo "all done"

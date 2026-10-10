@@ -7,7 +7,7 @@ import sys, os, csv
 import numpy as np
 import scipy.io as sio
 from scipy.stats import ks_2samp
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import WORK, CONV, NHEMI, roi_mask, circ_diff, circ_mean
 
 LBL = '/scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/labels/VisualAreasLabels_Wang2015'

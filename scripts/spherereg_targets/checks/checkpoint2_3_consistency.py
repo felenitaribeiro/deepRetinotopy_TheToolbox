@@ -1,6 +1,7 @@
 import csv, sys
 import numpy as np
-sys.path.insert(0, '/scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/sandbox/spherereg_targets/scripts')
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import WORK, NHEMI, load_metric, reconstruct, roi_mask, orig_maps
 rows=list(csv.DictReader(open(f'{WORK}/checks/full_metrics.csv')))
 f=lambda r,k: float(r[k])

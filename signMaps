@@ -2,7 +2,7 @@
 
 # Default values
 subject_id=""
-model="visualCoord-model"   # model-name token of the input PA/ecc maps; pass -m model for legacy data
+model="visualCoord-spherereg-model"   # model-name token of the input PA/ecc maps; pass -m model for legacy data
 
 while getopts s:t:d:m:i: flag
 do

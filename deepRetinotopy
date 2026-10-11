@@ -388,7 +388,10 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ]; then
                     echo "[Step 2] Retinotopy prediction..."
 
-                    step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere"
+                    # The -spherereg token marks the registration frame of the deployed
+                    # models (targets re-expressed in the sphere.reg frame, >= 1.0.20),
+                    # so outputs never collide with pre-1.0.20 (MSMAll-frame) maps.
+                    step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere --tag ${map}-spherereg"
                     if [ -n "$output_dir" ]; then
                         step2_args="$step2_args --output_dir $output_dir"
                     fi
@@ -425,7 +428,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step3" ]; then
                     echo "[Step 3] Resampling predictions to native space..."
                     
-                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m ${map}-model"
+                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m ${map}-spherereg-model"
                     if [ -n "$subject_id" ]; then
                         step3_args="$step3_args -j 1 -i $subject_id"
                     else

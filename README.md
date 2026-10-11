@@ -197,26 +197,26 @@ When no custom output directory is specified, files are saved within the FreeSur
 		│   ├── [sub_id].curvature-midthickness.rh.32k_fs_LR.func.gii
 		│   └── ... (other surface processing files)
 		└── deepRetinotopy
-			├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_pRFsize-model.func.gii
-			├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_pRFsize-model.func.gii
-			├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_x_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_x_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_y_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_y_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].predicted_eccentricity_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_eccentricity_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_pRFsize_pRFsize-model.lh.native.func.gii
-			├── [sub_id].predicted_pRFsize_pRFsize-model.rh.native.func.gii
-			├── [sub_id].predicted_polarAngle_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_polarAngle_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_x_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_x_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_y_visualCoord-model.lh.native.func.gii
-			└── [sub_id].predicted_y_visualCoord-model.rh.native.func.gii
+			├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_pRFsize-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_pRFsize-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_x_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_x_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_y_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_y_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].predicted_eccentricity_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_eccentricity_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_pRFsize_pRFsize-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_pRFsize_pRFsize-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_polarAngle_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_polarAngle_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_x_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_x_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_y_visualCoord-spherereg-model.lh.native.func.gii
+			└── [sub_id].predicted_y_visualCoord-spherereg-model.rh.native.func.gii
 ```
 
 ### Custom Output Directory

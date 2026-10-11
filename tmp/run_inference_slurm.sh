@@ -29,21 +29,26 @@ REPO=/scratch/project/recyle_dl/deepRetinotopy_TheToolbox
 FS="$REPO/HCP/freesurfer/"                 # subjects dir (needs curvature files from Step 1)
 cd "$REPO/main"
 
-N_MODELS=5                                  # number of seeds per hemisphere in ./models/
+N_MODELS=5                                  # number of seeds per hemisphere
+# Seeds of the sphere.reg-frame run (targets re-expressed in the curvature frame,
+# scripts/spherereg_targets/). Tags carry a -spherereg token on BOTH paths so the
+# outputs never collide with the September MSMAll-frame seed maps
+# (visualCoord-model{1..5} / pRFsize-model{1..5}) still in deepRetinotopy/.
+MODEL_DIR=./output/roi-wholebrain_ep400_bs8_lr0.005_swa_spherereg
 
 for H in lh rh;
 do
     echo "=== visualCoord inference ($H, $N_MODELS seeds) -> polarAngle + eccentricity ==="
-    # outputs: <sub>.fs_predicted_{polarAngle,eccentricity,x,y}_${H}_curvatureFeat_visualCoord-model{1..N}.func.gii
+    # outputs: <sub>.fs_predicted_{polarAngle,eccentricity,x,y}_${H}_curvatureFeat_visualCoord-spherereg-model{1..N}.func.gii
     python -u ./2_inference.py --path "$FS" --dataset hcp \
         --prediction_type visualCoord --hemisphere "$H" --num_features 1 \
-        --num_of_models "$N_MODELS"
+        --num_of_models "$N_MODELS" --model_dir "$MODEL_DIR" --tag visualCoord-spherereg
 
     echo "=== pRFsize inference ($H, $N_MODELS seeds) ==="
-    # outputs: <sub>.fs_predicted_pRFsize_${H}_curvatureFeat_pRFsize-model{1..N}.func.gii
+    # outputs: <sub>.fs_predicted_pRFsize_${H}_curvatureFeat_pRFsize-spherereg-model{1..N}.func.gii
     python -u ./2_inference.py --path "$FS" --dataset hcp \
         --prediction_type pRFsize --hemisphere "$H" --num_features 1 \
-        --num_of_models "$N_MODELS"
+        --num_of_models "$N_MODELS" --model_dir "$MODEL_DIR" --tag pRFsize-spherereg
 done
 
 # After selecting a seed, deploy it seedless for the container CLI, e.g.:

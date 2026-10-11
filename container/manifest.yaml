@@ -15,7 +15,7 @@
 # OSF project that hosts the trained model weights, and the path prefix within
 # it. Files are fetched as: <osf_model_dir>/deepRetinotopy_<map>_<hemi>_model<seed>.pt
 osf_project: ermbz
-osf_model_dir: osfstorage/models/v2
+osf_model_dir: osfstorage/models/v3
 
 # Which trained seed ships for each hemisphere + map. The renderer emits the
 # download list in a fixed order (LH block first, then RH; within each,
@@ -24,8 +24,8 @@ osf_model_dir: osfstorage/models/v2
 # those. Each file is fetched into models/ and renamed to drop the seed number.
 models:
   LH:
-    visualCoord: 5
-    pRFsize: 4
-  RH:
     visualCoord: 1
     pRFsize: 5
+  RH:
+    visualCoord: 1
+    pRFsize: 2

@@ -1,0 +1,2 @@
+#!/bin/bash
+exec singularity exec -B /scratch /scratch/project_mnt/S0210/deepRetinotopy_TheToolbox/deepretinotopy_1.0.18_20250909.simg wb_command "$@"

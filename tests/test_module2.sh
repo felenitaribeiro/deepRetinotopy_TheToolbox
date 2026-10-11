@@ -13,17 +13,18 @@ test_module2() {
     get_deepretinotopy_paths
     setup_path_and_bins
     
-    # Copy specific models for polarAngle LH
+    # Copy the visualCoord LH model (the container ships visualCoord weights,
+    # which produce polarAngle + eccentricity jointly; no per-map models since 1.0.19)
     cd "$DEEPRETINOTOPY_PATH/$DEEPRETINOTOPY_DIR.simg/opt/deepRetinotopy_TheToolbox"
     sudo mkdir -p "$TOOLBOX_PATH/models/"
     sudo chmod 777 "$TOOLBOX_PATH"
-    sudo cp -r models/deepRetinotopy_polarAngle_LH_* "$TOOLBOX_PATH/models/"
+    sudo cp -r models/deepRetinotopy_visualCoord_LH_* "$TOOLBOX_PATH/models/"
     
     echo "[DEBUG]: deepRetinotopy inference..."
     cd "$TOOLBOX_PATH/main"
     
     for hemisphere in lh; do  # Could expand to rh
-        for map in polarAngle; do  # Could expand to eccentricity, pRFsize
+        for map in visualCoord; do  # Could expand to pRFsize
             echo "Hemisphere: $hemisphere"
             setup_subject_directories
             

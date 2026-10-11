@@ -253,30 +253,26 @@ def inference(args):
             # Resolve model weights + per-model output tag. Default source is the
             # toolbox models/ dir (override with --model_dir, e.g. an experiment
             # output dir). --num_of_models>1 loops over the per-seed files
-            # model1..modelN and writes one output per seed; --model_path is an
-            # explicit single-file override (only meaningful for --num_of_models 1).
+            # model1..modelN and writes one output per seed.
             HU = 'LH' if args.hemisphere in ('Left', 'LH', 'left', 'lh') else 'RH'
             model_dir = args.model_dir if args.model_dir else osp.join(
                 osp.dirname(osp.realpath(__file__)), '..', 'models')
-            if args.model_path and num_of_models == 1:
-                model_path = args.model_path
-            else:
-                seed = str(i + 1) if num_of_models != 1 else ''
-                model_path = osp.join(model_dir, 'deepRetinotopy_{}_{}_model{}{}.pt'.format(
-                    args.prediction_type, HU, seed, stimulus_name))
+            seed = str(i + 1) if num_of_models != 1 else ''
+            model_path = osp.join(model_dir, 'deepRetinotopy_{}_{}_model{}{}.pt'.format(
+                args.prediction_type, HU, seed, stimulus_name))
             # MODEL-name token in the output filename (= Step 3's -m value):
-            # "<name>-model[<seed>]". The coords path names the model via --tag
-            # (default visualCoord, overridable for variant sweeps); the single-
-            # variable path names it by prediction_type (e.g. pRFsize-model).
+            # "<name>-model[<seed>]". Both paths honor --tag; without it, the
+            # coords path defaults to "visualCoord" and the single-variable path
+            # to the prediction type (e.g. pRFsize-model), the legacy names.
             seed_suffix = '' if num_of_models == 1 else str(i + 1)
-            out_tag = '{}-model{}'.format(args.tag, seed_suffix)
-            model_token = '{}-model{}'.format(args.prediction_type, seed_suffix)
+            out_tag = '{}-model{}'.format(args.tag or 'visualCoord', seed_suffix)
+            model_token = '{}-model{}'.format(args.tag or args.prediction_type, seed_suffix)
             print(f'Loading model from: {osp.basename(model_path)}')
             if not osp.exists(model_path):
                 raise FileNotFoundError(
                     'Model weights not found: {}\nExpected a file named '
                     'deepRetinotopy_{}_{}_model{}{}.pt in {} . Deploy the trained '
-                    'model there, or pass --model_dir / --model_path.'.format(
+                    'model there, or pass --model_dir.'.format(
                         model_path, args.prediction_type, HU,
                         '' if num_of_models == 1 else '<seed>', stimulus_name,
                         model_dir))
@@ -432,14 +428,12 @@ def main():
                         help='Directory holding deepRetinotopy_<type>_<H>_model[<i>].pt '
                              '(default: the toolbox models/ dir). Point at an experiment '
                              'output dir to run its seeds without deploying to models/.')
-    parser.add_argument('--model_path', type=str, default=None,
-                        help='Explicit path to model weights (.pt). Overrides the '
-                             'default models/ lookup; use for experiment variants.')
-    parser.add_argument('--tag', type=str, default='visualCoord',
-                        help='Model-name stem for the visualCoord output token, '
-                             'written as "<tag>-model[<seed>]" (default visualCoord '
-                             '-> visualCoord-model). Override for variant sweeps, '
-                             'e.g. --tag loss-mse_ep300 -> loss-mse_ep300-model.')
+    parser.add_argument('--tag', type=str, default=None,
+                        help='Model-name stem for the output token, written as '
+                             '"<tag>-model[<seed>]". Default: "visualCoord" on the '
+                             'visualCoord path, the prediction type on single-map '
+                             'paths (e.g. pRFsize-model). Override for variant '
+                             'sweeps, e.g. --tag loss-mse_ep300 -> loss-mse_ep300-model.')
     args = parser.parse_args()
     inference(args)
 

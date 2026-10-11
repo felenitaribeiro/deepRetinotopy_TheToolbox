@@ -23,6 +23,11 @@ cd ../main
 # passed explicitly so the run is reproducible regardless of the code default.
 EP=400; BS=8; LR=0.005; SEEDS=5; CLIP=1.0; SWA_START=300
 ROI=wholebrain
+# Training data: targets re-expressed in the sphere.reg frame of the
+# curvature (scripts/spherereg_targets/). Passed explicitly, and baked into TAG
+# so these weights never collide with the MSMAll-frame baseline of the same
+# recipe in output/roi-wholebrain_ep400_bs8_lr0.005_swa/.
+DATASET=HCP_spherereg
 
 # 1) visualCoord: joint polar angle + eccentricity as Cartesian (x, y), Euclidean
 #    loss. Replaces the separate polarAngle + eccentricity models (one forward
@@ -30,11 +35,12 @@ ROI=wholebrain
 #    Output: output/<TAG>/deepRetinotopy_visualCoord_<H>_model<k>.pt
 #    TAG is ROI-namespaced so whole-brain weights never collide with / overwrite
 #    the wang_fovea baseline in output/loss-euclidean_...swa/.
-TAG="roi-${ROI}_ep${EP}_bs${BS}_lr${LR}_swa"
+TAG="roi-${ROI}_ep${EP}_bs${BS}_lr${LR}_swa_spherereg"
 for hemisphere in LH RH;
 do
     echo "=== Training visualCoord model ($ROI) for $hemisphere hemisphere ==="
     python -u ./train.py --path ./../HCP/ --path2list ./../HCP/subs.txt \
+        --dataset "$DATASET" \
         --roi "$ROI" --prediction_type visualCoord --hemisphere "$hemisphere" \
         --n_epochs "$EP" --batch_size "$BS" --lr "$LR" \
         --grad_clip "$CLIP" --swa --swa_start "$SWA_START" --n_seeds "$SEEDS" --tag "$TAG"
@@ -48,6 +54,7 @@ for hemisphere in LH RH;
 do
     echo "=== Training pRFsize model ($ROI) for $hemisphere hemisphere ==="
     python -u ./train.py --path ./../HCP/ --path2list ./../HCP/subs.txt \
+        --dataset "$DATASET" \
         --roi "$ROI" --prediction_type pRFsize --hemisphere "$hemisphere" \
         --n_epochs "$EP" --batch_size "$BS" --lr "$LR" \
         --grad_clip "$CLIP" --swa --swa_start "$SWA_START" --n_seeds "$SEEDS" --tag "$TAG"

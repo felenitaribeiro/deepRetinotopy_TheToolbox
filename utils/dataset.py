@@ -6,7 +6,7 @@ import sys
 sys.path.append(osp.dirname(osp.realpath(__file__)))
 from utils.rois import get_roi
 from utils.labels import labels
-from utils.read_data import read_gifti, read_HCP
+from utils.read_data import read_gifti, read_HCP, read_HCP_gifti
 from torch_geometric.data import InMemoryDataset
 from numpy.random import seed
 
@@ -90,7 +90,12 @@ class Retinotopy(InMemoryDataset):
         if self.shuffle == True:
             np.random.shuffle(self.list_subs)
 
-        if self.dataset == 'HCP':
+        # 'HCP': original training data (.mat files, targets/myelin in the MSMAll
+        # frame). 'HCP_spherereg': same split and semantics, but targets and myelin
+        # come from the per-subject GIFTIs re-expressed in the sphere.reg frame of
+        # the curvature (scripts/spherereg_targets/). The dataset name is part of
+        # the processed cache stem, so the two never share .pt files.
+        if self.dataset in ('HCP', 'HCP_spherereg'):
             path = osp.join(self.raw_dir, 'converted')
             data_list = []
             subs_id = []
@@ -108,15 +113,29 @@ class Retinotopy(InMemoryDataset):
             self.list_subs = self.list_subs + dev_subs + test_subs
 
             for i in range(0, len(self.list_subs)):
-                data = read_HCP(path, hemisphere=self.hemisphere,
-                                sub_id=self.list_subs[i],
-                                visual_mask_L=final_mask_L,
-                                visual_mask_R=final_mask_R,
-                                faces_L=faces_L,
-                                faces_R=faces_R,
-                                myelination=self.myelination,
-                                prediction=self.prediction,
-                                stimulus=self.stimulus)
+                if self.dataset == 'HCP_spherereg':
+                    if self.stimulus not in (None, 'original'):
+                        raise NotImplementedError(
+                            "dataset 'HCP_spherereg' only has stimulus='original' maps")
+                    data = read_HCP_gifti(osp.join(self.root, 'freesurfer'),
+                                          hemisphere=self.hemisphere,
+                                          sub_id=self.list_subs[i],
+                                          visual_mask_L=final_mask_L,
+                                          visual_mask_R=final_mask_R,
+                                          faces_L=faces_L,
+                                          faces_R=faces_R,
+                                          myelination=self.myelination,
+                                          prediction=self.prediction)
+                else:
+                    data = read_HCP(path, hemisphere=self.hemisphere,
+                                    sub_id=self.list_subs[i],
+                                    visual_mask_L=final_mask_L,
+                                    visual_mask_R=final_mask_R,
+                                    faces_L=faces_L,
+                                    faces_R=faces_R,
+                                    myelination=self.myelination,
+                                    prediction=self.prediction,
+                                    stimulus=self.stimulus)
                 if self.pre_transform is not None:
                     data = self.pre_transform(data)
                 subs_id.append(self.list_subs[i])

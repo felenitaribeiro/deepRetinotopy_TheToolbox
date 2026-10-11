@@ -293,6 +293,108 @@ def read_HCP(path, hemisphere=None, sub_id=None,
     return data
 
 
+def read_HCP_gifti(path, hemisphere=None, sub_id=None,
+                   visual_mask_L=None, visual_mask_R=None,
+                   faces_L=None, faces_R=None, myelination=None,
+                   prediction=None):
+    """Read the sphere.reg-frame HCP training data from per-subject GIFTI files
+        and create a data object with attributes x, y, pos, faces and R2.
+
+        Same outputs and semantics as read_HCP (stimulus='original'), but the
+        empirical maps come from the re-expressed per-subject files in
+        <path>/<sub_id>/surf/ (see scripts/spherereg_targets/):
+            <sub>.empirical_<map>_fit1-spherereg.<h>.32k_fs_LR.func.gii
+            <sub>.myelinmap-spherereg.<h>.32k_fs_LR.func.gii
+        so that targets, curvature and myelin all share the sphere.reg frame.
+
+        Args:
+            path (string): Path to the freesurfer directory (one folder per subject)
+            hemisphere (string): 'Left' or 'Right' hemisphere
+            sub_id (string): ID of the participant
+            visual_mask_L / visual_mask_R (numpy array): ROI mask (32492,)
+            faces_L / faces_R (numpy array): ROI triangular faces
+            myelination (boolean): True adds myelin as a second feature
+            prediction (string): 'polarAngle', 'eccentricity', 'pRFsize' or
+                'visualCoord'
+        Returns:
+            data (object): torch_geometric Data with x, y, pos, faces, R2, mask.
+        """
+    number_hemi_nodes = int(32492)
+    hemi_left = hemisphere in ('Left', 'LH', 'left', 'lh')
+    h = 'lh' if hemi_left else 'rh'
+    visual_mask = visual_mask_L if hemi_left else visual_mask_R
+    faces = torch.tensor((faces_L if hemi_left else faces_R).T, dtype=torch.long)
+
+    pos_tag = 'L' if hemi_left else 'R'
+    pos = torch.tensor((scipy.io.loadmat(
+        osp.join(osp.dirname(osp.realpath(__file__)),
+                 'templates/mid_pos_' + pos_tag + '.mat'))['mid_pos_' + pos_tag].reshape(
+        (number_hemi_nodes, 3))[visual_mask == 1]),
+        dtype=torch.float)
+
+    def load_empirical(map_name):
+        f = osp.join(path, sub_id, 'surf',
+                     sub_id + '.empirical_' + map_name +
+                     '_fit1-spherereg.' + h + '.32k_fs_LR.func.gii')
+        return torch.tensor(np.reshape(
+            np.array(nib.load(f).agg_data()).reshape(
+                (number_hemi_nodes))[visual_mask == 1], (-1, 1)),
+            dtype=torch.float)
+
+    R2_values = load_empirical('R2')
+
+    # Anatomical features (same files/order as read_HCP: curvature, then myelin)
+    curvature = torch.tensor(np.array(nib.load(osp.join(
+        path, sub_id, 'surf',
+        sub_id + '.curvature-midthickness.' + h + '.32k_fs_LR.func.gii')
+    ).agg_data()).reshape(number_hemi_nodes, -1)[visual_mask == 1],
+        dtype=torch.float)
+    nocurv = np.isnan(curvature)
+    curvature[nocurv == 1] = 0
+
+    if myelination == True:
+        myelin_values = torch.tensor(np.reshape(np.array(nib.load(osp.join(
+            path, sub_id, 'surf',
+            sub_id + '.myelinmap-spherereg.' + h + '.32k_fs_LR.func.gii')
+        ).agg_data()).reshape((number_hemi_nodes))[visual_mask == 1], (-1, 1)),
+            dtype=torch.float)
+        nomyelin = np.isnan(myelin_values)
+        myelin_values[nomyelin == 1] = 0
+
+    noR2 = np.isnan(R2_values)
+    R2_values[noR2 == 1] = 0
+
+    if prediction == 'visualCoord':
+        pa_values = load_empirical('polarAngle')
+        ecc_values = load_empirical('eccentricity')
+        y_values, mask_values = _coords_from_pa_ecc(pa_values, ecc_values)
+    else:
+        retinotopicMap_values = load_empirical(prediction)
+        condition = np.isnan(retinotopicMap_values)
+        retinotopicMap_values[condition == 1] = -1
+
+        if prediction == 'polarAngle' and hemi_left:
+            # Rescaling polar angle values (same legacy LH shift as read_HCP,
+            # applied after the NaN -> -1 fill so outputs match exactly)
+            sum_180 = retinotopicMap_values < 180
+            minus_180 = retinotopicMap_values > 180
+            retinotopicMap_values[sum_180] = retinotopicMap_values[sum_180] + 180
+            retinotopicMap_values[minus_180] = retinotopicMap_values[minus_180] - 180
+
+        y_values = retinotopicMap_values
+        mask_values = R2_values > 0
+
+    if myelination == False:
+        data = Data(x=curvature, y=y_values, pos=pos)
+    else:
+        data = Data(x=torch.cat((curvature, myelin_values), 1),
+                    y=y_values, pos=pos)
+    data.face = faces
+    data.R2 = R2_values
+    data.mask = mask_values
+    return data
+
+
 def read_gifti(path, hemisphere=None, sub_id=None,
                visual_mask_L=None, visual_mask_R=None,
                faces_L=None, faces_R=None):

@@ -1,6 +1,33 @@
-
 # macOS metadata
 .DS_Store
 
 # Sphinx build output
 docs/_build/*
+
+# training data
+HCP/*
+templates/*
+tmp/*
+
+# cache
+utils/__pycache__/*
+main/__pycache__/*
+
+# ai stuff
+sandbox/*
+.claude/*
+
+# Large Singularity/Apptainer container image
+*.simg
+
+# Model artifacts and per-experiment outputs
+main/output/
+models/
+
+# SLURM / training log files
+output_*.txt
+error_*.txt
+
+# Grid-search per-job logs
+tmp/logs/
+test/

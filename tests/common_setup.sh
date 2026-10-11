@@ -78,6 +78,12 @@ setup_data_directories() {
 
 setup_path_and_bins() {
     echo "[DEBUG]: Setting up PATH and DEPLOY_BINS..."
+    # Resolve the module's container location BEFORE the repo checkout shadows
+    # the deepRetinotopy module wrapper on PATH (and never clobber it if a test
+    # already resolved it).
+    if [ -z "${DEEPRETINOTOPY_PATH:-}" ] || [ -z "${DEEPRETINOTOPY_DIR:-}" ]; then
+        get_deepretinotopy_paths
+    fi
     export PATH="$TOOLBOX_PATH:$TOOLBOX_PATH/main/:$TOOLBOX_PATH/utils/:$PATH"
     export DEPLOY_BINS="wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:reconstruct_coords_native.py:midthickness_surf.py:mris_convert:mris_curvature:mris_expand"
 
@@ -85,7 +91,6 @@ setup_path_and_bins() {
     # mris_curvature, mris_expand). Released modules <= 1.0.19 never exposed
     # them on the host PATH (they are in deploy.bins from 1.1.0), so shim any
     # missing one by exec'ing into the container sandbox the module ships.
-    get_deepretinotopy_paths
     local runtime sandbox tool
     runtime=$(command -v apptainer || command -v singularity || true)
     sandbox="$DEEPRETINOTOPY_PATH/$DEEPRETINOTOPY_DIR.simg"

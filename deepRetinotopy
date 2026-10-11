@@ -389,8 +389,8 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     echo "[Step 2] Retinotopy prediction..."
 
                     # The -spherereg token marks the registration frame of the deployed
-                    # models (targets re-expressed in the sphere.reg frame, >= 1.0.20),
-                    # so outputs never collide with pre-1.0.20 (MSMAll-frame) maps.
+                    # models (targets re-expressed in the sphere.reg frame, >= 1.1.0),
+                    # so outputs never collide with pre-1.1.0 (MSMAll-frame) maps.
                     step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere --tag ${map}-spherereg"
                     if [ -n "$output_dir" ]; then
                         step2_args="$step2_args --output_dir $output_dir"

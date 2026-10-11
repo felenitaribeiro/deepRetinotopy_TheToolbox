@@ -187,6 +187,22 @@ process_subject() {
             echo "[$dirSub] Data resampling complete"
         else
             echo "[$dirSub] Resampled curvature data already available"
+            # A pre-existing file may predate the template-sphere enforcement
+            # (toolbox <= 1.0.19 docs pointed to the 2017 'dedrifted' sphere,
+            # which does not match model training). wb_command embeds the
+            # template's own creation provenance in every resampled metric, so
+            # the file itself records which template produced it:
+            #   2016 release -> 'spherical_std.164k'; 2017 -> 'MSMAll-to-fsaverage'.
+            if [ "${DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK:-0}" != "1" ]; then
+                curv_existing="$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+                if grep -q "MSMAll-to-fsaverage" "$curv_existing"; then
+                    echo "[$dirSub] ERROR: the existing curvature file was resampled with the 2017 template sphere, which does NOT match the sphere used for model training (2016 release)."
+                    echo "[$dirSub] Delete it to regenerate with the verified template: $curv_existing"
+                    exit 1
+                elif ! grep -q "spherical_std.164k" "$curv_existing"; then
+                    echo "[$dirSub] [Warning] Could not verify which template sphere produced the existing curvature file (no provenance marker found); proceeding. To be safe, delete it so it is regenerated with the verified template: $curv_existing"
+                fi
+            fi
         fi
 
         # Post-condition: a tool failure above (e.g. wb_command missing or a

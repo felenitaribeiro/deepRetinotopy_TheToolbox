@@ -257,10 +257,19 @@ process_subject_step3() {
         
         # Post-condition: a tool failure above (e.g. wb_command missing or a
         # resample error) must fail this subject, not fall through to "completed".
-        if [ ! -f "$deepret_output_dir/$dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii" ]; then
-            echo "[$dirSub] ERROR: expected output $dirSub.predicted_${map}_${model}.$hemisphere.native.func.gii was not produced"
-            exit 1
+        # visualCoord never writes a "predicted_visualCoord" file: it resamples
+        # x/y and reconstructs polarAngle/eccentricity, so check those outputs.
+        if [ "$map" == "visualCoord" ]; then
+            expected_maps="x y polarAngle eccentricity"
+        else
+            expected_maps="$map"
         fi
+        for _m in $expected_maps; do
+            if [ ! -f "$deepret_output_dir/$dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii" ]; then
+                echo "[$dirSub] ERROR: expected output $dirSub.predicted_${_m}_${model}.$hemisphere.native.func.gii was not produced"
+                exit 1
+            fi
+        done
 
         end_time=$(date +%s)
         execution_time=$((end_time-start_time))

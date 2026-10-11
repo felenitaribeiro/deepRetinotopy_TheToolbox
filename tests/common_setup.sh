@@ -80,6 +80,26 @@ setup_path_and_bins() {
     echo "[DEBUG]: Setting up PATH and DEPLOY_BINS..."
     export PATH="$TOOLBOX_PATH:$TOOLBOX_PATH/main/:$TOOLBOX_PATH/utils/:$PATH"
     export DEPLOY_BINS="wb_view:wb_command:wb_shortcuts:python:deepRetinotopy:signMaps:1_native2fsaverage.sh:2_inference.py:3_fsaverage2native.sh:4_signmaps.py:transform_polarangle_lh.py:reconstruct_coords_native.py:midthickness_surf.py:mris_convert:mris_curvature:mris_expand"
+
+    # Step 1 fail-fast checks require FreeSurfer tools (mris_convert,
+    # mris_curvature, mris_expand). Released modules <= 1.0.19 never exposed
+    # them on the host PATH (they are in deploy.bins from 1.1.0), so shim any
+    # missing one by exec'ing into the container sandbox the module ships.
+    get_deepretinotopy_paths
+    local runtime sandbox tool
+    runtime=$(command -v apptainer || command -v singularity || true)
+    sandbox="$DEEPRETINOTOPY_PATH/$DEEPRETINOTOPY_DIR.simg"
+    if [ -n "$runtime" ] && [ -e "$sandbox" ]; then
+        mkdir -p "$TOOLBOX_PATH/fs_bins"
+        for tool in mris_convert mris_curvature mris_expand; do
+            if ! command -v "$tool" > /dev/null; then
+                printf '#!/usr/bin/env bash\nexec "%s" exec "%s" %s "$@"\n' \
+                    "$runtime" "$sandbox" "$tool" > "$TOOLBOX_PATH/fs_bins/$tool"
+                chmod +x "$TOOLBOX_PATH/fs_bins/$tool"
+            fi
+        done
+        export PATH="$TOOLBOX_PATH/fs_bins:$PATH"
+    fi
 }
 
 get_deepretinotopy_paths() {

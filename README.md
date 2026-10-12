@@ -24,7 +24,7 @@ DeepRetinotopy is a toolkit that leverages a geometric deep learning model to pr
 
 - Docker / Singularity container / Neurodesk
 - freesurfer directory
-- HCP "fs_LR-deformed_to-fsaverage" surfaces, pinned to the version our models were trained with (available at: https://github.com/Washington-University/HCPpipelines/tree/ab8895fb012ab4c5764d81b3865915fe7da27f24/global/templates/standard_mesh_atlases/resample_fsaverage). Note that the current (`master`) version of these sphere files differs from the pinned one; in our tests both yield practically identical predictions, but use the pinned version for exact reproducibility.
+- HCP "fs_LR-deformed_to-fsaverage" surfaces, pinned to the version our models were trained with (available at: https://github.com/Washington-University/HCPpipelines/tree/ab8895fb012ab4c5764d81b3865915fe7da27f24/global/templates/standard_mesh_atlases/resample_fsaverage). The pipeline verifies these files by checksum and will not run with any other version — including the current (`master`) HCPpipelines spheres. 
 
 ## Software containers
 DeepRetinotopy (pre-trained models) and required software are packaged in software containers available through Neurodesk and Dockerhub.
@@ -33,7 +33,7 @@ DeepRetinotopy (pre-trained models) and required software are packaged in softwa
 You can run deepRetinotopy on [Neurodesktop](https://www.neurodesk.org/docs/getting-started/neurodesktop/) or using [Neurocommand](https://www.neurodesk.org/docs/getting-started/neurocommand/linux-and-hpc/) through the following commands:
 
 ```bash
-ml deepretinotopy/1.0.19
+ml deepretinotopy/1.1.0
 deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
@@ -41,12 +41,12 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 If you prefer running deepRetinotopy locally via Docker, you can pull our container from Dockerhub and run it using the following commands:
 
 ```bash
-docker pull vnmd/deepretinotopy_1.0.19
-docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.19
+docker pull vnmd/deepretinotopy_1.1.0
+docker run -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.1.0
 # docker exec -it deepret bash
 ```
 
-If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.0.19').
+If you would like Python scripts to print output to the terminal in real-time, you can set the appropriate environment variable when running the container (e.g., 'docker run -e PYTHONUNBUFFERED=1 -it -v ~:/tmp/ --name deepret -u $(id -u):$(id -g) vnmd/deepretinotopy_1.1.0').
 
 Once in the container (the working directory is deepRetinotopy_TheToolbox), you can run **deepRetinotopy**: 
 ```bash
@@ -57,26 +57,26 @@ deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $datase
 Alternatively, you can also download the Singularity/Apptainer container using the following command to run it locally or on your HPC:
 
 ```bash
-date_tag=20260727
-export container=deepretinotopy_1.0.19_$date_tag
+date_tag=20261012
+export container=deepretinotopy_1.1.0_$date_tag
 curl -X GET https://neurocontainers.neurodesk.workers.dev/$container.simg -O
 ```
 
 Then, you can execute the container (so long as Singularity/Apptainer is already available on your computing environment) using the following command:
 
 ```bash
-apptainer exec ./deepretinotopy_1.0.19_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec ./deepretinotopy_1.1.0_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 **Note:** Apptainer >= 1.5 recommended; older packaged builds such as SingularityCE 4.1.1 may fail to unpack this image.
 
 ### Containers for GPU inference
-Our "deepretinotopy_1.0.19" containers are meant for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. You may see warnings like 'An issue occurred while importing pyg-lib' due to GLIBC version differences between PyTorch Geometric and FreeSurfer base image, but these can be safely ignored as they don't affect inference behaviour. You can also use the same container for a broader CPU-based inference pipeline. 
+Our "deepretinotopy_1.1.0" containers are meant for GPU inference with CUDA 12.4, compatible with H100, A100, and L40. You may see warnings like 'An issue occurred while importing pyg-lib' due to GLIBC version differences between PyTorch Geometric and FreeSurfer base image, but these can be safely ignored as they don't affect inference behaviour. You can also use the same container for a broader CPU-based inference pipeline. 
 
 To run our tool using a GPU, you need to pass the --nv flag.
 
 ```bash
-apptainer exec --nv  ./deepretinotopy_1.0.19_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
+apptainer exec --nv  ./deepretinotopy_1.1.0_$date_tag.simg deepRetinotopy -s $path_freesurfer_dir -t $path_hcp_template_surfaces -d $dataset_name -m $maps
 ```
 
 ## Usage
@@ -152,6 +152,8 @@ deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarA
 Store generated files in a separate directory (useful for DataLad and version control workflows):
 
 ```bash
+mkdir -p /path/to/output # current version assumes this folder already exists
+
 # All outputs to custom directory
 deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -o /path/to/output
 
@@ -197,26 +199,26 @@ When no custom output directory is specified, files are saved within the FreeSur
 		│   ├── [sub_id].curvature-midthickness.rh.32k_fs_LR.func.gii
 		│   └── ... (other surface processing files)
 		└── deepRetinotopy
-			├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_pRFsize-model.func.gii
-			├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_pRFsize-model.func.gii
-			├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_x_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_x_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_y_lh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].fs_predicted_y_rh_curvatureFeat_visualCoord-model.func.gii
-			├── [sub_id].predicted_eccentricity_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_eccentricity_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_pRFsize_pRFsize-model.lh.native.func.gii
-			├── [sub_id].predicted_pRFsize_pRFsize-model.rh.native.func.gii
-			├── [sub_id].predicted_polarAngle_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_polarAngle_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_x_visualCoord-model.lh.native.func.gii
-			├── [sub_id].predicted_x_visualCoord-model.rh.native.func.gii
-			├── [sub_id].predicted_y_visualCoord-model.lh.native.func.gii
-			└── [sub_id].predicted_y_visualCoord-model.rh.native.func.gii
+			├── [sub_id].fs_predicted_eccentricity_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_eccentricity_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_pRFsize_lh_curvatureFeat_pRFsize-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_pRFsize_rh_curvatureFeat_pRFsize-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_polarAngle_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_polarAngle_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_x_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_x_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_y_lh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].fs_predicted_y_rh_curvatureFeat_visualCoord-spherereg-model.func.gii
+			├── [sub_id].predicted_eccentricity_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_eccentricity_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_pRFsize_pRFsize-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_pRFsize_pRFsize-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_polarAngle_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_polarAngle_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_x_visualCoord-spherereg-model.lh.native.func.gii
+			├── [sub_id].predicted_x_visualCoord-spherereg-model.rh.native.func.gii
+			├── [sub_id].predicted_y_visualCoord-spherereg-model.lh.native.func.gii
+			└── [sub_id].predicted_y_visualCoord-spherereg-model.rh.native.func.gii
 ```
 
 ### Custom Output Directory

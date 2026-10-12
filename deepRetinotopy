@@ -89,7 +89,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -o)
-            output_dir=$(realpath "$2")
+            output_dir=$(realpath -m "$2")
             shift 2
             ;;
         --step1)
@@ -288,10 +288,48 @@ echo "--------------------------------------------------------------------------
 if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
     # check if template surfaces are available (only if we're running steps that need them)
     if [ "$run_mode" = "all" ] || [ "$run_mode" = "step1" ] || [ "$run_mode" = "step3" ]; then
-        if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] && [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
-            echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii 
+        if [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii" ] || [ ! -f "$dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii" ]; then
+            echo "[Error]: Files $dirHCP/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii
             and/or $dirHCP/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii do not exist!"
             exit 1
+        fi
+
+        # Verify the template spheres are the fs_LR-deformed_to-fsaverage release the
+        # models were trained with: the 2016 spheres (HCPpipelines ab8895fb01; pinned
+        # download link in the README). Any other file is refused -- including the 2017
+        # "dedrifted" spheres from HCPpipelines master, which differ by ~2 mm on the
+        # registration sphere -- since the model targets are tied to the 2016 frame and
+        # a wrong sphere misregisters the data silently. Set
+        # DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to bypass (not recommended).
+        if [ "${DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK:-0}" != "1" ] && command -v md5sum > /dev/null; then
+            for H in L R; do
+                if [ "$H" = "L" ]; then
+                    ref2016=f902cf1182f6cb8546aff07b76dd6791
+                    ref2017=c1390ecd78b0f3bd7600dd655bbcf413
+                else
+                    ref2016=9b236e70328ac3382190aa0f852977c2
+                    ref2017=2d02bca8d1b82cb06ce989528c913dcf
+                fi
+                template_file="$dirHCP/fs_LR-deformed_to-fsaverage.$H.sphere.32k_fs_LR.surf.gii"
+                template_md5=$(md5sum "$template_file" | cut -d' ' -f1)
+                if [ "$template_md5" = "$ref2016" ]; then
+                    echo "Template sphere $H: 2016 release (matches model training) -- OK"
+                elif [ "$template_md5" = "$ref2017" ]; then
+                    echo "[Error]: Template sphere $H is the 2017 'dedrifted' release (HCPpipelines master),"
+                    echo "         not the 2016 release the deployed models were trained with (the two differ"
+                    echo "         by ~2 mm on the registration sphere). Download the pinned 2016 release"
+                    echo "         (HCPpipelines commit ab8895fb01; link in the README), or set"
+                    echo "         DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to proceed anyway (not recommended)."
+                    exit 1
+                else
+                    echo "[Error]: $template_file"
+                    echo "         md5 $template_md5 does not match any known fs_LR-deformed_to-fsaverage release"
+                    echo "         (2016 training sphere: $ref2016; 2017 dedrifted: $ref2017)."
+                    echo "         Download the pinned 2016 release (HCPpipelines commit ab8895fb01; link"
+                    echo "         in the README), or set DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK=1 to proceed anyway."
+                    exit 1
+                fi
+            done
         fi
     fi
     
@@ -320,9 +358,15 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
             
             1_native2fsaverage.sh $step1_args
 
-            if [ $? -eq 1 ]; then
+            step_status=$?
+            # exit 1 = some subjects failed (continue with the rest); exit >=2 =
+            # nothing succeeded (abort). In single-subject mode any failure is fatal.
+            if [ $step_status -ge 2 ] || { [ $step_status -ne 0 ] && [ -n "$subject_id" ]; }; then
                 echo "Error in Step 1: Please check surface files."
                 exit 1
+            elif [ $step_status -ne 0 ]; then
+                echo "[Warning] Step 1 ($hemisphere): some subjects failed; continuing with the subjects that succeeded (see messages above)."
+                pipeline_errors=1
             fi
             
             # If we're only running step1, we're done with this hemisphere
@@ -344,7 +388,10 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step2" ]; then
                     echo "[Step 2] Retinotopy prediction..."
 
-                    step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere"
+                    # The -spherereg token marks the registration frame of the deployed
+                    # models (targets re-expressed in the sphere.reg frame, >= 1.1.0),
+                    # so outputs never collide with pre-1.1.0 (MSMAll-frame) maps.
+                    step2_args="--path $dirSubs --dataset $datasetName --prediction_type $map --hemisphere $hemisphere --tag ${map}-spherereg"
                     if [ -n "$output_dir" ]; then
                         step2_args="$step2_args --output_dir $output_dir"
                     fi
@@ -381,7 +428,7 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                 if [ "$run_mode" = "all" ] || [ "$run_mode" = "step3" ]; then
                     echo "[Step 3] Resampling predictions to native space..."
                     
-                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m ${map}-model"
+                    step3_args="-s $dirSubs -t $dirHCP -h $hemisphere -r $map -m ${map}-spherereg-model"
                     if [ -n "$subject_id" ]; then
                         step3_args="$step3_args -j 1 -i $subject_id"
                     else
@@ -393,9 +440,13 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
                     
                     3_fsaverage2native.sh $step3_args
                     
-                    if [ $? -eq 1 ]; then
+                    step_status=$?
+                    if [ $step_status -ge 2 ] || { [ $step_status -ne 0 ] && [ -n "$subject_id" ]; }; then
                         echo "Error in Step 3: Please check if prediction files were appropriately generated."
                         exit 1
+                    elif [ $step_status -ne 0 ]; then
+                        echo "[Warning] Step 3 ($map, $hemisphere): some subjects failed; continuing with the subjects that succeeded (see messages above)."
+                        pipeline_errors=1
                     fi
                     
                     echo "$map resampling completed for $hemisphere hemisphere"
@@ -408,6 +459,14 @@ if [ -d "$dirSubs" ] && [ -d "$dirHCP" ]; then
     echo "Execution completed!"
     if [ -n "$output_dir" ]; then
         echo "All output files have been saved to: $output_dir"
+    fi
+    if [ -n "$pipeline_errors" ]; then
+        echo "================================================================================"
+        echo "[Warning] One or more subjects FAILED in at least one step; their outputs are"
+        echo "          missing. Search this run's logs for 'FAILED' / 'ERROR' to see which."
+        echo "          Re-running the same command only redoes the missing work."
+        echo "================================================================================"
+        exit 1
     fi
 else
     echo "Directories do not exist! Please check the paths to the directories."

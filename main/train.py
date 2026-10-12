@@ -246,7 +246,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train deepRetinotopy model')
     parser.add_argument('--path', type=str, help='Path to the data folder')
     parser.add_argument('--path2list', type=str, help='Path to the list of subjects')
-    parser.add_argument('--dataset', type=str, default='HCP', help='Dataset to use')
+    parser.add_argument('--dataset', type=str, default='HCP_spherereg', help='Dataset to use')
     parser.add_argument('--prediction_type', type=str, default='polarAngle',
                         choices=['polarAngle', 'eccentricity', 'pRFsize', 'visualCoord'],
                         help='Prediction type')

@@ -16,9 +16,9 @@ authors:
   - family-names: Bollmann
     given-names: Steffen
     orcid: "https://orcid.org/0000-0002-2909-0906"
-version: 1.0.19
-date-released: "2026-07-28"
-doi: "10.5281/zenodo.21646928"
+version: 1.1.0
+date-released: "2026-10-12"
+doi: "10.5281/zenodo.23319222"
 license: GPL-3.0
 repository-code: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"
 url: "https://github.com/felenitaribeiro/deepRetinotopy_TheToolbox"

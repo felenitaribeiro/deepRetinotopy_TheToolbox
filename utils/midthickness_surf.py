@@ -21,12 +21,21 @@ def generate_midthickness_surf(args):
         surf = nib.load(osp.join(args.path, args.hemisphere + '.' + surface + '.gii'))
         coords.append(surf.agg_data('NIFTI_INTENT_POINTSET'))
 
-    # print(np.shape(coords))
     mean_coords = np.mean(coords, axis=0)
     surf.agg_data('NIFTI_INTENT_POINTSET')[:] = mean_coords
-    nib.save(surf, args.path + args.hemisphere + '.graymid.gii')
-    return print("Midthickness surface saved at " + args.path + 
-                 args.hemisphere + '.graymid.gii')
+    # The image object was loaded from the pial surface; relabel its metadata so
+    # the saved file does not claim to be a pial surface (coordinates are already
+    # the white/pial average).
+    pointset_intent = nib.nifti1.intent_codes['NIFTI_INTENT_POINTSET']
+    for darray in surf.darrays:
+        if darray.intent == pointset_intent:
+            meta = dict(darray.meta)
+            meta['AnatomicalStructureSecondary'] = 'MidThickness'
+            meta['Name'] = args.hemisphere + '.graymid'
+            darray.meta = nib.gifti.GiftiMetaData(meta)
+    out_path = osp.join(args.path, args.hemisphere + '.graymid.gii')
+    nib.save(surf, out_path)
+    return print("Midthickness surface saved at " + out_path)
     
 def main():
     parser = argparse.ArgumentParser(description='Generation of midthickness surface')

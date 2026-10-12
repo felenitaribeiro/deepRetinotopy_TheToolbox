@@ -15,7 +15,7 @@ test_deepretinotopy_full() {
     
     cd "$TOOLBOX_PATH"
     
-    local list_of_maps="polarAngle,eccentricity,pRFsize"
+    local list_of_maps="visualCoord,pRFsize"
     IFS=',' read -ra maps <<< "$list_of_maps"
     echo "Maps: ${maps[*]}"
 

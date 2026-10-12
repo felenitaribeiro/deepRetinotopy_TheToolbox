@@ -33,6 +33,27 @@ do
     esac
 done
 
+# Normalize paths: the script cd's into $dirSubs, so relative -s/-t/-o arguments
+# would silently resolve against the wrong base afterwards.
+dirSubs=$(realpath "$dirSubs")
+dirHCP=$(realpath "$dirHCP")
+[ -n "$output_dir" ] && output_dir=$(realpath -m "$output_dir")
+
+# Fail fast if a required tool is missing (otherwise every subject fails
+# mid-function with 'command not found' noise).
+required_tools="mris_convert mris_curvature wb_shortcuts wb_command"
+if [ "$fast" == "yes" ]; then
+    required_tools="$required_tools midthickness_surf.py"
+else
+    required_tools="$required_tools mris_expand"
+fi
+for tool in $required_tools; do
+    if ! command -v "$tool" > /dev/null; then
+        echo "[Step 1] ERROR: required tool '$tool' not found on PATH. Run inside the deepRetinotopy container or load FreeSurfer + Connectome Workbench."
+        exit 2   # environment problem: fatal for every subject, caller must abort
+    fi
+done
+
 echo "Hemisphere: $hemisphere"
 
 # Check if processing single subject or multiple subjects
@@ -78,7 +99,20 @@ process_subject() {
     
     if [ -d "$dirSubs/$dirSub/surf" ]; then
         start_time=$(date +%s)
-        
+
+        # Prerequisites for this subject, checked up front so a missing file gives
+        # one clear message instead of mid-run tool errors: white + pial +
+        # sphere.reg are always needed (freesurfer-resample-prep); non-fast mode
+        # additionally needs thickness (mris_expand -thickness).
+        required_files="$hemisphere.white $hemisphere.pial $hemisphere.sphere.reg"
+        [ "$fast" != "yes" ] && required_files="$required_files $hemisphere.thickness"
+        for req in $required_files; do
+            if [ ! -f "$dirSubs/$dirSub/surf/$req" ]; then
+                echo "[$dirSub] ERROR: required input surf/$req not found"
+                exit 1
+            fi
+        done
+
         if [ "$fast" == "yes" ]; then
             echo "[$dirSub] Fast mode enabled."
             echo "[$dirSub] [Step 1.1] Generating mid-thickness surface and curvature data if not available..."
@@ -153,12 +187,35 @@ process_subject() {
             echo "[$dirSub] Data resampling complete"
         else
             echo "[$dirSub] Resampled curvature data already available"
+            # A pre-existing file may predate the template-sphere enforcement
+            # (toolbox <= 1.0.19 docs pointed to the 2017 'dedrifted' sphere,
+            # which does not match model training). wb_command embeds the
+            # template's own creation provenance in every resampled metric, so
+            # the file itself records which template produced it:
+            #   2016 release -> 'spherical_std.164k'; 2017 -> 'MSMAll-to-fsaverage'.
+            if [ "${DEEPRETINOTOPY_SKIP_TEMPLATE_CHECK:-0}" != "1" ]; then
+                curv_existing="$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+                if grep -q "MSMAll-to-fsaverage" "$curv_existing"; then
+                    echo "[$dirSub] ERROR: the existing curvature file was resampled with the 2017 template sphere, which does NOT match the sphere used for model training (2016 release)."
+                    echo "[$dirSub] Delete it to regenerate with the verified template: $curv_existing"
+                    exit 1
+                elif ! grep -q "spherical_std.164k" "$curv_existing"; then
+                    echo "[$dirSub] [Warning] Could not verify which template sphere produced the existing curvature file (no provenance marker found); proceeding. To be safe, delete it so it is regenerated with the verified template: $curv_existing"
+                fi
+            fi
         fi
-        
+
+        # Post-condition: a tool failure above (e.g. wb_command missing or a
+        # resample error) must fail this subject, not fall through to "completed".
+        if [ ! -f "$surf_output_dir/$dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii" ]; then
+            echo "[$dirSub] ERROR: expected output $dirSub.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii was not produced"
+            exit 1
+        fi
+
         end_time=$(date +%s)
         execution_time=$((end_time-start_time))
         execution_time_minutes=$((execution_time / 60))
-        echo "=== Subject $dirSub completed in $execution_time_minutes minutes ==="         
+        echo "=== Subject $dirSub completed in $execution_time_minutes minutes ==="
     else
         echo "[$dirSub] ERROR: No surface directory found"
         exit 1
@@ -195,8 +252,31 @@ else
 
     echo "Found ${#subjects[@]} subjects to process: ${subjects[*]}"
 
-    # Process in parallel
+    # Process in parallel. xargs returns 123 if ANY per-subject invocation failed;
+    # without this check a failed subject is silently dropped and the step
+    # reports success (the CLI then only sees missing files much later, if at all).
     printf '%s\n' "${subjects[@]}" | xargs -I {} -P $n_jobs bash -c "process_subject '{}' '$hemisphere' '$fast' '$dirSubs' '$dirHCP' '$output_dir'"
+    xargs_status=$?
+    if [ $xargs_status -ne 0 ]; then
+        # Partial failure: list who failed and exit 1 so the caller can warn and
+        # CONTINUE with the subjects that succeeded. If nobody succeeded, exit 2
+        # (fatal -- almost certainly an environment or input problem).
+        n_ok=0; failed_subjects=""
+        for s in "${subjects[@]}"; do
+            if [ -n "$output_dir" ]; then
+                out="$output_dir/$s/surf/$s.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+            else
+                out="$dirSubs/$s/surf/$s.curvature-midthickness.$hemisphere.32k_fs_LR.func.gii"
+            fi
+            if [ -f "$out" ]; then n_ok=$((n_ok+1)); else failed_subjects="$failed_subjects $s"; fi
+        done
+        echo "[Step 1] WARNING: $(( ${#subjects[@]} - n_ok )) of ${#subjects[@]} subjects FAILED:$failed_subjects"
+        if [ $n_ok -eq 0 ]; then
+            echo "[Step 1] ERROR: no subject produced output -- aborting."
+            exit 2
+        fi
+        exit 1
+    fi
 fi
 
 # Calculate and display total time

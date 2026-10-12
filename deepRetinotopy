@@ -89,7 +89,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -o)
-            output_dir=$(realpath "$2")
+            output_dir=$(realpath -m "$2")
             shift 2
             ;;
         --step1)

@@ -76,7 +76,8 @@ Store generated files in a separate directory (useful for DataLad and version co
 
 .. code-block:: bash
 
-    # All outputs to custom directory
+    mkdir -p /path/to/output  # current version assumes this folder already exists
+
     deepRetinotopy -s /path/to/freesurfer -t /path/to/hcp/surfaces -d hcp -m "polarAngle,eccentricity" -o /path/to/output
 
     # Single subject with custom output

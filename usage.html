@@ -426,7 +426,8 @@ deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesur
 <section id="custom-output-directory">
 <h2>Custom Output Directory<a class="headerlink" href="#custom-output-directory" title="Link to this heading">#</a></h2>
 <p>Store generated files in a separate directory (useful for DataLad and version control workflows):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># All outputs to custom directory</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>/path/to/output<span class="w">  </span><span class="c1"># current version assumes this folder already exists</span>
+
 deepRetinotopy<span class="w"> </span>-s<span class="w"> </span>/path/to/freesurfer<span class="w"> </span>-t<span class="w"> </span>/path/to/hcp/surfaces<span class="w"> </span>-d<span class="w"> </span>hcp<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;polarAngle,eccentricity&quot;</span><span class="w"> </span>-o<span class="w"> </span>/path/to/output
 
 <span class="c1"># Single subject with custom output</span>

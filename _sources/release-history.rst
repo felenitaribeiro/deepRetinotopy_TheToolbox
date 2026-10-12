@@ -2,6 +2,10 @@
 Release History
 ===============
 
+Version 1.1.0
+-----------------
+Released on 2026-10-12.
+
 Version 1.0.19
 -----------------
 Released on 2026-07-27.
